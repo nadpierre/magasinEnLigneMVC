@@ -1,11 +1,18 @@
 <?php
-
+require_once("GestionArticlesCommande.php");
 /**
  * Représente un objet de type GestionCommandes
  * Son rôle est de gérer les commandes dans la base de données MySQL
  * Hérite de la classe GestionBD
  */
 class GestionCommandes extends GestionBD {
+
+    private $_gestionAC;
+
+    public function __construct(){
+        parent::__construct();
+        $this->_gestionAC = new GestionArticlesCommande();
+    }
 
     /**
      * Ajoute une commande
@@ -25,21 +32,11 @@ class GestionCommandes extends GestionBD {
         $requete->bindValue(':paypalOrderId', $paypalOrderId, PDO::PARAM_STR);
         $requete->execute();
         $requete->closeCursor();
-
+        
         //Insérer les articles en commande
         $noCommande = (int) $this->_bdd->lastInsertId();
-        for($i = 0; $i < count($tabNoArticle); $i++) {
-            $requete = $this->_bdd->prepare(
-                'INSERT INTO article_en_commande (noCommande, noArticle, quantite)
-                VALUES (:noCommande, :noArticle, :quantite)'
-            );
-            $requete->bindValue(':noCommande', $noCommande, PDO::PARAM_INT);
-            $requete->bindValue(':noArticle', (int) $tabNoArticle[$i], PDO::PARAM_INT);
-            $requete->bindValue(':quantite', (int) $tabQuantite[$i], PDO::PARAM_INT);
-            $requete->execute();
-            $requete->closeCursor();
-        }
-
+        $this->_gestionAC->ajouterArticles($noCommande, $tabNoArticle, $tabQuantite);
+       
     }
 
      /**
