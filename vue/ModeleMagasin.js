@@ -7,7 +7,7 @@
 class ModeleMagasin {
 
     /**
-     * CONSTRUCTEUR ...
+     * CONSTRUCTEUR
      * @param {string} idModele 
      */
     constructor(idModele) {

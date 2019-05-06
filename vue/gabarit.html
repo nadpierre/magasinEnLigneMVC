@@ -1,48 +1,9 @@
-<!DOCTYPE HTML>
-<html>
-	<head>
-	    <title>Mon Magasin</title>
-        <meta charset="utf-8">
-        <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+<body>
 
-	    <link href="https://fonts.googleapis.com/css?family=Montserrat:300,400,500,600,700" rel="stylesheet">
-	    <link href="https://fonts.googleapis.com/css?family=Rokkitt:100,300,400,700" rel="stylesheet">
-	
-        <!-- Animate.css -->
-        <link rel="stylesheet" href="css/animate.css">
-        <!-- Icomoon Icon Fonts-->
-        <link rel="stylesheet" href="css/icomoon.css">
-        <!-- Ion Icon Fonts-->
-        <link rel="stylesheet" href="css/ionicons.min.css">
-        <!-- Bootstrap  -->
-        <link rel="stylesheet" href="css/bootstrap.min.css">
-
-        <!-- Magnific Popup -->
-        <link rel="stylesheet" href="css/magnific-popup.css">
-
-        <!-- Flexslider  -->
-        <link rel="stylesheet" href="css/flexslider.css">
-
-        <!-- Owl Carousel -->
-        <link rel="stylesheet" href="css/owl.carousel.min.css">
-        <link rel="stylesheet" href="css/owl.theme.default.min.css">
-        
-        <!-- Date Picker -->
-        <link rel="stylesheet" href="css/bootstrap-datepicker.css">
-        <!-- Flaticons  -->
-        <link rel="stylesheet" href="fonts/flaticon/font/flaticon.css">
-
-        <!-- Theme style  -->
-        <link rel="stylesheet" href="css/style.css">
-
-	</head>
-    
-    <body onLoad="afficherInventaire(listerArticles, '', ''); getTotalPanier()">
-		
 	<div class="colorlib-loader"></div>
 
 	<div id="page">
-		<!-- ### EN TÊTE ###-->
+		<!--  EN TÊTE -->
 		<nav class="colorlib-nav" role="navigation">
 			<div class="top-menu">
 				<div class="container">
@@ -51,43 +12,50 @@
 							<div id="colorlib-logo"><a href="index.html">Mon Magasin</a></div>
 						</div>
 						<div class="col-sm-5 col-md-3">
-			            <form action="#" class="search-wrap">
-			            	<div class="form-group">
-			                	<input type="search" id="recherche" class="form-control search" placeholder="Rechercher">
-			                  	<button class="btn btn-primary submit-search text-center" onClick="afficherInventaire(listerArticles, 'mot', document.getElementById('recherche').value)">
-								  	<i class="icon-search"></i>
-								</button>
-			               	</div>
-			            </form>
-			         </div>
-		         </div>
+							<form action="#" class="search-wrap">
+								<div class="form-group">
+									<input type="search" id="recherche" class="form-control search"
+										placeholder="Rechercher">
+									<button class="btn btn-primary submit-search text-center"
+										onClick="afficherInventaire(listerArticles, 'mot', document.getElementById('recherche').value)">
+										<i class="icon-search"></i>
+									</button>
+								</div>
+							</form>
+						</div>
+					</div>
 					<div class="row">
 						<div class="col-sm-12 text-left menu-1">
 							<ul>
-                                <li><a href="#" onClick="afficherInventaire(listerArticles,'', '')">Accueil</a></li>
-                                <li id="cat1" data-value="Maquillage">
-									<a href="#" onClick="afficherInventaire(listerArticles, 'categorie', document.getElementById('cat1').dataset.value)">Maquillage</a>
+								<li><a href="#" onClick="afficherInventaire(listerArticles,'', '')">Accueil</a></li>
+								<li id="cat1" data-value="Maquillage">
+									<a href="#"
+										onClick="afficherInventaire(listerArticles, 'categorie', document.getElementById('cat1').dataset.value)">Maquillage</a>
 								</li>
 								<li id="cat2" data-value="Cheveux">
-									<a href="#" onClick="afficherInventaire(listerArticles, 'categorie', document.getElementById('cat2').dataset.value)">Cheveux</a>
+									<a href="#"
+										onClick="afficherInventaire(listerArticles, 'categorie', document.getElementById('cat2').dataset.value)">Cheveux</a>
 								</li>
 								<li id="cat3" data-value="Peau">
-									<a href="#" onClick="afficherInventaire(listerArticles, 'categorie', document.getElementById('cat3').dataset.value)">Soins de la peau</a>
+									<a href="#"
+										onClick="afficherInventaire(listerArticles, 'categorie', document.getElementById('cat3').dataset.value)">Soins
+										de la peau</a>
 								</li>
 								<li id="cat4" data-value="Hommes">
-									<a href="#" onClick="afficherInventaire(listerArticles, 'categorie', document.getElementById('cat4').dataset.value)">Hommes</a>
+									<a href="#"
+										onClick="afficherInventaire(listerArticles, 'categorie', document.getElementById('cat4').dataset.value)">Hommes</a>
 								</li>
 							</ul>
 						</div>
 					</div>
 				</div>
 			</div>
-			<div class="cart">	
+			<div class="cart">
 				<div class="container">
 					<div class="row">
 						<div class="col-sm-12 col-md 12 text-center">
 							<a href="#" onClick="afficherSommaire()">
-								<i class="icon-shopping-cart"></i> 
+								<i class="icon-shopping-cart"></i>
 								PANIER[<span id="nombre-total">{nbArticles}</span>]
 							</a>
 						</div>
@@ -118,11 +86,11 @@
 			</div>
 		</nav>
 
-		<!-- ### MILIEU DE LA PAGE (dynamique)  ###-->
+		<!--  MILIEU DE LA PAGE (dynamique)  -->
 		<div id="milieu-page"></div>
-		
 
-		<!-- ### PIED DE PAGE ###-->
+
+		<!--  PIED DE PAGE -->
 		<footer id="colorlib-footer" role="contentinfo">
 			<div class="container">
 				<div class="row row-pb-md">
@@ -131,18 +99,21 @@
 						<p>Je suis une étudiante de deuxième année en informatique de gestion au Collège Ahuntsic</p>
 						<p>
 							<ul class="colorlib-social-icons">
-								<li><a target="_blank" href="https://www.linkedin.com/in/nadine-pierre-32374ab2"><i class="icon-linkedin"></i></a></li>
-								<li><a target="_blank" href="https://github.com/nadpierre"><i class="icon-github"></i></a></li>
+								<li><a target="_blank" href="https://www.linkedin.com/in/nadine-pierre-32374ab2"><i
+											class="icon-linkedin"></i></a></li>
+								<li><a target="_blank" href="https://github.com/nadpierre"><i
+											class="icon-github"></i></a></li>
 							</ul>
 						</p>
 					</div>
-					
+
 					<div class="col footer-col">
 						<h4>Contactez-moi</h4>
 						<ul class="colorlib-footer-links">
 							<li>9155, rue St-Hubert, <br> Montréal, QC H2M 1Y8</li>
 							<li><a href="tel://5148395921">(514)389-5921</a></li>
-							<li><a href="mailto:information@collegeahuntsic.qc.ca">information@collegeahuntsic.qc.ca</a></li>
+							<li><a href="mailto:information@collegeahuntsic.qc.ca">information@collegeahuntsic.qc.ca</a>
+							</li>
 						</ul>
 					</div>
 				</div>
@@ -151,10 +122,15 @@
 				<div class="row">
 					<div class="col-sm-12 text-center">
 						<p>
-							<span><!-- Link back to Colorlib can't be removed. Template is licensed under CC BY 3.0. -->
-Copyright &copy;<script>document.write(new Date().getFullYear());</script> All rights reserved | This template is made with <i class="icon-heart" aria-hidden="true"></i> by <a href="https://colorlib.com" target="_blank">Colorlib</a>
-<!-- Link back to Colorlib can't be removed. Template is licensed under CC BY 3.0. --></span> 
-							<span class="block">Demo Images: <a href="http://unsplash.co/" target="_blank">Unsplash</a> , <a href="http://pexels.com/" target="_blank">Pexels.com</a></span>
+							<span>
+								<!-- Link back to Colorlib can't be removed. Template is licensed under CC BY 3.0. -->
+								Copyright &copy;
+								<!--<script>document.write(new Date().getFullYear());</script>--> All rights reserved | This
+								template is made with <i class="icon-heart" aria-hidden="true"></i> by <a
+									href="https://colorlib.com" target="_blank">Colorlib</a>
+								<!-- Link back to Colorlib can't be removed. Template is licensed under CC BY 3.0. --></span>
+							<span class="block">Demo Images: <a href="http://unsplash.co/" target="_blank">Unsplash</a>
+								, <a href="http://pexels.com/" target="_blank">Pexels.com</a></span>
 						</p>
 					</div>
 				</div>
@@ -162,41 +138,44 @@ Copyright &copy;<script>document.write(new Date().getFullYear());</script> All r
 		</footer>
 	</div>
 
-	<!-- ### TEMPLATES ###-->
+	<!--  TEMPLATES -->
 
 	<!-- Affichage de ce qui "entoure" la liste des articles -->
 	<template id="affichage-articles">
 		<div class="colorlib-product">
-				<div class="container">
-					<div class="row">
-						<div class="col-sm-8 offset-sm-2 text-center colorlib-heading">
-							<h2>Produits</h2>
-						</div>
+			<div class="container">
+				<div class="row">
+					<div class="col-sm-8 offset-sm-2 text-center colorlib-heading">
+						<h2>Produits</h2>
 					</div>
-					<div class="row row-pb-md" id="liste-articles"><!-- Remplissage dynamique --></div>
-					<div class="row">
-						<div class="col-md-12 text-center">
-							<p><a href="#" onClick="afficherInventaire(listerArticles, '', '')" class="btn btn-primary btn-lg">Voir tous les produits</a></p>
-						</div>
+				</div>
+				<div class="row row-pb-md" id="liste-articles">
+					<!-- Remplissage dynamique -->
+				</div>
+				<div class="row">
+					<div class="col-md-12 text-center">
+						<p><a href="#" onClick="afficherInventaire(listerArticles, '', '')"
+								class="btn btn-primary btn-lg">Voir tous les produits</a></p>
 					</div>
 				</div>
 			</div>
+		</div>
 	</template>
-	
-	
+
+
 	<!-- Modèle d'un élément dans la liste des articles -->
 	<template id="modele-liste-articles" type="text/MagasinModele">
 		<div class="col-lg-3 mb-4 text-center" onClick="afficherArticle({noArticle})">
-            <div class="product-entry border">
-                <a href="#" class="prod-img">
-                    <img src="{cheminImage}" class="img-fluid" alt="{description}">
-                </a>
-                <div class="desc">
-                    <h2><a href="#">{description}</a></h2>
-                    <span class="price">{prixUnitaire}</span>
-                </div>
-            </div>
-        </div>
+			<div class="product-entry border">
+				<a href="#" class="prod-img">
+					<img src="{cheminImage}" class="img-fluid" alt="{description}">
+				</a>
+				<div class="desc">
+					<h2><a href="#">{description}</a></h2>
+					<span class="price">{prixUnitaire}</span>
+				</div>
+			</div>
+		</div>
 	</template>
 
 	<!-- Modèle pour les détails d'un seul article -->
@@ -205,7 +184,9 @@ Copyright &copy;<script>document.write(new Date().getFullYear());</script> All r
 			<div class="container">
 				<div class="row">
 					<div class="col">
-						<p class="bread"><span><a href="#" onClick="afficherInventaire(listerArticles, '', '')">Accueil</a></span> / <span>Détails du produit</span></p>
+						<p class="bread"><span><a href="#"
+									onClick="afficherInventaire(listerArticles, '', '')">Accueil</a></span> /
+							<span>Détails du produit</span></p>
 					</div>
 				</div>
 			</div>
@@ -226,17 +207,20 @@ Copyright &copy;<script>document.write(new Date().getFullYear());</script> All r
 						<div class="product-desc">
 							<h3>{description}</h3>
 							<p class="price">
-								<span>{prixUnitaire}</span> 
+								<span>{prixUnitaire}</span>
 							</p>
 							<div class="input-group mb-4">
 								<span class="input-group-btn">
-									<button type="button" class="quantity-left-minus btn"  data-type="minus" data-field="" onClick="changerQuantite(this)">
+									<button type="button" class="quantity-left-minus btn" data-type="minus"
+										data-field="" onClick="changerQuantite(this)">
 										<i class="icon-minus2"></i>
 									</button>
 								</span>
-								<input type="text" id="quantity" name="quantity" class="form-control input-number" value="1" min="1" max="100">
+								<input type="text" id="quantity" name="quantity" class="form-control input-number"
+									value="1" min="1" max="100">
 								<span class="input-group-btn ml-1">
-									<button type="button" class="quantity-right-plus btn" data-type="plus" data-field="" onClick="changerQuantite(this)">
+									<button type="button" class="quantity-right-plus btn" data-type="plus" data-field=""
+										onClick="changerQuantite(this)">
 										<i class="icon-plus2"></i>
 									</button>
 								</span>
@@ -247,11 +231,15 @@ Copyright &copy;<script>document.write(new Date().getFullYear());</script> All r
 									<input type="hidden" id="description" value="{description}">
 									<input type="hidden" id="cheminImage" value="{cheminImage}">
 									<input type="hidden" id="prix" value="{prixUnitaire}">
-									<p class="addtocart"><a href="#" class="btn btn-primary btn-addtocart" onClick="ajouterAuPanier()"><i class="icon-shopping-cart"></i>Ajouter au panier</a></p>
+									<p class="addtocart"><a href="#" class="btn btn-primary btn-addtocart"
+											onClick="ajouterAuPanier()"><i class="icon-shopping-cart"></i>Ajouter au
+											panier</a></p>
 								</div>
 								<div class="col-sm-12">
 									<div class="form-group">
-										<div role="alert" id="message-erreur"><!-- Message dynamique --></div>
+										<div role="alert" id="message-erreur">
+											<!-- Message dynamique -->
+										</div>
 									</div>
 								</div>
 							</div>
@@ -268,7 +256,9 @@ Copyright &copy;<script>document.write(new Date().getFullYear());</script> All r
 			<div class="container">
 				<div class="row">
 					<div class="col">
-						<p class="bread"><span><a href="#" onClick="afficherInventaire(listerArticles, '', '')">Accueil</a></span> / <span>Panier d'achat</span></p>
+						<p class="bread"><span><a href="#"
+									onClick="afficherInventaire(listerArticles, '', '')">Accueil</a></span> /
+							<span>Panier d'achat</span></p>
 					</div>
 				</div>
 			</div>
@@ -296,7 +286,9 @@ Copyright &copy;<script>document.write(new Date().getFullYear());</script> All r
 				<div class="row row-pb-lg">
 					<div class="col-sm-12">
 						<div class="form-group">
-							<div role="alert" id="message-erreur"><!-- Message dynamique --></div>
+							<div role="alert" id="message-erreur">
+								<!-- Message dynamique -->
+							</div>
 						</div>
 					</div>
 					<div class="col-md-12">
@@ -317,7 +309,9 @@ Copyright &copy;<script>document.write(new Date().getFullYear());</script> All r
 								<span>Retirer</span>
 							</div>
 						</div>
-						<div id="liste-panier"><!-- Affichage dynamique --></div>
+						<div id="liste-panier">
+							<!-- Affichage dynamique -->
+						</div>
 					</div>
 				</div>
 				<div class="row row-pb-lg">
@@ -328,7 +322,8 @@ Copyright &copy;<script>document.write(new Date().getFullYear());</script> All r
 								<div class="col-sm-12 text-center">
 									<div class="row form-group">
 										<div class="col-md-12 text-center">
-											<p><a href="#" class="btn btn-primary" onClick="modifierPanier()">Mettre à jour</a></p>
+											<p><a href="#" class="btn btn-primary" onClick="modifierPanier()">Mettre à
+													jour</a></p>
 										</div>
 									</div>
 									<div class="total">
@@ -345,7 +340,8 @@ Copyright &copy;<script>document.write(new Date().getFullYear());</script> All r
 									<div class="w-100"></div>
 									<div class="row form-group">
 										<div class="col-md-12 text-center">
-											<p><a href="#" class="btn btn-primary" onClick="formulaireInscription()">Passer à la caisse</a></p>
+											<p><a href="#" class="btn btn-primary"
+													onClick="formulaireInscription()">Passer à la caisse</a></p>
 										</div>
 									</div>
 								</div>
@@ -373,7 +369,9 @@ Copyright &copy;<script>document.write(new Date().getFullYear());</script> All r
 			</div>
 			<div class="one-eight text-center">
 				<div class="display-tc">
-					<input type="text" id="quantity" name="quantity" title="appuyez sur Enter pour modifier la quantité" class="form-control input-number text-center quantite" value="{quantiteDansPanier}" min="1" max="100">
+					<input type="text" id="quantity" name="quantity" title="appuyez sur Enter pour modifier la quantité"
+						class="form-control input-number text-center quantite" value="{quantiteDansPanier}" min="1"
+						max="100">
 				</div>
 			</div>
 			<div class="one-eight text-center">
@@ -383,7 +381,8 @@ Copyright &copy;<script>document.write(new Date().getFullYear());</script> All r
 			</div>
 			<div class="one-eight text-center">
 				<div class="display-tc">
-					<a href="#" class="closed" id="article{noArticle}" data-value="{noArticle}" onClick="supprimerDuPanier()"></a>
+					<a href="#" class="closed" id="article{noArticle}" data-value="{noArticle}"
+						onClick="supprimerDuPanier()"></a>
 				</div>
 			</div>
 		</div>
@@ -405,35 +404,42 @@ Copyright &copy;<script>document.write(new Date().getFullYear());</script> All r
 							<div class="row">
 								<div class="col-md-12">
 									<div class="form-group">
-										<div role="alert" id="message-erreur"><!-- Message dynamique --></div>
+										<div role="alert" id="message-erreur">
+											<!-- Message dynamique -->
+										</div>
 									</div>
-									
+
 								</div>
 								<div class="col-md-6">
 									<div class="form-group">
 										<label for="fname">Prénom</label>
-										<input type="text" id="fname" class="form-control" placeholder="Votre prénom" required>
+										<input type="text" id="fname" class="form-control" placeholder="Votre prénom"
+											required>
 									</div>
 								</div>
 								<div class="col-md-6">
 									<div class="form-group">
 										<label for="lname">Nom</label>
-										<input type="text" id="lname" class="form-control" placeholder="Votre nom" required>
+										<input type="text" id="lname" class="form-control" placeholder="Votre nom"
+											required>
 									</div>
 								</div>
 								<div class="col-md-12">
 									<div class="form-group">
 										<label for="address">Adresse</label>
-										<input type="text" id="address" class="form-control" placeholder="Entrez votre adresse" required>
+										<input type="text" id="address" class="form-control"
+											placeholder="Entrez votre adresse" required>
 									</div>
 									<div class="form-group">
-										<input type="text" id="address2" class="form-control" placeholder="Entrez votre deuxième adresse">
+										<input type="text" id="address2" class="form-control"
+											placeholder="Entrez votre deuxième adresse">
 									</div>
 								</div>
 								<div class="col-md-12">
 									<div class="form-group">
 										<label for="towncity">Ville</label>
-										<input type="text" id="towncity" class="form-control" placeholder="Ville" required>
+										<input type="text" id="towncity" class="form-control" placeholder="Ville"
+											required>
 									</div>
 								</div>
 								<div class="col-md-6">
@@ -456,42 +462,49 @@ Copyright &copy;<script>document.write(new Date().getFullYear());</script> All r
 								<div class="col-md-6">
 									<div class="form-group">
 										<label for="lname">Code Postal</label>
-										<input type="text" id="zippostalcode" class="form-control" placeholder="Code postal" required>
+										<input type="text" id="zippostalcode" class="form-control"
+											placeholder="Code postal" required>
 									</div>
 								</div>
 								<div class="col-md-6">
 									<div class="form-group">
 										<label for="email">Courriel</label>
-										<input type="email" id="email" class="form-control" placeholder="Courriel" required>
+										<input type="email" id="email" class="form-control" placeholder="Courriel"
+											required>
 									</div>
 								</div>
 								<div class="col-md-6">
 									<div class="form-group">
 										<label for="Phone">Numéro de téléphone</label>
-										<input type="text" id="phone" class="form-control" placeholder="Numéro de téléphone" required>
+										<input type="text" id="phone" class="form-control"
+											placeholder="Numéro de téléphone" required>
 									</div>
 								</div>
 								<div class="col-md-12">
 									<div class="form-group">
 										<label for="companyname">Nom d'utilisateur</label>
-										<input type="text" id="pseudo" class="form-control" placeholder="Votre nom d'utilisateur" required>
+										<input type="text" id="pseudo" class="form-control"
+											placeholder="Votre nom d'utilisateur" required>
 									</div>
 								</div>
 								<div class="col-md-6">
 									<div class="form-group">
 										<label for="Phone">Mot de passe</label>
-										<input type="password" id="mot-de-passe" class="form-control" placeholder="Votre mot de passe" required>
+										<input type="password" id="mot-de-passe" class="form-control"
+											placeholder="Votre mot de passe" required>
 									</div>
 								</div>
 								<div class="col-md-6">
 									<div class="form-group">
 										<label for="Phone">Confirmer votre mot de passe</label>
-										<input type="password" id="conf-mot-de-passe" class="form-control" placeholder="Confirmation de votre mot de passe" required>
+										<input type="password" id="conf-mot-de-passe" class="form-control"
+											placeholder="Confirmation de votre mot de passe" required>
 									</div>
 								</div>
-								<div class="col-md-12 text-center"> 
-									<a href="#" id="btn-membre" class="btn btn-primary col-md-6" onClick="validerFormulaire()">S'inscrire</a>
-								</div> 
+								<div class="col-md-12 text-center">
+									<a href="#" id="btn-membre" class="btn btn-primary col-md-6"
+										onClick="validerFormulaire()">S'inscrire</a>
+								</div>
 							</div>
 						</form>
 					</div>
@@ -504,44 +517,47 @@ Copyright &copy;<script>document.write(new Date().getFullYear());</script> All r
 	<!-- Modèle pour le formulaire de connexion -->
 	<template id="modele-connexion" type="text/MagasinModele">
 		<div class="colorlib-product">
-            <div class="container d-flex justify-content-center align-items-center">
-                <div class="col-lg-6">
-                    <h2 class="text-center">Connexion</h2>
-                    <form method="post" class="colorlib-form">
-                        <div class="row">
+			<div class="container d-flex justify-content-center align-items-center">
+				<div class="col-lg-6">
+					<h2 class="text-center">Connexion</h2>
+					<form method="post" class="colorlib-form">
+						<div class="row">
 							<div class="col-md-12">
 								<div class="form-group">
 									<div id="message-erreur" role="alert"></div>
 								</div>
 							</div>
-                            <div class="col-md-12">
-                                <div class="form-group">
-                                    <label for="pseudo">Nom d'utilisateur</label>
-                                    <input type="text" id="pseudo" class="form-control" placeholder="Votre nom d'utilisateur">
-                                </div>
-                            </div>
-                            <div class="col-md-12">
-                                <div class="form-group">
-                                    <label for="mot-de-passe">Mot de passe</label>
-                                    <input type="password" id="mot-de-passe" class="form-control" placeholder="Votre mot de passe">
-                                </div>
+							<div class="col-md-12">
+								<div class="form-group">
+									<label for="pseudo">Nom d'utilisateur</label>
+									<input type="text" id="pseudo" class="form-control"
+										placeholder="Votre nom d'utilisateur">
+								</div>
+							</div>
+							<div class="col-md-12">
+								<div class="form-group">
+									<label for="mot-de-passe">Mot de passe</label>
+									<input type="password" id="mot-de-passe" class="form-control"
+										placeholder="Votre mot de passe">
+								</div>
 							</div>
 							<div class="col-md-12 text-center">
 								<div class="form-group">
 									<a href="#" onClick="formulaireInscription()">Pas encore inscrit ? Cliquez ici.</a>
 								</div>
 							</div>
-                            <div class="col-md-12 text-center"> 
-                                <a href="#" id="btn-membre" class="btn btn-primary col-md-6" onClick="seConnecter()">Se connecter</a>
-                            </div>   
-                        </div>
-                    </form>
-                </div>
-            </div>
-        </div>
+							<div class="col-md-12 text-center">
+								<a href="#" id="btn-membre" class="btn btn-primary col-md-6" onClick="seConnecter()">Se
+									connecter</a>
+							</div>
+						</div>
+					</form>
+				</div>
+			</div>
+		</div>
 	</template>
-	
-	
+
+
 	<!-- Modèle pour la caisse -->
 	<template id="modele-caisse" type="text/MagasinModele">
 		<div class="breadcrumbs">
@@ -551,9 +567,9 @@ Copyright &copy;<script>document.write(new Date().getFullYear());</script> All r
 						<p class="bread">
 							<span>
 								<a href="#" onClick="afficherInventaire(listerArticles, '', '')">Accueil</a>
-							</span> / 
+							</span> /
 							<span>
-								<a href="#" onClick="afficherSommaire()">Panier</a>	
+								<a href="#" onClick="afficherSommaire()">Panier</a>
 							</span> /
 							<span>Passer à la caisse</span>
 						</p>
@@ -589,20 +605,22 @@ Copyright &copy;<script>document.write(new Date().getFullYear());</script> All r
 							<h3>Vos renseignements personnels</h3>
 							<tr>
 								<td>Adresse de livraison</td>
-								<td>{adresse}, {ville} {province} {codePostal}</td>		
+								<td>{adresse}, {ville} {province} {codePostal}</td>
 							</tr>
 							<tr>
 								<td>Téléphone</td>
-								<td>{noTel}</td>		
+								<td>{noTel}</td>
 							</tr>
 							<tr>
 								<td>Courriel</td>
-								<td>{courriel}</td>		
+								<td>{courriel}</td>
 							</tr>
-						</table>	
+						</table>
 					</div>
 					<div class="col-lg-4">
-						<div id="facture"><!-- Affichage dynamique--></div>
+						<div id="facture">
+							<!-- Affichage dynamique-->
+						</div>
 					</div>
 				</div>
 			</div>
@@ -618,7 +636,9 @@ Copyright &copy;<script>document.write(new Date().getFullYear());</script> All r
 					<ul>
 						<li>
 							<span>Sous-total</span> <span>{sousTotal}</span>
-							<ul id="details-facture"><!-- Affichage dynamique --></ul>	
+							<ul id="details-facture">
+								<!-- Affichage dynamique -->
+							</ul>
 						</li>
 						<li><span>Taxes (15%)</span> <span>{taxes}</span></li>
 						<li><span>Livraison</span> <span>{fraisLivraison}</span></li>
@@ -634,14 +654,15 @@ Copyright &copy;<script>document.write(new Date().getFullYear());</script> All r
 					<div class="form-group">
 						<div class="col-md-12">
 							<div class="checkbox">
-								<label><input type="checkbox" value="accepter" checked> J'ai lu et j'accepte les termes et conditions</label>
+								<label><input type="checkbox" value="accepter" checked> J'ai lu et j'accepte les termes
+									et conditions</label>
 							</div>
 						</div>
 					</div>
 				</div>
 			</div>
 			<div class="col-md-12 text-center">
-				<div id="paypal-button-container"></div>	
+				<div id="paypal-button-container"></div>
 			</div>
 
 		</div>
@@ -660,7 +681,9 @@ Copyright &copy;<script>document.write(new Date().getFullYear());</script> All r
 			<div class="container">
 				<div class="row">
 					<div class="col">
-						<p class="bread"><span><a href="#" onClick="afficherInventaire(listerArticles, '', '')">Accueil</a></span> / <span>Commande complétée</span></p>
+						<p class="bread"><span><a href="#"
+									onClick="afficherInventaire(listerArticles, '', '')">Accueil</a></span> /
+							<span>Commande complétée</span></p>
 					</div>
 				</div>
 			</div>
@@ -692,7 +715,8 @@ Copyright &copy;<script>document.write(new Date().getFullYear());</script> All r
 						<h3 class="mb-4">Votre numéro de confirmation est le {paypalOrderId}</h3>
 						<h3 class="mb-4">Un courriel sera envoyé au {courriel} sous-peu</h3>
 						<p>
-							<a href="#"class="btn btn-primary btn-outline-primary" onClick="afficherInventaire(listerArticles, '', '')">Continuer à magasiner</a>
+							<a href="#" class="btn btn-primary btn-outline-primary"
+								onClick="afficherInventaire(listerArticles, '', '')">Continuer à magasiner</a>
 						</p>
 					</div>
 				</div>
@@ -700,39 +724,5 @@ Copyright &copy;<script>document.write(new Date().getFullYear());</script> All r
 		</div>
 	</template>
 
-	<!-- ### SCRIPTS ###-->
-	
-	<!-- Mes scripts personnels -->
-	<script src="js/personnel/projet3.js"></script>
-	<script src="js/personnel/RequeteAjax.js"></script>
-	<script src="js/personnel/ModeleMagasin.js"></script>
 
-	<!-- API de Paypal-->
-	<script src="https://www.paypal.com/sdk/js?client-id=AdSpTBXWcGfoW4-ZftERpu3BQQxvd2kFeUWy-pai_utQ-dSbZONHv0z0skbgJrMhel3Q_CFrXJbtOUyl&currency=CAD"></script>
-	
-	<!-- jQuery -->
-	<script src="js/jquery.min.js"></script>
-   	<!-- popper -->
-   	<script src="js/popper.min.js"></script>
-   	<!-- bootstrap 4.1 -->
-   	<script src="js/bootstrap.min.js"></script>
-   	<!-- jQuery easing -->
-   	<script src="js/jquery.easing.1.3.js"></script>
-	<!-- Waypoints -->
-	<script src="js/jquery.waypoints.min.js"></script>
-	<!-- Flexslider -->
-	<script src="js/jquery.flexslider-min.js"></script>
-	<!-- Owl carousel -->
-	<script src="js/owl.carousel.min.js"></script>
-	<!-- Magnific Popup -->
-	<script src="js/jquery.magnific-popup.min.js"></script>
-	<script src="js/magnific-popup-options.js"></script>
-	<!-- Date Picker -->
-	<script src="js/bootstrap-datepicker.js"></script>
-	<!-- Stellar Parallax -->
-	<script src="js/jquery.stellar.min.js"></script>
-	<!-- Main -->
-	<script src="js/main.js"></script>
-
-	</body>
-</html>
+</body>
