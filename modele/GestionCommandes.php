@@ -44,7 +44,7 @@ class GestionCommandes extends GestionBD {
 
      /**
      * Retourne le numéro de confirmation et le courriel de l'utilisateur
-     * @return array - un tableau associatif
+     * @return string - un JSON du tableau associatif
      */
     public function getConfirmation(){
         $tabCommande = array();
@@ -63,7 +63,7 @@ class GestionCommandes extends GestionBD {
         
         
         array_push($tabCommande, $donnees);
-        return $tabCommande;
+        return json_encode($tabCommande);
     }
 
 

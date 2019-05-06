@@ -9,7 +9,7 @@ class GestionArticles extends GestionBD {
 
     /**
      * Retourne la liste de l'inventaire
-     * @return {array} un tableau associatif contenant les articles
+     * @return string -  un JSON du tableau d'articles
      */
     public function getListeArticles() {
         $listeArticles = array();
@@ -23,13 +23,13 @@ class GestionArticles extends GestionBD {
 
         $requete->closeCursor();
 
-        return $listeArticles;
+        return json_encode($listeArticles);
     }
 
     /**
      * Retourne une liste d'articles ayant la même catégorie
      * @param {string} $categorie - la catégorie de l'article
-     * @return array - un tableau associatif contenant les articles
+     * @return string - un JSON du tableau d'articles
      */
     public function listerParCategorie($categorie){
 
@@ -46,13 +46,13 @@ class GestionArticles extends GestionBD {
 
         $requete->closeCursor();
 
-        return $listeArticles;
+        return json_encode($listeArticles);
     }
 
     /**
      * Retourne une liste d'article contant le même mot dans leur description
      * @param {string} $mot - le mot cherché
-     * @return array - un tableau associatif contenant des articles
+     * @return string - un JSON du tableau d'articles
      */
     public function listerParMot($mot){
         //S'assurer que la paramètre ne contient pas du code SQL et/ou HTML
@@ -70,7 +70,7 @@ class GestionArticles extends GestionBD {
 
         $requete->closeCursor();
 
-        return $listeArticles;
+        return json_encode($listeArticles);
 
     }
 
@@ -87,7 +87,7 @@ class GestionArticles extends GestionBD {
     /**
      * Retourne un seul article
      * @param {int} $id - l'identifiant de l'article
-     * @return array - un tableau associatif de l'instance d'un objet Article
+     * @return string - un JSON du tableau d'articles
      */
     public function getArticle($noArticle) {
         $listeArticles = array();
@@ -101,7 +101,7 @@ class GestionArticles extends GestionBD {
 
         $article = new Article($donnees);
         array_push($listeArticles, $article->getTableau());
-        return $listeArticles;
+        return json_encode($listeArticles);
     }
 
     /**

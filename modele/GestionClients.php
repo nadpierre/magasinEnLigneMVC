@@ -20,7 +20,6 @@
             $requete->bindValue(1, $info, PDO::PARAM_INT);
         }
         else {//Sinon, c'est un courriel
-            $info = $this->filtrerParametre($info);
             $requete = $this->_bdd->prepare('SELECT * FROM client WHERE courriel = ?');
             $requete->bindValue(1, $info, PDO::PARAM_STR);
         }
@@ -94,12 +93,12 @@
      * @param {string} $motDePasse - le mot de passe
      * @return array - si le membre existe
      */
-    public function getMembre($pseudo, $motDePasse) {
+    public function getMembre($courriel, $motDePasse) {
         $tabMembre = array();
         $requete = $this->_bdd->prepare(
-            'SELECT * FROM client WHERE pseudo = :pseudo AND motDePasse = :motDePasse'
+            'SELECT * FROM client WHERE courriel = :courriel AND motDePasse = :motDePasse'
         );
-        $requete->bindValue(':pseudo', $pseudo, PDO::PARAM_STR);
+        $requete->bindValue(':courriel', $pseudo, PDO::PARAM_STR);
         $requete->bindValue(':motDePasse', $motDePasse, PDO::PARAM_STR);
         $requete->execute();
         

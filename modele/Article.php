@@ -121,13 +121,11 @@ class Article {
             "categorie" => $this->getCategorie(),
             "description" => $this->getDescription(),
             "cheminImage" => $this->getCheminImage(),
-            "prixUnitaire" => number_format($this->getPrixUnitaire(), 2, ',', ' ') . ' $',
+            "prixUnitaire" => $this->getPrixUnitaire(),
             "quantiteEnStock" => $this->getQuantiteEnStock(),
             "quantiteDansPanier" => $this->getQuantiteDansPanier()
         );
     }
-
-
 }
 
 ?>

@@ -38,7 +38,7 @@ class Panier {
 
     /**
      * Retourne le panier (réarrange les variables de session)
-     * @return array - un tableau associatif pour chaque élément du panier
+     * @return string - un JSON du tableau associatif
      */
     public function getPanier() {
         $listePanier = array();
@@ -59,12 +59,12 @@ class Panier {
                 array_push($listePanier, $ligne);
             }
         }
-        return $listePanier;
+        return json_encode($listePanier);
     }
 
     /**
      * Retourne le nombre total d'articles
-     * @return int
+     * @return string
      */
     public function getNbArticlesTotal() {
         $compteur = 0;
@@ -73,7 +73,7 @@ class Panier {
                 $compteur += $_SESSION['panier']['quantiteDansPanier'][$i];
             }
         }
-        return $compteur;
+        return json_encode($compteur);
     }
 
     /**
@@ -95,7 +95,7 @@ class Panier {
     /**
      * Retourne le sommaire du panier
      * @param {boolean} - s'il y a un rabais ou pas
-     * @return array - un tableau associatif
+     * @return string - le JSON du tableau du panier
      */
     public function getSommaire(){
 
@@ -109,17 +109,17 @@ class Panier {
             $total = $sousTotal + $taxes + $fraisLivraison - $rabais;
 
             $sommaire = array(
-                "sousTotal" => number_format($sousTotal, 2, ',', '') . ' $',
-                "taxes" => number_format($taxes, 2, ',', '') . ' $',
-                "fraisLivraison" => number_format($fraisLivraison, 2, ',', '') . ' $',
-                "rabais" => '-' . number_format($rabais, 2, ',', '') . ' $',
-                "total" => number_format($total, 2, ',', '') . ' $',
+                "sousTotal" => $sousTotal,
+                "taxes" => $taxes,
+                "fraisLivraison" => $fraisLivraison,
+                "rabais" => 0.00 - $rabais,
+                "total" => $total
             );
 
             array_push($tabSommaire, $sommaire);
         }
 
-        return $tabSommaire;
+        return json_encode($tabSommaire);
     }
 
     /**
