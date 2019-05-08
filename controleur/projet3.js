@@ -30,7 +30,6 @@ function listerArticles(filtre, valeur) {
         sucess: function(code_html, status){
             let modeleListeArticle = new ModeleMagasin("modele-liste-articles");
             modeleListeArticle.appliquerModele(code_html, "liste-articles");
-            
         }
     }) */
     
