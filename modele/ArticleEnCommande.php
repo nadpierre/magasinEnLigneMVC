@@ -2,9 +2,9 @@
 class ArticleEnCommande {
     
     /* ATTRIBUTS */
-    private $_noCommande;
-    private $_noArticle;
-    private $_quantite;
+    private $noCommande;
+    private $noArticle;
+    private $quantite;
 
     /**
      * CONSTRUCTEUR
@@ -17,34 +17,35 @@ class ArticleEnCommande {
 
     /* ACCESSEURS */
     public function getNoCommande() {
-        return $this->_noCommande;
+        return $this->noCommande;
     }
 
     public function getNoArticle() {
-        return $this->_noArticle;
+        return $this->noArticle;
     }
 
     public function getQuantite() {
-        return $this->_quantite;
+        return $this->quantite;
     }
 
     /* MUTATEURS */
     public function setNoCommande($noCommande) {
-        $this->_noCommande = $noCommande;
+        $this->noCommande = $noCommande;
     }
 
     public function setNoArticle($noArticle) {
-        $this->_noArticle = $noArticle;
+        $this->noArticle = $noArticle;
     }
 
     public function setQuantite($quantite) {
-        $this->_quantite = $quantite;
+        $this->quantite = $quantite;
     }
 
 
     /**
      * Assigne les bonnes valeurs aux attributs
      * @param {array} $donnes - tableau associatif contenant les attributs et les valeurs
+     * @return void
      */
     public function hydrate(array $donnees) {
         foreach ($donnees as $attribut => $valeur) {
@@ -56,15 +57,19 @@ class ArticleEnCommande {
     }
 
 
-    /**
-     * Retourne les attributs et les valeurs de l'article
-     * @return array - un tableau associatif (retire les "_" des attributs)
+   /**
+     * Retourne les attributs et les valeurs de l'objet
+     * @return array
      */
     public function getTableau(){
-        return array (
-            "noCommande" => $this->getNoCommande(),
-            "noArticle" => $this->getNoArticle(),
-            "quantite" => $this->getQuantite()
-        );
+        return get_object_vars($this);
+    }
+
+    /**
+     * Retourne le JSON de l'objet
+     * @return string
+     */
+    public function __toString() {
+        return json_encode(get_object_vars($this));
     }
 }
