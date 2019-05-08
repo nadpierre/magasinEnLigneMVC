@@ -11,6 +11,7 @@
 						<div class="col-sm-7 col-md-9">
 							<div id="colorlib-logo"><a href="index.html">Mon Magasin</a></div>
 						</div>
+						
 						<div class="col-sm-5 col-md-3">
 							<form action="#" class="search-wrap">
 								<div class="form-group">
@@ -46,8 +47,17 @@
 										onClick="afficherInventaire(listerArticles, 'categorie', document.getElementById('cat4').dataset.value)">Hommes</a>
 								</li>
 							</ul>
+							
 						</div>
+						<div class="col-sm-12 text-right menu-login">
+								<button id="btn-login"><i class="fas fa-user-alt"></i><a href="#" id="btn-msg" onclick="formulaireConnexion();iconConnexion()">Connexion</a></button>
+							<!--	<a href="profile.php"><i class="fas fa-user-circle"></i>Profile</a> -->
+							<!--	<a href="logout.php"><i class="fas fa-sign-out-alt"></i>Logout</a> -->
+								
+						</div>
+						
 					</div>
+					
 				</div>
 			</div>
 			<div class="cart">
@@ -529,9 +539,9 @@
 							</div>
 							<div class="col-md-12">
 								<div class="form-group">
-									<label for="pseudo">Nom d'utilisateur</label>
+									<label for="pseudo">Email</label>
 									<input type="text" id="pseudo" class="form-control"
-										placeholder="Votre nom d'utilisateur">
+										placeholder="Votre courrier electronique">
 								</div>
 							</div>
 							<div class="col-md-12">
