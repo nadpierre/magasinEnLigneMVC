@@ -36,7 +36,7 @@ class Commande {
         return $this->dateCommande;
     }
 
-    public function getNoClient(){
+    public function getNoMembre(){
         return $this->noMembre;
     }
 
@@ -59,7 +59,7 @@ class Commande {
         $this->dateCommande = $dateCommande;
     }
 
-    public function setNoClient($noMembre){
+    public function setNoMembre($noMembre){
         $noMembre = (int) $noMembre;
         $this->noMembre = $noMembre;
     }
@@ -74,6 +74,7 @@ class Commande {
     /**
      * Assigne les bonnes valeurs aux attributs
      * @param {array} $donnees - tableau associatif contenant les attributs et les valeurs
+     * @return void
      */
     public function hydrate(array $donnees) {
         foreach ($donnees as $attribut => $valeur) {

@@ -2,18 +2,30 @@
 
 class GestionArticlesCommande extends GestionBD {
 
-    public function ajouterArticles($noCommande, $tabNoArticle, $tabQuantite) {
+    public function ajouterArticle(ArticleEnCommande $article) {
+
+        $requete = $this->bdd->prepare(
+            'INSERT INTO article_en_commande
+            VALUES (:noCommande, :noArticle, :quantite)'
+        );
+        $requete->bindValue(':noCommande', $article->getNoCommande(), PDO::PARAM_INT);
+        $requete->bindValue(':noArticle', $article->getNoArticle(), PDO::PARAM_INT);
+        $requete->bindValue(':quantite', $article->getQuantite(), PDO::PARAM_INT);
+        $requete->execute();
+        $requete->closeCursor();
+    }
+
+    public function placerCommande($noCommande, $tabNoArticle, $tabQuantite) {
         
         for($i = 0; $i < count($tabNoArticle); $i++) {
-            $requete = $this->_bdd->prepare(
-                'INSERT INTO article_en_commande (noCommande, noArticle, quantite)
-                VALUES (:noCommande, :noArticle, :quantite)'
-            );
-            $requete->bindValue(':noCommande', $noCommande, PDO::PARAM_INT);
-            $requete->bindValue(':noArticle', (int) $tabNoArticle[$i], PDO::PARAM_INT);
-            $requete->bindValue(':quantite', (int) $tabQuantite[$i], PDO::PARAM_INT);
-            $requete->execute();
-            $requete->closeCursor();
+
+            $article = new ArticleEnCommande(array(
+                "noCommande" => $noCommande,
+                "noArticle" => (int) $tabNoArticle[$i],
+                "quantite" => (int) $tabQuantite[$i]
+            ));
+
+            $this->ajouterArticle($article);
         }
 
     }

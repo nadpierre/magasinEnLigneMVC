@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Hôte : 127.0.0.1
--- Généré le :  lun. 06 mai 2019 à 23:38
+-- Généré le :  mer. 08 mai 2019 à 07:02
 -- Version du serveur :  10.1.36-MariaDB
 -- Version de PHP :  7.2.11
 
@@ -21,7 +21,7 @@ SET time_zone = "+00:00";
 --
 -- Base de données :  `magasin_en_ligne`
 --
-CREATE DATABASE IF NOT EXISTS `magasin_en_ligne` DEFAULT CHARACTER SET latin1 COLLATE latin1_swedish_ci;
+CREATE DATABASE IF NOT EXISTS `magasin_en_ligne` DEFAULT CHARACTER SET utf8 COLLATE utf8_general_ci;
 USE `magasin_en_ligne`;
 
 -- --------------------------------------------------------
@@ -34,19 +34,19 @@ DROP TABLE IF EXISTS `article`;
 CREATE TABLE IF NOT EXISTS `article` (
   `noArticle` int(10) UNSIGNED NOT NULL AUTO_INCREMENT,
   `categorie` varchar(25) NOT NULL,
-  `description` varchar(255) NOT NULL,
+  `libelle` varchar(255) NOT NULL,
   `cheminImage` varchar(255) DEFAULT NULL,
   `prixUnitaire` decimal(10,2) DEFAULT NULL,
   `quantiteEnStock` int(10) NOT NULL,
   `quantiteDansPanier` int(10) NOT NULL,
   PRIMARY KEY (`noArticle`)
-) ENGINE=InnoDB AUTO_INCREMENT=29 DEFAULT CHARSET=latin1;
+) ENGINE=InnoDB AUTO_INCREMENT=29 DEFAULT CHARSET=utf8;
 
 --
 -- Déchargement des données de la table `article`
 --
 
-INSERT INTO `article` (`noArticle`, `categorie`, `description`, `cheminImage`, `prixUnitaire`, `quantiteEnStock`, `quantiteDansPanier`) VALUES
+INSERT INTO `article` (`noArticle`, `categorie`, `libelle`, `cheminImage`, `prixUnitaire`, `quantiteEnStock`, `quantiteDansPanier`) VALUES
 (1, 'Cheveux', 'Alikay Naturals Lemongrass Leave In Conditioner', 'images/alikay_naturals_lemongrass_leave_in_conditioner.jpg', '28.99', 8, 0),
 (2, 'Cheveux', 'ApHogee Curlific! Texture Treatment', 'images/aphogee_curlific_texture_treatment.jpg', '13.99', 8, 0),
 (3, 'Cheveux', 'As I Am Coconut Cowash Cleansing Conditioner', 'images/as_i_am_coconut_cowash.jpeg', '15.99', 8, 0),
@@ -90,7 +90,7 @@ CREATE TABLE IF NOT EXISTS `article_en_commande` (
   PRIMARY KEY (`noCommande`,`noArticle`),
   KEY `commande_fk` (`noCommande`),
   KEY `article_fk` (`noArticle`)
-) ENGINE=InnoDB DEFAULT CHARSET=latin1;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
 --
 -- Déchargement des données de la table `article_en_commande`
@@ -148,56 +148,6 @@ INSERT INTO `article_en_commande` (`noCommande`, `noArticle`, `quantite`) VALUES
 -- --------------------------------------------------------
 
 --
--- Structure de la table `client`
---
-
-DROP TABLE IF EXISTS `client`;
-CREATE TABLE IF NOT EXISTS `client` (
-  `noClient` int(10) UNSIGNED NOT NULL AUTO_INCREMENT,
-  `nomClient` varchar(50) NOT NULL,
-  `prenomClient` varchar(50) NOT NULL,
-  `adresse` varchar(255) NOT NULL,
-  `ville` varchar(50) NOT NULL,
-  `province` varchar(50) NOT NULL,
-  `codePostal` varchar(10) NOT NULL,
-  `noTel` varchar(25) NOT NULL,
-  `pseudo` varchar(25) DEFAULT NULL,
-  `motDePasse` varchar(255) DEFAULT NULL,
-  `courriel` varchar(255) NOT NULL,
-  PRIMARY KEY (`noClient`)
-) ENGINE=InnoDB AUTO_INCREMENT=26 DEFAULT CHARSET=latin1;
-
---
--- Déchargement des données de la table `client`
---
-
-INSERT INTO `client` (`noClient`, `nomClient`, `prenomClient`, `adresse`, `ville`, `province`, `codePostal`, `noTel`, `pseudo`, `motDePasse`, `courriel`) VALUES
-(1, 'Collins', 'Renee B', '2394 St Jean Baptiste St', 'Montréal', 'Québec', 'G0M 1W0', '819-548-2143', 'LAstAinV', 'jhULyARS', 'w8drqcfwb2o@payspun.com'),
-(2, 'Kirk', 'Oscar M', '4277 40th Street', 'Calgary', 'Alberta', 'T2C 2P3', '403-236-7859', 'vaShosIX', 'MTyxIjsH', 'xt4v02xxx0g@thrubay.com'),
-(3, 'Delossantos', 'Julia', '4603 Yonge Street', 'Toronto', 'Ontario', 'M4W 1J7', '416-301-6292', 'NciDeGON', 'pV2VAqRJ', 'sowl5hn2y9k@thrubay.com'),
-(4, 'Desantiago', 'Ruben J', '1097 Mountain Rd', 'Moncton', 'Nouveau-Brunswick', 'E1C 1H6', '506-961-5510', 'STevERse', 'ENwSdBDW', 'e02n5x6ptto@payspun.com'),
-(5, 'Rivera', 'Linda M', '496 2nd Street', 'Oakbank', 'Manitoba', 'R0E 1J0', '204-444-1472', 'eoNVOvar', 'S2tDbmiz', 'os8l3vscf7r@fakemailgenerator.net'),
-(7, 'Soucy', 'Warrane', '4686 Roger Street', 'Oyster River', 'Colombie-Britannique', 'V9W 5N0', '250-337-5002', 'ouRYPtIC', 'BmwxI84I', 'warranesoucy@rhyta.com '),
-(8, 'Kou', 'Mingmei', '3375 5th Avenue', 'Fort Vermilion', 'Alberta', 'T0H 1N0', '780-927-6217', 'TRATerfi', 'BuXVRdUl', 'mingmeikuo@armyspy.com '),
-(9, 'Antoun', 'Rais Fathi', '3564 St Marys Rd', 'Winnipeg', 'Manitoba', 'R3C 0C4', '204-292-9473', 'aBlEUren', 'LwTtG3N5', 'raisfathiantoun@rhyta.com'),
-(10, 'Chatigny', 'Dalmace', '3008 No. 3 Road', 'Richmond', 'Colombie-Britannique', 'V6X 2B8', '604-214-5060', 'siTaNtaN', 'ggCEbGjg', 'dalmacechatigny@armyspy.com'),
-(11, 'Michel', 'Annot', '2516 Carling Avenue', 'Ottawa', 'Ontario', 'K1Z 7B5', '613-355-2003', 'Thempheince', 'Xaashoh3oh', 'annotmichel@jourrapide.com '),
-(12, 'Ahmad Ba', 'Mufeed', '4458 Reserve St', 'Inverary', 'Ontario', 'K0H 1X0', '613-353-0555', 'Mussiout', 'ahlei3Sh', 'mufeedahmadBa@teleworm.us'),
-(13, 'Sousa Pereira', 'Brenda', '4644 Dry Pine Bay Rd', 'Azilda', 'Ontario', 'H0M 1B0', '705-983-0538', 'Larearme', 'void2xu5Ii', 'brendasousapereira@jourrapide.com '),
-(14, 'Robel', 'Zewdi', '3336, Water Street', 'Kitchener', 'Ontario', 'N2H 5A5', '519-744-5326', 'Oweept', 'RaiPh2vee', 'zewdirobel@teleworm.us'),
-(15, 'Chieloka', 'Nkechiyerem', '4262 Orenda Rd', 'Brampton', 'Ontario', 'L6W 1Z2', '905-451-0542', 'Nowee1989', 'eiBie0zai', 'nkechiyeremchieloka@rhyta.com'),
-(16, 'Arteaga Garay', 'Denna', '878 Speers Road', 'Brampton', 'Ontario', 'G0H 1H0', '905-790-4905', 'Morty1947', 'ayo6gooXuwae', 'dennaarteagagaray@rhyta.com '),
-(17, 'Olivas', 'Jaclyn Lira', '3767 Wallace Street', 'Nanaimo', 'Colombie-Britannique', 'V9R 3A8', '250-755-5941', 'Acusid', 'vahWeiL2Ch', 'jaclynliraolivas@armyspy.com '),
-(18, 'Bernier', 'Geneviève', '1805 Quayside Dr', 'New Westminster', 'Colombie-Britannique', 'V3M 6A1', '604-764-5263', 'Sucan1982', 'ahMobahtae2', 'genevievebernier@dayrep.com '),
-(19, 'Bondy', 'Favor', '3295 2nd Street', 'Lac Du Bonnet', 'Manitoba', 'R0E 1A0', '204-345-8196', 'Heeut1980', 'Foe7zi9Othie', 'favorbondy@armyspy.com'),
-(22, 'test', 'test', 'test test', 'test', 'Québec', 'A2B 2C4', '514-123-4567', 'test123', 'toto99', 'test@test.com'),
-(23, 'test', 'test', 'test test', 'Montréal', 'Québec', 'A2B 2C4', '514-123-4567', 'test1234', 'toto99', 'test123@test.com'),
-(24, 'Test', 'Nadine', '123, rue Test appartement 100', 'Montréal', 'Québec', 'A1B 2C3', '514-123-4567', 'nad2273', 'magasin', 'nadine@test.com'),
-(25, 'Sandyman', 'Menegilda', '2470 Findlay Creek Road', 'Creston', 'Colombie-Britannique', 'V0B 1G0', '250-402-3442', 'Boodsom', 'aV8Ahghahnan', 'MenegildaSandyman@dayrep.com');
-
--- --------------------------------------------------------
-
---
 -- Structure de la table `commande`
 --
 
@@ -209,7 +159,7 @@ CREATE TABLE IF NOT EXISTS `commande` (
   `paypalOrderId` char(17) NOT NULL,
   PRIMARY KEY (`noCommande`),
   KEY `commande_noclient_idx` (`noClient`)
-) ENGINE=InnoDB AUTO_INCREMENT=20 DEFAULT CHARSET=latin1;
+) ENGINE=InnoDB AUTO_INCREMENT=20 DEFAULT CHARSET=utf8;
 
 --
 -- Déchargement des données de la table `commande`
@@ -239,17 +189,62 @@ INSERT INTO `commande` (`noCommande`, `dateCommande`, `noClient`, `paypalOrderId
 -- --------------------------------------------------------
 
 --
+-- Structure de la table `membre`
+--
+
+DROP TABLE IF EXISTS `membre`;
+CREATE TABLE IF NOT EXISTS `membre` (
+  `noMembre` int(10) UNSIGNED NOT NULL AUTO_INCREMENT,
+  `nomMembre` varchar(50) NOT NULL,
+  `prenomMembre` varchar(50) NOT NULL,
+  `estAdmin` tinyint(1) NOT NULL,
+  `adresse` varchar(255) NOT NULL,
+  `ville` varchar(50) NOT NULL,
+  `province` varchar(50) NOT NULL,
+  `codePostal` varchar(10) NOT NULL,
+  `noTel` varchar(25) NOT NULL,
+  `courriel` varchar(255) NOT NULL,
+  `motDePasse` varchar(255) NOT NULL,
+  PRIMARY KEY (`noMembre`)
+) ENGINE=InnoDB AUTO_INCREMENT=26 DEFAULT CHARSET=utf8;
+
+--
+-- Déchargement des données de la table `membre`
+--
+
+INSERT INTO `membre` (`noMembre`, `nomMembre`, `prenomMembre`, `estAdmin`, `adresse`, `ville`, `province`, `codePostal`, `noTel`, `courriel`, `motDePasse`) VALUES
+(1, 'Collins', 'Renee B', 0, '2394 St Jean Baptiste St', 'Montréal', 'Québec', 'G0M 1W0', '819-548-2143', 'w8drqcfwb2o@payspun.com', 'jhULyARS'),
+(2, 'Kirk', 'Oscar M', 0, '4277 40th Street', 'Calgary', 'Alberta', 'T2C 2P3', '403-236-7859', 'xt4v02xxx0g@thrubay.com', 'MTyxIjsH'),
+(3, 'Delossantos', 'Julia', 0, '4603 Yonge Street', 'Toronto', 'Ontario', 'M4W 1J7', '416-301-6292', 'sowl5hn2y9k@thrubay.com', 'pV2VAqRJ'),
+(4, 'Desantiago', 'Ruben J', 0, '1097 Mountain Rd', 'Moncton', 'Nouveau-Brunswick', 'E1C 1H6', '506-961-5510', 'e02n5x6ptto@payspun.com', 'ENwSdBDW'),
+(5, 'Rivera', 'Linda M', 0, '496 2nd Street', 'Oakbank', 'Manitoba', 'R0E 1J0', '204-444-1472', 'os8l3vscf7r@fakemailgenerator.net', 'S2tDbmiz'),
+(6, 'Pierre', 'Nadine', 1, '9429, avenue Christophe-Colomb', 'Montréal', 'Québec', 'H2M 1Z7', '514-830-6966', 'nadine_pierre@hotmail.com', 'toto99'),
+(7, 'Soucy', 'Warrane', 0, '4686 Roger Street', 'Oyster River', 'Colombie-Britannique', 'V9W 5N0', '250-337-5002', 'warranesoucy@rhyta.com ', 'BmwxI84I'),
+(8, 'Kou', 'Mingmei', 0, '3375 5th Avenue', 'Fort Vermilion', 'Alberta', 'T0H 1N0', '780-927-6217', 'mingmeikuo@armyspy.com ', 'BuXVRdUl'),
+(9, 'Antoun', 'Rais Fathi', 0, '3564 St Marys Rd', 'Winnipeg', 'Manitoba', 'R3C 0C4', '204-292-9473', 'raisfathiantoun@rhyta.com', 'LwTtG3N5'),
+(10, 'Chatigny', 'Dalmace', 0, '3008 No. 3 Road', 'Richmond', 'Colombie-Britannique', 'V6X 2B8', '604-214-5060', 'dalmacechatigny@armyspy.com', 'ggCEbGjg'),
+(11, 'Michel', 'Annot', 0, '2516 Carling Avenue', 'Ottawa', 'Ontario', 'K1Z 7B5', '613-355-2003', 'annotmichel@jourrapide.com ', 'Xaashoh3oh'),
+(12, 'Ahmad Ba', 'Mufeed', 0, '4458 Reserve St', 'Inverary', 'Ontario', 'K0H 1X0', '613-353-0555', 'mufeedahmadBa@teleworm.us', 'ahlei3Sh'),
+(13, 'Sousa Pereira', 'Brenda', 0, '4644 Dry Pine Bay Rd', 'Azilda', 'Ontario', 'H0M 1B0', '705-983-0538', 'brendasousapereira@jourrapide.com ', 'void2xu5Ii'),
+(14, 'Robel', 'Zewdi', 0, '3336, Water Street', 'Kitchener', 'Ontario', 'N2H 5A5', '519-744-5326', 'zewdirobel@teleworm.us', 'RaiPh2vee'),
+(15, 'Chieloka', 'Nkechiyerem', 0, '4262 Orenda Rd', 'Brampton', 'Ontario', 'L6W 1Z2', '905-451-0542', 'nkechiyeremchieloka@rhyta.com', 'eiBie0zai'),
+(16, 'Arteaga Garay', 'Denna', 0, '878 Speers Road', 'Brampton', 'Ontario', 'G0H 1H0', '905-790-4905', 'dennaarteagagaray@rhyta.com ', 'ayo6gooXuwae'),
+(17, 'Olivas', 'Jaclyn Lira', 0, '3767 Wallace Street', 'Nanaimo', 'Colombie-Britannique', 'V9R 3A8', '250-755-5941', 'jaclynliraolivas@armyspy.com ', 'vahWeiL2Ch'),
+(18, 'Bernier', 'Geneviève', 0, '1805 Quayside Dr', 'New Westminster', 'Colombie-Britannique', 'V3M 6A1', '604-764-5263', 'genevievebernier@dayrep.com ', 'ahMobahtae2'),
+(19, 'Bondy', 'Favor', 0, '3295 2nd Street', 'Lac Du Bonnet', 'Manitoba', 'R0E 1A0', '204-345-8196', 'favorbondy@armyspy.com', 'Foe7zi9Othie'),
+(20, 'Pradel-Tessier', 'Shao', 1, '123 rue ABC', 'Montréal', 'Québec', 'A1B 2C3', '514-123-4567', 'Shao.P.Tessier@gmail.com', 'abc123'),
+(21, 'Pham', 'Binh', 1, '456 rue DEF', 'Montréal', 'Québec', 'B1C 2D3', '514-234-5678', 'binh.pham@gmail.com', 'abc123'),
+(24, 'Test', 'Nadine', 0, '123, rue Test appartement 100', 'Montréal', 'Québec', 'A1B 2C3', '514-123-4567', 'nadine@test.com', 'magasin'),
+(25, 'Sandyman', 'Menegilda', 0, '2470 Findlay Creek Road', 'Creston', 'Colombie-Britannique', 'V0B 1G0', '250-402-3442', 'MenegildaSandyman@dayrep.com', 'aV8Ahghahnan');
+
+-- --------------------------------------------------------
+
+--
 -- Doublure de structure pour la vue `vue_article`
 -- (Voir ci-dessous la vue réelle)
 --
 DROP VIEW IF EXISTS `vue_article`;
 CREATE TABLE IF NOT EXISTS `vue_article` (
-`noArticle` int(10) unsigned
-,`description` varchar(255)
-,`cheminImage` varchar(255)
-,`prixUnitaire` decimal(10,2)
-,`quantiteEnStock` int(10)
-,`quantiteDansPanier` int(10)
 );
 
 -- --------------------------------------------------------
@@ -260,10 +255,6 @@ CREATE TABLE IF NOT EXISTS `vue_article` (
 --
 DROP VIEW IF EXISTS `vue_commande`;
 CREATE TABLE IF NOT EXISTS `vue_commande` (
-`Nom complet` varchar(101)
-,`ville` varchar(50)
-,`noCommande` int(10) unsigned
-,`dateCommande` datetime
 );
 
 -- --------------------------------------------------------
@@ -274,12 +265,6 @@ CREATE TABLE IF NOT EXISTS `vue_commande` (
 --
 DROP VIEW IF EXISTS `vue_commande_full`;
 CREATE TABLE IF NOT EXISTS `vue_commande_full` (
-`Nom complet` varchar(101)
-,`ville` varchar(50)
-,`noCommande` int(10) unsigned
-,`dateCommande` datetime
-,`Nb d'articles` decimal(32,0)
-,`Prix total` decimal(42,2)
 );
 
 -- --------------------------------------------------------
@@ -326,7 +311,7 @@ ALTER TABLE `article_en_commande`
 -- Contraintes pour la table `commande`
 --
 ALTER TABLE `commande`
-  ADD CONSTRAINT `client_commande_fk` FOREIGN KEY (`noClient`) REFERENCES `client` (`noClient`);
+  ADD CONSTRAINT `client_commande_fk` FOREIGN KEY (`noClient`) REFERENCES `membre` (`noMembre`);
 COMMIT;
 
 /*!40101 SET CHARACTER_SET_CLIENT=@OLD_CHARACTER_SET_CLIENT */;

@@ -100,6 +100,7 @@ class Article {
     /**
      * Assigne les bonnes valeurs aux attributs
      * @param {array} $donnes - tableau associatif contenant les attributs et les valeurs
+     * @return void
      */
     public function hydrate(array $donnees) {
         foreach ($donnees as $attribut => $valeur) {

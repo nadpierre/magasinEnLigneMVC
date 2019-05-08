@@ -13,16 +13,42 @@ class GestionCommandes extends GestionBD {
      */
     public function getCommande($noCommande) {
         $noCommande = (int) $noCommande;
+
+        $requete = $this->bdd->prepare(
+            'SELECT * FROM commande WHERE noCommande = ?'
+        );
+        $requete->bindValue(1, $noCommande, PDO::PARAM_INT);
+        $requete->execute();
+        $donnees = $requete->fetch(PDO::FETCH_ASSOC);
+        $requete->closeCursor();
+
+        $commande = new Commande($donnees);
+        return $commande;
+    }
+
+    /**
+     * Retourne la commande qui vient d'être créée
+     * @return Commande - une instance de l'objet Commande
+     */
+    public function getDerniereCommande() {
+        $requete = $this->bdd->query(
+            'SELECT * FROM commande ORDER BY dateCommande DESC LIMIT 1'
+        );
+        $donnees = $requete->fetch(PDO::FETCH_ASSOC);
+        $requete->closeCursor();
+
+        $commande = new Commande($donnees);
+        return $commande;
     }
 
     /**
      * Ajoute une commande
-     * @param {Commande} $noMembre - une instance de l'objet Commande
+     * @param {Commande} $commande - une instance de l'objet Commande
      * @return void
      */
     public function ajouterCommande(Commande $commande) {
 
-        $requete = $this->_bdd->prepare(
+        $requete = $this->bdd->prepare(
             'INSERT INTO commande (dateCommande, noMembre, paypalOrderId)
             VALUES (NOW(), :noMembre, :paypalOrderId)'
         );
@@ -35,15 +61,16 @@ class GestionCommandes extends GestionBD {
 
     /**
      * Supprime une commande
+     * @param {Commande} $commande - une instance de l'objet Commande
+     * @return void
      */
-    public function supprimerCommande() {
-
+    public function supprimerCommande(Commande $commande) {
+        $requete = $this->bdd->prepare('DELETE FROM commande WHERE noCommande = ?');
+        $requete->bindValue(1, $commande->getNoCommande(), PDO::PARAM_INT);
+        $requete->execute();
+        $requete->closeCursor();
     }
 
-    
-
-
-   
 }
 
 ?>
