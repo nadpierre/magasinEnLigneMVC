@@ -23,6 +23,17 @@ function afficherInventaire(callback, filtre, valeur) {
  */
 function listerArticles(filtre, valeur) {
 
+    /* $.ajax({
+        url: 'php/main.php',
+        type : "POST",
+        data : "q=inventaire",
+        sucess: function(code_html, status){
+            let modeleListeArticle = new ModeleMagasin("modele-liste-articles");
+            modeleListeArticle.appliquerModele(code_html, "liste-articles");
+            
+        }
+    }) */
+    
     //Afficher tous les articles
     let requete = new RequeteAjax("php/main.php?q=inventaire" +
         ((filtre != "" && valeur != "") ? "&" + filtre + "=" + valeur : ""));
