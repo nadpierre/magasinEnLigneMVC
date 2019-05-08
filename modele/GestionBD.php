@@ -7,10 +7,10 @@
 abstract class GestionBD {
 
     /* ATTRIBUTS */
-    private $_nomBD = 'magasin_en_ligne';
-    private $_utilisateur = 'webdev';
-    private $_mdp = 'toto99';
-    protected $_bdd;
+    private $nomBD = 'magasin_en_ligne';
+    private $utilisateur = 'root';
+    private $mdp = '';
+    protected $bdd;
 
     /**
      * CONSTRUCTEUR : instanciation de l'objet
@@ -30,7 +30,7 @@ abstract class GestionBD {
      */
     public function connexionBD() {
 
-        $nsd = 'mysql:host=localhost;dbname='.$this->_nomBD.';charset=utf8';
+        $nsd = 'mysql:host=localhost;dbname='.$this->nomBD.';charset=utf8';
 
         $options = [
             PDO::ATTR_ERRMODE            => PDO::ERRMODE_EXCEPTION,
@@ -39,7 +39,7 @@ abstract class GestionBD {
         ];
 
         try {
-            $this->_bdd = new PDO($nsd, $this->_utilisateur, $this->_mdp, $options);
+            $this->bdd = new PDO($nsd, $this->utilisateur, $this->mdp, $options);
         } 
         catch (PDOException $e) {
             echo 'Message : ' . $e->getMessage() . "\t Code : " . (int)$e->getCode(). "\n";
@@ -57,11 +57,32 @@ abstract class GestionBD {
     protected function filtrerParametre($parametre){
         if (get_magic_quotes_gpc()){
             $parametre = stripslashes($parametre);
-            $parametre = $this->_bdd->real_escape_string($parametre);
+            $parametre = $this->bdd->real_escape_string($parametre);
             $parametre = htmlentities($parametre);
         }
 
         return $parametre;
+    }
+
+    /**
+     * Débuter une transaction (mettre le autocommit à 0)
+     */
+    protected function debuterTransaction() {
+        $this->bdd->beginTransaction();
+    }
+
+     /**
+     * Confirmer une transaction
+     */
+    protected function confirmer() {
+        $this->bdd->commit();
+    }
+
+    /**
+     * Annuler une transaction
+     */
+    protected function annuler() {
+        $this->bdd->rollback();
     }
 
 }

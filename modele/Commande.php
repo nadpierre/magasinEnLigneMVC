@@ -6,10 +6,10 @@ class Commande {
 
     /* ATTRIBUTS */
 
-    private $_noCommande;
-    private $_dateCommande;
-    private $_noClient;
-    private $_paypalOrderId;
+    private $noCommande;
+    private $dateCommande;
+    private $noMembre;
+    private $paypalOrderId;
 
 
     /* CONSTANTES (regex) */
@@ -29,26 +29,26 @@ class Commande {
     /* ACCESSEURS */
 
     public function getNoCommande(){
-        return $this->_noCommande;
+        return $this->noCommande;
     }
 
     public function getDateCommande(){
-        return $this->_dateCommande;
+        return $this->dateCommande;
     }
 
     public function getNoClient(){
-        return $this->_noClient;
+        return $this->noMembre;
     }
 
     public function getPaypalOrderId(){
-        return $this->_paypalOrderId;
+        return $this->paypalOrderId;
     }
 
 
     /* MUTATEURS */
     public function setNoCommande($noCommande){
         $noCommande = (int) $noCommande;
-        $this->_noCommande = $noCommande;
+        $this->noCommande = $noCommande;
     }
 
     public function setDateCommande($dateCommande){
@@ -56,20 +56,20 @@ class Commande {
             throw new Exception('Format de date invalide.');
             return;
         }
-        $this->_dateCommande = $dateCommande;
+        $this->dateCommande = $dateCommande;
     }
 
-    public function setNoClient($noClient){
-        $noClient = (int) $noClient;
-        $this->_noClient = $noClient;
+    public function setNoClient($noMembre){
+        $noMembre = (int) $noMembre;
+        $this->noMembre = $noMembre;
     }
 
     public function setPaypalOrderId($paypalOrderId) {
-        $this->_paypalOrderId = $paypalOrderId;
+        $this->paypalOrderId = $paypalOrderId;
     }
 
 
-     /* MÉTHODE GÉNÉRALE */
+     /* MÉTHODES GÉNÉRALES */
 
     /**
      * Assigne les bonnes valeurs aux attributs
@@ -84,19 +84,22 @@ class Commande {
         }
     }
 
-
      /**
-     * Retourne les attributs et les valeurs de la commande
-     * @return array - un tableau associatif (retire les "_" des attributs)
+     * Retourne les attributs et les valeurs de l'objet
+     * @return array
      */
     public function getTableau(){
-        return array (
-            "noCommande" => $this->getNoCommande(),
-            "dateCommande" => $this->getDateCommande(),
-            "noClient" => $this->getNoClient(),
-            "paypalOrderId" => $this->getPaypalOrderId()
-        );
+        return get_object_vars($this);
     }
+
+    /**
+     * Retourne le JSON de l'objet
+     * @return string
+     */
+    public function __toString() {
+        return json_encode(get_object_vars($this));
+    }
+
 
 }
 

@@ -6,13 +6,13 @@
 class Article {
 
     /* ATTRIBUTS */
-    private $_noArticle;
-    private $_categorie;
-    private $_description;
-    private $_cheminImage;
-    private $_prixUnitaire;
-    private $_quantiteEnStock;
-    private $_quantiteDansPanier;
+    private $noArticle;
+    private $categorie;
+    private $libelle;
+    private $cheminImage;
+    private $prixUnitaire;
+    private $quantiteEnStock;
+    private $quantiteDansPanier;
 
     /* CONSTANTES (regex) */
    const CHEMIN_IMAGE = '/^images\/(.*)\.(jpg|jpeg|png|gif)$/';
@@ -29,46 +29,46 @@ class Article {
     /* ACCESSEURS */
 
     public function getNoArticle() {
-        return $this->_noArticle;
+        return $this->noArticle;
     }
 
     public function getCategorie() {
-        return $this->_categorie;
+        return $this->categorie;
     }
 
-    public function getDescription() {
-        return $this->_description;
+    public function getLibelle() {
+        return $this->libelle;
     }
 
     public function getCheminImage() {
-        return $this->_cheminImage;
+        return $this->cheminImage;
     }
 
     public function getPrixUnitaire() {
-        return $this->_prixUnitaire;
+        return $this->prixUnitaire;
     }
 
     public function getQuantiteEnStock() {
-        return $this->_quantiteEnStock;
+        return $this->quantiteEnStock;
     }
 
     public function getQuantiteDansPanier() {
-        return $this->_quantiteDansPanier;
+        return $this->quantiteDansPanier;
     }
 
     /* MUTATEURS */
 
     public function setNoArticle($noArticle) {
         $noArticle = (int) $noArticle;
-        $this->_noArticle = $noArticle;
+        $this->noArticle = $noArticle;
     }
 
     public function setCategorie($categorie) {
-        $this->_categorie = $categorie;
+        $this->categorie = $categorie;
     }
 
-    public function setDescription($description) {
-        $this->_description = $description;
+    public function setLibelle($libelle) {
+        $this->libelle = $libelle;
     }
 
     public function setCheminImage($cheminImage) {
@@ -76,22 +76,22 @@ class Article {
             throw new Exception('Format de chemin d\'image invalide');
             return;
         }
-        $this->_cheminImage = $cheminImage;
+        $this->cheminImage = $cheminImage;
     }
 
     public function setPrixUnitaire($prixUnitaire) {
         $prixUnitaire = (double) $prixUnitaire;
-        $this->_prixUnitaire = $prixUnitaire;
+        $this->prixUnitaire = $prixUnitaire;
     }
 
     public function setQuantiteEnStock($quantiteEnStock) {
         $quantiteEnStock = (int) $quantiteEnStock;
-        $this->_quantiteEnStock = $quantiteEnStock;
+        $this->quantiteEnStock = $quantiteEnStock;
     }
 
     public function setQuantiteDansPanier($quantiteDansPanier) {
         $quantiteDansPanier = (int) $quantiteDansPanier;
-        $this->_quantiteDansPanier = $quantiteDansPanier;
+        $this->quantiteDansPanier = $quantiteDansPanier;
     }
     
 
@@ -110,21 +110,20 @@ class Article {
         }
     }
 
-
     /**
-     * Retourne les attributs et les valeurs de l'article
-     * @return array - un tableau associatif (retire les "_" des attributs)
+     * Retourne les attributs et les valeurs de l'objet
+     * @return array
      */
     public function getTableau(){
-        return array (
-            "noArticle" => $this->getNoArticle(),
-            "categorie" => $this->getCategorie(),
-            "description" => $this->getDescription(),
-            "cheminImage" => $this->getCheminImage(),
-            "prixUnitaire" => $this->getPrixUnitaire(),
-            "quantiteEnStock" => $this->getQuantiteEnStock(),
-            "quantiteDansPanier" => $this->getQuantiteDansPanier()
-        );
+        return get_object_vars($this);
+    }
+
+    /**
+     * Retourne le JSON de l'objet
+     * @return string
+     */
+    public function __toString() {
+        return json_encode(get_object_vars($this));
     }
 }
 

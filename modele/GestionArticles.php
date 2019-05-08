@@ -14,7 +14,7 @@ class GestionArticles extends GestionBD {
     public function getListeArticles() {
         $listeArticles = array();
 
-        $requete = $this->_bdd->query('SELECT * FROM article ORDER BY `description`');
+        $requete = $this->bdd->query('SELECT * FROM article ORDER BY libelle');
        
         while ($donnees = $requete->fetch(PDO::FETCH_ASSOC)) {
             $article = new Article($donnees);
@@ -32,10 +32,9 @@ class GestionArticles extends GestionBD {
      * @return string - un JSON du tableau d'articles
      */
     public function listerParCategorie($categorie){
-
         $listeArticles = array();
 
-        $requete = $this->_bdd->prepare('SELECT * FROM article WHERE categorie = ? ORDER BY `description`');
+        $requete = $this->bdd->prepare('SELECT * FROM article WHERE categorie = ? ORDER BY libelle');
         $requete->bindValue(1, $categorie, PDO::PARAM_STR);
         $requete->execute();
 
@@ -50,7 +49,7 @@ class GestionArticles extends GestionBD {
     }
 
     /**
-     * Retourne une liste d'article contant le même mot dans leur description
+     * Retourne une liste d'article contant le même mot dans leur libelle
      * @param {string} $mot - le mot cherché
      * @return string - un JSON du tableau d'articles
      */
@@ -61,7 +60,7 @@ class GestionArticles extends GestionBD {
         $mot = strtolower($mot);
         $listeArticles = array();
 
-        $requete = $this->_bdd->query("SELECT * FROM article WHERE LOWER(description) LIKE '%$mot%' ORDER BY `description`");
+        $requete = $this->bdd->query("SELECT * FROM article WHERE LOWER(libelle) LIKE '%$mot%' ORDER BY libelle");
         
         while ($donnees = $requete->fetch(PDO::FETCH_ASSOC)) {
             $article = new Article($donnees);
@@ -76,9 +75,10 @@ class GestionArticles extends GestionBD {
 
     /**
      * Calcule le nombre total d'articles
+     * @return int
      */
-    function getNbArticles(){
-        $requete = $this->_bdd->query('SELECT COUNT(*) FROM article');
+    private function getNbArticles(){
+        $requete = $this->bdd->query('SELECT COUNT(*) FROM article');
         $somme = $requete->fetch(PDO::FETCH_NUM);
         $requete->closeCursor();
         return (int) $somme[0];
@@ -87,21 +87,19 @@ class GestionArticles extends GestionBD {
     /**
      * Retourne un seul article
      * @param {int} $id - l'identifiant de l'article
-     * @return string - un JSON du tableau d'articles
+     * @return string - un JSON de l'article
      */
     public function getArticle($noArticle) {
-        $listeArticles = array();
         $noArticle = (int) $noArticle;
        
-        $requete = $this->_bdd->prepare('SELECT * FROM article WHERE noArticle = ?');
+        $requete = $this->bdd->prepare('SELECT * FROM article WHERE noArticle = ?');
         $requete->bindValue(1, $noArticle, PDO::PARAM_INT);
         $requete->execute();
         $donnees = $requete->fetch(PDO::FETCH_ASSOC);
         $requete->closeCursor();
 
         $article = new Article($donnees);
-        array_push($listeArticles, $article->getTableau());
-        return json_encode($listeArticles);
+        return '[' . $article . ']';
     }
 
     /**
@@ -112,7 +110,7 @@ class GestionArticles extends GestionBD {
     private function getQteStock($noArticle){
         $noArticle = (int) $noArticle;
       
-        $requete = $this->_bdd->prepare('SELECT quantiteEnStock FROM article WHERE noArticle = ?');
+        $requete = $this->bdd->prepare('SELECT quantiteEnStock FROM article WHERE noArticle = ?');
         $requete->bindValue(1, $noArticle, PDO::PARAM_INT);
         $requete->execute();
         $donnees = $requete->fetch(PDO::FETCH_NUM);
@@ -129,7 +127,7 @@ class GestionArticles extends GestionBD {
     private function getQteDansPanier($noArticle){
         $noArticle = (int) $noArticle;
        
-        $requete = $this->_bdd->prepare('SELECT quantiteDansPanier FROM article WHERE noArticle = ?');
+        $requete = $this->bdd->prepare('SELECT quantiteDansPanier FROM article WHERE noArticle = ?');
         $requete->bindValue(1, $noArticle, PDO::PARAM_INT);
         $requete->execute();
         $donnees = $requete->fetch(PDO::FETCH_NUM);
@@ -138,11 +136,93 @@ class GestionArticles extends GestionBD {
         return (int) $donnees[0];
     }
 
+    /**
+     * Ajoute un article dans l'inventaire
+     * @param {Article} - une instance de l'objet Article
+     * @return void
+     */
+    public function ajouterArticle(Article $article){
+        $requete = $this->bdd->prepare(
+            'INSERT INTO article (
+                categorie, 
+                libelle, 
+                cheminImage, 
+                prixUnitaire, 
+                quantiteEnStock, 
+                quantiteDansPanier
+            )
+            VALUES (
+                :categorie,
+                :libelle,
+                :cheminImage,
+                :prixUnitaire,
+                :quantiteEnStock,
+                :quantiteDansPanier
+            )
+            '
+        );
+
+        $requete->bindValue(':categorie', $article->getCategorie(), PDO::PARAM_STR);
+        $requete->bindValue(':libelle', $article->getLibelle(), PDO::PARAM_STR);
+        $requete->bindValue(':cheminImage', $article->getCheminImage(), PDO::PARAM_STR);
+        $requete->bindValue(':prixUnitaire', $article->getPrixUnitaire(), PDO::PARAM_STR);
+        $requete->bindValue(':quantiteEnStock', $article->getQuantiteEnStock(), PDO::PARAM_INT);
+        $requete->bindValue(':quantiteDansPanier', $article->getQuantiteDansPanier(), PDO::PARAM_INT);
+
+        $requete->execute();
+        $requete->closeCursor();
+    }
+
+    /**
+     * Modifie les informations d'un article existant
+     * @param {Article} - une instance de l'objet Article
+     * @return void
+     */
+    public function modifierArticle(Article $article) {
+        $requete = $this->bdd->prepare(
+            'UPDATE article
+            SET  
+                categorie = :categorie, 
+                libelle = :libelle,
+                cheminImage = :cheminImage, 
+                prixUnitaire = :prixUnitaire,
+                quantiteEnStock = :quantiteEnStock,
+                quantiteDansPanier = :quantiteDansPanier
+            WHERE noArticle = :noArticle
+            '
+        );
+
+        $requete->bindValue(':categorie', $article->getCategorie(), PDO::PARAM_STR);
+        $requete->bindValue(':libelle', $article->getLibelle(), PDO::PARAM_STR);
+        $requete->bindValue(':cheminImage', $article->getCheminImage(), PDO::PARAM_STR);
+        $requete->bindValue(':prixUnitaire', $article->getPrixUnitaire(), PDO::PARAM_STR);
+        $requete->bindValue(':quantiteEnStock', $article->getQuantiteEnStock(), PDO::PARAM_INT);
+        $requete->bindValue(':quantiteDansPanier', $article->getQuantiteDansPanier(), PDO::PARAM_INT);
+        $requete->bindValue(':noArticle', $article->getNoArticle(), PDO::PARAM_INT);
+
+        $requete->execute();
+        $requete->closeCursor();
+    }
+
+    /**
+     * Supprime un article de l'inventaire
+     * @param {Article} - une instance de l'objet Article
+     * @return void
+     */
+    public function supprimerArticle(Article $article) {
+        $requete = $this->bdd->prepare('DELETE FROM article WHERE noArticle = ?');
+        $requete->bindValue(1, $article->getNoArticle(), PDO::PARAM_INT);
+        $requete->execute();
+        $requete->closeCursor();
+    }
+
 
     /**
      * Réserve un article dans l'inventaire
      * @param {int} $noArticle - l'identifiant de l'article
      * @param {int} $quantite - la quantité demandée
+     * @return void
+     * @throws Exeption si l'article n'est pas disponible
      */
     public function reserverArticle($noArticle, $quantite) {
         $noArticle = (int) $noArticle;
@@ -152,7 +232,7 @@ class GestionArticles extends GestionBD {
             throw new Exception("Il n'y a pas assez d'articles en stock. Veuillez choisir une plus petite quantité.");
         }
         else{
-            $requete = $this->_bdd->prepare(
+            $requete = $this->bdd->prepare(
                 'UPDATE article
                 SET 
                     quantiteEnStock = quantiteEnStock - ?,
@@ -171,12 +251,13 @@ class GestionArticles extends GestionBD {
 
     /**
      * Supprime un élément du panier
-     * @param {string} $description - la description de l'article
+     * @param {string} $libelle - le libelle de l'article
+     * @return void
      */
     public function supprimerDuPanier($noArticle){
         $noArticle = (int) $noArticle;
 
-        $requete = $this->_bdd->prepare(
+        $requete = $this->bdd->prepare(
             'UPDATE article
             SET 
                 quantiteEnStock = quantiteEnStock + quantiteDansPanier,
@@ -193,6 +274,7 @@ class GestionArticles extends GestionBD {
      * Modifie la quantité dans le panier
      * @param {array} $tabNoArticle - tous les numéros d'article
      * @param {array} $tabQteDansPanier - toutes les quantités
+     * @return void
      */
     public function modifierPanier($tabNoArticle, $tabQuantite){
         
@@ -204,7 +286,7 @@ class GestionArticles extends GestionBD {
                 throw new Exception("La quantité est trop élevée pour un ou plusieurs articles.");
             }
             
-            $requete = $this->_bdd->prepare(
+            $requete = $this->bdd->prepare(
                 'UPDATE article
                 SET 
                     quantiteEnStock = :somme - :quantite,
@@ -224,9 +306,10 @@ class GestionArticles extends GestionBD {
 
     /**
      * Lorsqu'une commande est placée, annule la quantité dans le panier
+     * @return void
      */
     public function effacerQtePanierTous(){
-        $requete = $this->_bdd->query(
+        $requete = $this->bdd->query(
             'UPDATE article
             SET quantiteDansPanier = 0'
         );
@@ -237,13 +320,14 @@ class GestionArticles extends GestionBD {
     /**
      * Détruit le panier d'achat : rétablit la quantité en stock
      * et annule la quantité dans le panier
+     * @return void
      */
     public function detruirePanier(){
           
        $nbArticles = $this->getNbArticles();
        
        for($i = 1; $i <= $nbArticles; $i++){
-           $requete = $this->_bdd->prepare(
+           $requete = $this->bdd->prepare(
                'UPDATE article
                SET 
                     quantiteEnStock = quantiteEnStock + :quantite,
@@ -256,9 +340,6 @@ class GestionArticles extends GestionBD {
             $requete->closeCursor();
        }
     }
-
-   
-
 }
 
 ?>
