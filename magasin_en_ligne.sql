@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Hôte : 127.0.0.1
--- Généré le :  mer. 08 mai 2019 à 07:02
+-- Généré le :  mer. 08 mai 2019 à 07:42
 -- Version du serveur :  10.1.36-MariaDB
 -- Version de PHP :  7.2.11
 
@@ -155,17 +155,17 @@ DROP TABLE IF EXISTS `commande`;
 CREATE TABLE IF NOT EXISTS `commande` (
   `noCommande` int(10) UNSIGNED NOT NULL AUTO_INCREMENT,
   `dateCommande` datetime NOT NULL,
-  `noClient` int(10) UNSIGNED NOT NULL,
+  `noMembre` int(10) UNSIGNED NOT NULL,
   `paypalOrderId` char(17) NOT NULL,
   PRIMARY KEY (`noCommande`),
-  KEY `commande_noclient_idx` (`noClient`)
+  KEY `commande_noclient_idx` (`noMembre`)
 ) ENGINE=InnoDB AUTO_INCREMENT=20 DEFAULT CHARSET=utf8;
 
 --
 -- Déchargement des données de la table `commande`
 --
 
-INSERT INTO `commande` (`noCommande`, `dateCommande`, `noClient`, `paypalOrderId`) VALUES
+INSERT INTO `commande` (`noCommande`, `dateCommande`, `noMembre`, `paypalOrderId`) VALUES
 (1, '2019-04-02 19:00:16', 1, 'PG9N8746L66G574L7'),
 (2, '2019-04-02 19:00:17', 2, 'Z6G6FLEUYAS5QVDKG'),
 (3, '2019-04-02 19:00:17', 3, 'DJ7PN4N20N23W68AA'),
@@ -311,7 +311,7 @@ ALTER TABLE `article_en_commande`
 -- Contraintes pour la table `commande`
 --
 ALTER TABLE `commande`
-  ADD CONSTRAINT `client_commande_fk` FOREIGN KEY (`noClient`) REFERENCES `membre` (`noMembre`);
+  ADD CONSTRAINT `client_commande_fk` FOREIGN KEY (`noMembre`) REFERENCES `membre` (`noMembre`);
 COMMIT;
 
 /*!40101 SET CHARACTER_SET_CLIENT=@OLD_CHARACTER_SET_CLIENT */;
