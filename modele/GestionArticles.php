@@ -23,7 +23,12 @@ class GestionArticles extends GestionBD {
 
         $requete->closeCursor();
 
+        if(count($listeArticles) == 0) {
+            return "AUCUN ARTICLE SÉLECTIONNÉ";
+        }
+        
         return json_encode($listeArticles);
+          
     }
 
     /**
@@ -45,6 +50,10 @@ class GestionArticles extends GestionBD {
 
         $requete->closeCursor();
 
+        if(count($listeArticles) == 0) {
+            return "AUCUN ARTICLE SÉLECTIONNÉ";
+        }
+        
         return json_encode($listeArticles);
     }
 
@@ -69,6 +78,10 @@ class GestionArticles extends GestionBD {
 
         $requete->closeCursor();
 
+        if(count($listeArticles) == 0) {
+            return "AUCUN ARTICLE SÉLECTIONNÉ";
+        }
+        
         return json_encode($listeArticles);
 
     }

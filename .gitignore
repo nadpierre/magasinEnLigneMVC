@@ -1,4 +1,10 @@
 controleur/*
+css/*
+fonts/*
+images/*
+js/*
+sass/*
 vue/*
-test/*
 index.html
+prepros-6.config
+test.html
