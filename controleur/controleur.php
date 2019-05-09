@@ -19,9 +19,11 @@ $panier = new Panier();
 
 
 /** APPELER LA BONNE FONCTION EN FONCTION DE LA REQUÊTE */
+$objJson = json_decode(file_get_contents("php://input"));
 
+echo($objJson);
 /* REQUÊTES GET */
-if(isset($_GET["q"])){
+/* if(isset($_GET["q"])){
     if($_GET["q"] == "inventaire"){
         if(isset($_GET["noArticle"])){//afficher un seul article
             $noArticle = (int) $_GET["noArticle"];
@@ -74,7 +76,7 @@ if(isset($_GET["q"])){
 }
 
 /* REQUÊTES POST */
-elseif(isset($_POST["x"])){
+/*elseif(isset($_POST["x"])){
     $obj = json_decode($_POST["x"], false);
     switch($obj->requete) {
         case "ajouter" : //ajouter un article dans le panier
@@ -174,6 +176,6 @@ elseif(isset($_POST["x"])){
             break;
     }
    
-}
+} */
 
 ?>

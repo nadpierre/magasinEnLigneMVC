@@ -14,29 +14,20 @@ class RequeteAjax {
     }
 
     /**
-     * Effectue une requête GET au serveur
-     * @param {function} callback - la fonction à appeler après 
-     * avoir reçu la réponse
-     */
-    getJSON(callback) {
-        $.get(this.url, function(response, status){
-            if(status == "success"){
-                callback(response);
-            }
-        });
-    }
-
-    /**
      * Effectue une requête POST au serveur
-     * @param {string} objJson - les données à envoyer
      * @param {function} callback - la fonction à appeler après 
      * avoir reçu la réponse
      */
-    envoyerDonnees(objJson, callback) {
-        $.post(this.url, objJson, function(response, status){
-            if(status == "success"){
-                callback(response);
-            }
+    getJSON(objJson, callback) {
+        $.ajax({
+            method : "POST",
+            contentType: "application/json",
+            url : this.url,
+            data : JSON.stringify(objJson)
+        })
+        .done(function(reponse){
+            callback(reponse);
+            console.log(reponse);
         })
     }
 }

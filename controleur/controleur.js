@@ -2,8 +2,10 @@
  * Affiche l'inventaire
  */
 $(document).ready(function(){
-    afficherInventaire(listerArticles(),'', '');
-    getTotalPanier();
+    $("#gabarit").load("vue/gabarit.html", function(){
+        afficherInventaire(listerArticles, '', '');
+        getTotalPanier();
+    })
 });
 
 /**
@@ -35,7 +37,10 @@ function listerArticles(filtre, valeur) {
     let requete = new RequeteAjax("controleur/controleur.php?q=inventaire" +
         ((filtre != "" && valeur != "") ? "&" + filtre + "=" + valeur : ""));
     let modeleListeArticles = new ModeleMagasin("modele-liste-articles");
-    requete.getJSON(function (reponse) {
+    let objJSON = {
+        "requete": "inventaire"
+    };
+    requete.getJSON(objJSON,function (reponse) {
         modeleListeArticles.appliquerModele(reponse, "liste-articles");
     });
 }
@@ -383,7 +388,26 @@ function seConnecter() {
  * Déconnexion du client actif
  */
 
-function seDeconnecter(){}
+function seDeconnecter(){
+    let objJSON = {
+        "requete": "deconnexion",
+        "courriel": courriel
+    };
+
+    let requete = new RequeteAjax("controleur/controleur.php");
+    requete.envoyerDonnees(objJSON, function(reponse){
+        let objJSON = reponse;
+        if (objJSON["statut"] == "succes") {
+            afficherInventaire(listerArticles);
+        }
+        else if (objJSON["statut"] == "echec") {
+
+            messageErreur.addClass('alert');
+            messageErreur.addClass('alert-danger');
+            messageErreur.html(objJSON["message"]);
+        }
+    });
+}
 
 /**
 * Supprime le compte du client
