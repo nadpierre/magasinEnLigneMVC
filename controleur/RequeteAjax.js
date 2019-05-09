@@ -19,31 +19,24 @@ class RequeteAjax {
      * avoir reçu la réponse
      */
     getJSON(callback) {
-        let xhttp = new XMLHttpRequest();
-        xhttp.onreadystatechange = function() {
-            if(this.readyState == 4 && this.status == 200) {
-                callback(this.responseText);
+        $.get(this.url, function(response, status){
+            if(status == "success"){
+                callback(response);
             }
-        };
-        xhttp.open("GET", this.url, true);
-        xhttp.send();
+        });
     }
 
     /**
      * Effectue une requête POST au serveur
-     * @param {string} txtJSON - les données à envoyer
+     * @param {string} objJson - les données à envoyer
      * @param {function} callback - la fonction à appeler après 
      * avoir reçu la réponse
      */
-    envoyerDonnees(txtJSON, callback) {
-        let xhttp = new XMLHttpRequest();
-        xhttp.onreadystatechange = function() {
-            if(this.readyState == 4 && this.status == 200) {
-                callback(this.responseText);
+    envoyerDonnees(objJson, callback) {
+        $.post(this.url, objJson, function(response, status){
+            if(status == "success"){
+                callback(response);
             }
-        };
-        xhttp.open("POST", this.url, true);
-        xhttp.setRequestHeader("Content-type", "application/x-www-form-urlencoded");
-        xhttp.send("x=" + txtJSON);
+        })
     }
 }

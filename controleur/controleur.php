@@ -136,7 +136,7 @@ elseif(isset($_POST["x"])){
             echo json_encode($reponse);
             break;
         case "connexion" ://connexion d'un membre existant
-            $courriel = $obj->pseudo;
+            $courriel = $obj->courriel;
             $motDePasse = $obj->motDePasse;
             try {
                 $gestionMembres->authentifierMembre($courriel, $motDePasse);
