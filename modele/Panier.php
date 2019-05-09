@@ -59,6 +59,11 @@ class Panier {
                 array_push($listePanier, $ligne);
             }
         }
+
+        if(count($listePanier) == 0){
+            return "PANIER VIDE";
+        }
+        
         return json_encode($listePanier);
     }
 

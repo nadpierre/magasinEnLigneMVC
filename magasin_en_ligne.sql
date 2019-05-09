@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Hôte : 127.0.0.1
--- Généré le :  mer. 08 mai 2019 à 07:42
+-- Généré le :  jeu. 09 mai 2019 à 05:11
 -- Version du serveur :  10.1.36-MariaDB
 -- Version de PHP :  7.2.11
 
@@ -302,16 +302,14 @@ CREATE ALGORITHM=UNDEFINED DEFINER=`root`@`localhost` SQL SECURITY DEFINER VIEW 
 -- Contraintes pour la table `article_en_commande`
 --
 ALTER TABLE `article_en_commande`
-  ADD CONSTRAINT `article_en_commande_ibfk_1` FOREIGN KEY (`noCommande`) REFERENCES `commande` (`noCommande`),
-  ADD CONSTRAINT `article_en_commande_ibfk_2` FOREIGN KEY (`noArticle`) REFERENCES `article` (`noArticle`),
-  ADD CONSTRAINT `article_fk` FOREIGN KEY (`noArticle`) REFERENCES `article` (`noArticle`),
-  ADD CONSTRAINT `commande_fk` FOREIGN KEY (`noCommande`) REFERENCES `commande` (`noCommande`);
+  ADD CONSTRAINT `article_en_commande_ibfk_1` FOREIGN KEY (`noCommande`) REFERENCES `commande` (`noCommande`) ON DELETE CASCADE ON UPDATE CASCADE,
+  ADD CONSTRAINT `article_en_commande_ibfk_2` FOREIGN KEY (`noArticle`) REFERENCES `article` (`noArticle`) ON DELETE CASCADE ON UPDATE CASCADE;
 
 --
 -- Contraintes pour la table `commande`
 --
 ALTER TABLE `commande`
-  ADD CONSTRAINT `client_commande_fk` FOREIGN KEY (`noMembre`) REFERENCES `membre` (`noMembre`);
+  ADD CONSTRAINT `client_commande_fk` FOREIGN KEY (`noMembre`) REFERENCES `membre` (`noMembre`) ON DELETE CASCADE ON UPDATE CASCADE;
 COMMIT;
 
 /*!40101 SET CHARACTER_SET_CLIENT=@OLD_CHARACTER_SET_CLIENT */;

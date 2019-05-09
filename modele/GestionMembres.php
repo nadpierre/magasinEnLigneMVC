@@ -29,7 +29,7 @@
         $requete->closeCursor();
 
         if($donnees === false){
-           throw new Exception("Le membre n'existe pas");
+           throw new Exception("Courriel invalide");
         }
 
         $membre = new Membre($donnees);
@@ -65,6 +65,9 @@
            throw new Exception("Un compte est déjà associé à ce courriel");
         }
 
+        //Encrypter le mot de passe
+        $motDePasse = password_hash($membre->getMotDePasse(), PASSWORD_DEFAULT);
+
         $requete = $this->bdd->prepare(
             'INSERT INTO membre (nomMembre, prenomMembre, estAdmin, adresse, ville, province,
                 codePostal, noTel, courriel, motDePasse)
@@ -81,7 +84,7 @@
         $requete->bindValue(':codePostal', $membre->getCodePostal(), PDO::PARAM_STR);
         $requete->bindValue(':noTel', $membre->getNoTel(), PDO::PARAM_STR);
         $requete->bindValue(':courriel', $membre->getCourriel(), PDO::PARAM_STR);
-        $requete->bindValue(':motDePasse', $membre->getMotDePasse(), PDO::PARAM_STR);
+        $requete->bindValue(':motDePasse', $motDePasse, PDO::PARAM_STR);
 
         $requete->execute();
         $requete->closeCursor();
@@ -159,7 +162,7 @@
         $requete->closeCursor();
 
         if($donnees === false ){
-           throw new Exception("Nom d'utilisateur ou mot de passe non valide.");
+           throw new Exception("Courriel ou mot de passe non valide.");
         }
        
         $membre = new Membre($donnees);
