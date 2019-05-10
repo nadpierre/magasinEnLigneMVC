@@ -1,5 +1,5 @@
-<body >
-	
+<body>
+
 	<!--<div class="colorlib-loader"></div>-->
 
 	<div id="page">
@@ -11,14 +11,14 @@
 						<div class="col-sm-7 col-md-9">
 							<div id="colorlib-logo"><a href="index.html">Mon Magasin</a></div>
 						</div>
-						
+
 						<div class="col-sm-5 col-md-3">
 							<form action="#" class="search-wrap">
 								<div class="form-group">
 									<input type="search" id="recherche" class="form-control search"
 										placeholder="Rechercher">
 									<button class="btn btn-primary submit-search text-center"
-										onClick="afficherInventaire(listerArticles, 'mot', document.getElementById('recherche').value)">
+										onClick="listerRecherche()">
 										<i class="icon-search"></i>
 									</button>
 								</div>
@@ -31,33 +31,37 @@
 								<li><a href="#" onClick="afficherInventaire(listerArticles,'', '')">Accueil</a></li>
 								<li id="cat1" data-value="Maquillage">
 									<a href="#"
-										onClick="afficherInventaire(listerArticles, 'categorie', document.getElementById('cat1').dataset.value)">Maquillage</a>
+										onClick="afficherInventaire(listerParCategorie('Maquillage'))">Maquillage</a>
 								</li>
 								<li id="cat2" data-value="Cheveux">
 									<a href="#"
-										onClick="afficherInventaire(listerArticles, 'categorie', document.getElementById('cat2').dataset.value)">Cheveux</a>
+										onClick="afficherInventaire(listerParCategorie('Cheveux'))">Cheveux</a>
 								</li>
 								<li id="cat3" data-value="Peau">
 									<a href="#"
-										onClick="afficherInventaire(listerArticles, 'categorie', document.getElementById('cat3').dataset.value)">Soins
+										onClick="afficherInventaire(listerParCategorie('Peau'))">Soins
 										de la peau</a>
 								</li>
 								<li id="cat4" data-value="Hommes">
 									<a href="#"
-										onClick="afficherInventaire(listerArticles, 'categorie', document.getElementById('cat4').dataset.value)">Hommes</a>
+										onClick="afficherInventaire(listerParCategorie('Peau'))">Hommes</a>
+								</li>
+								<li>
+									<a id="btn-test" href=# onClick="test()">Tester</a>
 								</li>
 							</ul>
-							
+
 						</div>
 						<div class="col-sm-12 text-right menu-login">
-								<button id="btn-login"><i class="fas fa-user-alt"></i><a href="#" id="btn-msg" onclick="formulaireConnexion();iconConnexion()">Connexion</a></button>
+							<button id="btn-login"><i class="fas fa-user-alt"></i><a href="#" id="btn-msg"
+									onclick="formulaireConnexion()">Connexion</a></button>
 							<!--	<a href="profile.php"><i class="fas fa-user-circle"></i>Profile</a> -->
 							<!--	<a href="logout.php"><i class="fas fa-sign-out-alt"></i>Logout</a> -->
-								
+
 						</div>
-						
+
 					</div>
-					
+
 				</div>
 			</div>
 			<div class="cart">
@@ -135,7 +139,8 @@
 							<span>
 								<!-- Link back to Colorlib can't be removed. Template is licensed under CC BY 3.0. -->
 								Copyright &copy;
-								<!--<script>document.write(new Date().getFullYear());</script>--> All rights reserved | This
+								<!--<script>document.write(new Date().getFullYear());</script>--> All rights reserved |
+								This
 								template is made with <i class="icon-heart" aria-hidden="true"></i> by <a
 									href="https://colorlib.com" target="_blank">Colorlib</a>
 								<!-- Link back to Colorlib can't be removed. Template is licensed under CC BY 3.0. --></span>
@@ -493,7 +498,7 @@
 								<div class="col-md-12">
 									<div class="form-group">
 										<label for="companyname">Nom d'utilisateur</label>
-										<input type="text" id="pseudo" class="form-control"
+										<input type="text" id="courriel" class="form-control"
 											placeholder="Votre nom d'utilisateur" required>
 									</div>
 								</div>
@@ -539,8 +544,8 @@
 							</div>
 							<div class="col-md-12">
 								<div class="form-group">
-									<label for="pseudo">Email</label>
-									<input type="text" id="pseudo" class="form-control"
+									<label for="courriel">Email</label>
+									<input type="text" id="courriel" class="form-control"
 										placeholder="Votre courrier electronique">
 								</div>
 							</div>
@@ -734,5 +739,411 @@
 		</div>
 	</template>
 
+<!-- TEMPLATE POUR PROFILE EN TEST -->
+	<!-- Modèle pour le profile client -->
+	<template id="modele-profile-client-test" type="text/MagasinModele">
+		<div class="breadcrumbs">
+			<div class="container">
+				<div class="row">
+					<div class="col">
+						<p class="bread"><span><a href="#"
+									onClick="afficherInventaire(listerArticles, '', '')">Accueil</a></span> /
+							<span>Compte de Binh</span></p>
+					</div>
+				</div>
+			</div>
+			<div class="col-md-3 offset-md-1 ">
+			<p class="nom-client">Bonjour Binh</p>
+			</div>
+		</div>
+		<div class="colorlib-product">
+			<div class="container">
+				<div class="row row-pb-lg">
+					<div class="col-md-6 ">
+						
+							
+								<button class="btn-icon" onclick="profileClient()"><i class="fas fa-address-book fa-2x"></i>PROFILE</button>
+								
+							
+							
+								<button class="btn-icon"><i class="fas fa-truck-moving fa-2x"></i>MES COMMANDES</button>
+								
+							
+							
+						
+					</div>
+				</div>
+				<div class="row row-pb-lg">
+					<div class="col-sm-12">
+						<div class="form-group">
+							<div role="alert" id="message-erreur">
+								<!-- Message dynamique -->
+							</div>
+						</div>
+					</div>
+					<div class="col-md-12">
+						<div class="product-name d-flex">
+							<div class="one-forth text-left px-4">
+								<span>Informations sur le produit</span>
+							</div>
+							<div class="one-eight text-center">
+								<span>Prix</span>
+							</div>
+							<div class="one-eight text-center">
+								<span>Quantité</span>
+							</div>
+							<div class="one-eight text-center">
+								<span>Total</span>
+							</div>
+							<div class="one-eight text-center px-4">
+								<span>Retirer</span>
+							</div>
+						</div>
+						<div id="liste-panier">
+							<!-- Affichage dynamique -->
+						</div>
+					</div>
+				</div>
+				<div class="row row-pb-lg">
+					<div class="col-md-12">
+						<div class="total-wrap">
+							<div class="row">
+								<!-- Sommaire -->
+								<div class="col-sm-12 text-center">
+									<div class="row form-group">
+										<div class="col-md-12 text-center">
+											<p><a href="#" class="btn btn-primary" onClick="modifierPanier()">Mettre à
+													jour</a></p>
+										</div>
+									</div>
+									<div class="total">
+										<div class="sub">
+											<p><span>Sous-total:</span> <span>{sousTotal}</span></p>
+											<p><span>Taxes (15%):</span> <span>{taxes}</span></p>
+											<p><span>Livraison:</span> <span>{fraisLivraison}</span></p>
+											<p><span>Rabais:</span> <span>{rabais}</span></p>
+										</div>
+										<div class="grand-total">
+											<p><span><strong>Total:</strong></span> <span>{total}</span></p>
+										</div>
+									</div>
+									<div class="w-100"></div>
+									<div class="row form-group">
+										<div class="col-md-12 text-center">
+											<p><a href="#" class="btn btn-primary"
+													onClick="formulaireInscription()">Passer à la caisse</a></p>
+										</div>
+									</div>
+								</div>
+							</div>
+						</div>
+					</div>
+				</div>
+			</div>
+		</div>
+	</template>
+
+
+	<!-- Modèle pour un seul article du commande du client -->
+	<template id="modele-liste-commande" type="text/MagasinModele">
+		<div class="product-cart d-flex">
+			<div class="one-forth">
+				<div class="product-img" style="background-image: url({cheminImage});"></div>
+				<div class="display-tc">
+					<h3>{noCommande}</h3>
+				</div>
+			</div>
+			<div class="one-eight text-center">
+				<div class="display-tc">
+					<span class="date">{dateCommande}</span>
+				</div>
+			</div>
+
+			<div class="one-eight text-center">
+				<div class="display-tc">
+					<span class="price">{payaplOrderId}</span>
+				</div>
+			</div>
+			<div class="one-eight text-center">
+				<div class="display-tc">
+					<a href="#" class="closed" id="article{noCommande}" data-value="{noCommande}"
+						onClick="supprimerDuPanier()"></a>
+				</div>
+			</div>
+		</div>
+	</template>
+
+	<!-- Modèle pour le afficher le profile du client -->
+	<template id="modele-profile" type="text/MagasinModele">
+		<div class="colorlib-product">
+			<div class="container">
+			
+				<div class="row align-items-center justify-content-center">
+					<div class="col-lg-8">
+						<h2 class="text-center">MES INFORMATIONS</h2>
+						<form method="post" class="colorlib-form" id="form-profile">
+							<div class="row">
+								<div class="col-md-12">
+									<div class="form-group">
+										<div role="alert" id="message-erreur">
+											<!-- Message dynamique -->
+										</div>
+									</div>
+
+								</div>
+								<div class="col-md-6">
+									<div class="form-group">
+										<label for="fname">Prénom</label>
+										<input type="text" id="fname" class="form-control" placeholder="Votre prénom"
+											required>
+									</div>
+								</div>
+								<div class="col-md-6">
+									<div class="form-group">
+										<label for="lname">Nom</label>
+										<input type="text" id="lname" class="form-control" placeholder="Votre nom"
+											required>
+									</div>
+								</div>
+								<div class="col-md-12">
+									<div class="form-group">
+										<label for="address">Adresse</label>
+										<input type="text" id="address" class="form-control"
+											placeholder="Entrez votre adresse" required>
+									</div>
+									<div class="form-group">
+										<input type="text" id="address2" class="form-control"
+											placeholder="Entrez votre deuxième adresse">
+									</div>
+								</div>
+								<div class="col-md-12">
+									<div class="form-group">
+										<label for="towncity">Ville</label>
+										<input type="text" id="towncity" class="form-control" placeholder="Ville"
+											required>
+									</div>
+								</div>
+								<div class="col-md-6">
+									<div class="form-group">
+										<label for="province">Province</label>
+										<select id="province" class="form-control">
+											<option value="Alberta">Alberta</option>
+											<option value="Colombie-Britannique">Colombie-Britannique</option>
+											<option value="Île-du-Prince-Édouard">Île-du-Prince-Édouard</option>
+											<option value="Manitoba">Manitoba</option>
+											<option value="Nouveau-Brunswick">Nouveau-Brunswick</option>
+											<option value="Nouvelle-Écosse">Nouvelle-Écosse</option>
+											<option value="Ontario">Ontario</option>
+											<option value="Québec" selected>Québec</option>
+											<option value="Saskatchewan">Saskatchewan</option>
+											<option value="Terre-Neuve">Terre-Neuve</option>
+										</select>
+									</div>
+								</div>
+								<div class="col-md-6">
+									<div class="form-group">
+										<label for="lname">Code Postal</label>
+										<input type="text" id="zippostalcode" class="form-control"
+											placeholder="Code postal" required>
+									</div>
+								</div>
+								<div class="col-md-6">
+									<div class="form-group">
+										<label for="email">Courriel</label>
+										<input type="email" id="email" class="form-control" placeholder="Courriel"
+											required>
+									</div>
+								</div>
+								<div class="col-md-6">
+									<div class="form-group">
+										<label for="Phone">Numéro de téléphone</label>
+										<input type="text" id="phone" class="form-control"
+											placeholder="Numéro de téléphone" required>
+									</div>
+								</div>
+								<div class="col-md-12">
+									<div class="form-group">
+										<label for="companyname">Nom d'utilisateur</label>
+										<input type="text" id="courriel" class="form-control"
+											placeholder="Votre nom d'utilisateur" required>
+									</div>
+								</div>
+								<div class="col-md-6">
+									<div class="form-group">
+										<label for="Phone">Mot de passe</label>
+										<input type="password" id="mot-de-passe" class="form-control"
+											placeholder="Votre mot de passe" required>
+									</div>
+								</div>
+								<div class="col-md-6">
+									<div class="form-group">
+										<label for="Phone">Confirmer votre mot de passe</label>
+										<input type="password" id="conf-mot-de-passe" class="form-control"
+											placeholder="Confirmation de votre mot de passe" required>
+									</div>
+								</div>
+								<div class="col-md-12 text-center">
+									<a href="#" id="btn-membre" class="btn btn-primary col-md-6"
+										onClick="modificationProfile()">Modifier</a>
+								</div>
+							</div>
+						</form>
+					</div>
+				</div>
+
+			</div>
+		</div>
+	</template>
+
+	<!-- Modèle pour afficher les commandes des clients -->
+	<template id="modele-commande-client" type="text/MagasinModele">
+		<div class="breadcrumbs">
+			<div class="container">
+				<div class="row">
+					<div class="col">
+						<p class="bread"><span><a href="#"
+									onClick="afficherInventaire(listerArticles, '', '')">Accueil</a></span> /
+					</div>
+				</div>
+			</div>
+			<div class="col-md-3 offset-md-1 ">
+			<p class="nom-client">Bonjour Binh</p>
+			</div>
+		</div>
+		<div class="colorlib-product">
+			<div class="container">
+				<div class="row row-pb-lg">
+					<div class="col-md-6 ">
+						
+							
+								<button class="btn-icon" onclick="profileClient()"><i class="fas fa-address-book fa-2x"></i>PROFILE</button>
+								
+							
+							
+								<button class="btn-icon"><i class="fas fa-truck-moving fa-2x"></i>MES COMMANDES</button>
+								
+							
+							
+						
+					</div>
+				</div>
+				<div class="row row-pb-lg">
+					<div class="col-sm-12">
+						<div class="form-group">
+							<div role="alert" id="message-erreur">
+								<!-- Message dynamique -->
+							</div>
+						</div>
+					</div>
+					<div class="col-md-12">
+						<div class="product-name d-flex">
+							<div class="one-forth text-left px-4">
+								<span>Informations sur le produit</span>
+							</div>
+							<div class="one-eight text-center">
+								<span>Prix</span>
+							</div>
+							<div class="one-eight text-center">
+								<span>Quantité</span>
+							</div>
+							<div class="one-eight text-center">
+								<span>Total</span>
+							</div>
+							<div class="one-eight text-center px-4">
+								<span>Retirer</span>
+							</div>
+						</div>
+						<div id="liste-panier">
+							<!-- Affichage dynamique -->
+						</div>
+					</div>
+				</div>
+				<div class="row row-pb-lg">
+					<div class="col-md-12">
+						<div class="total-wrap">
+							<div class="row">
+								<!-- Sommaire -->
+								<div class="col-sm-12 text-center">
+									<div class="row form-group">
+										<div class="col-md-12 text-center">
+											<p><a href="#" class="btn btn-primary" onClick="modifierPanier()">Mettre à
+													jour</a></p>
+										</div>
+									</div>
+									<div class="total">
+										<div class="sub">
+											<p><span>Sous-total:</span> <span>{sousTotal}</span></p>
+											<p><span>Taxes (15%):</span> <span>{taxes}</span></p>
+											<p><span>Livraison:</span> <span>{fraisLivraison}</span></p>
+											<p><span>Rabais:</span> <span>{rabais}</span></p>
+										</div>
+										<div class="grand-total">
+											<p><span><strong>Total:</strong></span> <span>{total}</span></p>
+										</div>
+									</div>
+									<div class="w-100"></div>
+									<div class="row form-group">
+										<div class="col-md-12 text-center">
+											<p><a href="#" class="btn btn-primary"
+													onClick="formulaireInscription()">Passer à la caisse</a></p>
+										</div>
+									</div>
+								</div>
+							</div>
+						</div>
+					</div>
+				</div>
+			</div>
+		</div>
+	</template>
+
+	<!-- Modèle pour le profile client -->
+	<template id="modele-profile-client" type="text/MagasinModele">
+		<div class="breadcrumbs">
+			<div class="container">
+				<div class="row">
+					<div class="col">
+						<p class="bread"><span><a href="#"
+									onClick="afficherInventaire(listerArticles, '', '')">Accueil</a></span> /
+							<span>Compte de Binh</span></p>
+					</div>
+				</div>
+			</div>
+		</div>
+		        <!-- Sign up form -->
+				<section class="signup">
+					
+						<div class="signup-content">
+							<div class="signup-form">
+								<h2 class="form-title">Sign up</h2>
+								<form method="POST" class="register-form" id="register-form">
+									<div class="form-group">
+										<label for="name"><i class="zmdi zmdi-account material-icons-name"></i></label>
+										<p>Nom</p>
+									</div>
+									<div class="form-group">
+										<label for="email"><i class="zmdi zmdi-email"></i></label>
+										<p>Nom</p>
+									</div>
+									<div class="form-group">
+										<label for="pass"><i class="zmdi zmdi-lock"></i></label>
+										<p>Nom</p>
+									</div>
+									<div class="form-group">
+										<label for="re-pass"><i class="zmdi zmdi-lock-outline"></i></label>
+										<p>Nom</p>
+									</div>
+									
+									<div class="form-group form-button">
+										<input type="submit" name="signup" id="signup" class="form-submit" value="Register"/>
+									</div>
+								</form>
+							</div>
+							
+						</div>
+					
+				</section>
+		
+	</template>
 
 </body>
