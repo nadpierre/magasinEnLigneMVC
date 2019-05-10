@@ -10,55 +10,129 @@ function chargerClasse($classe) {
 spl_autoload_register('chargerClasse');
 
 
-/* Instanciation du gestionnaire de la BD et du panier */
+/* Instanciation du gestionnaire de la BD, du panier et de la connexion */
 $gestionArticles = new GestionArticles();
 $gestionMembres = new GestionMembres();
 $gestionCommandes = new GestionCommandes();
 $gestionAC = new GestionArticlesCommande();
 $panier = new Panier();
+$connexion = new Connexion();
 
 
-/** APPELER LA BONNE FONCTION EN FONCTION DE LA REQUÊTE */
-$objJson = json_decode(file_get_contents("php://input"));
+/* APPELER LA BONNE FONCTION EN FONCTION DU JSON REÇU */
+$objJSON = json_decode(file_get_contents("php://input"));
 
-echo($objJson);
-/* REQUÊTES GET */
-/* if(isset($_GET["q"])){
-    if($_GET["q"] == "inventaire"){
-        if(isset($_GET["noArticle"])){//afficher un seul article
-            $noArticle = (int) $_GET["noArticle"];
-            echo $gestionArticles->getArticle($noArticle);
+switch($objJSON->type){
+    case "inventaire" :
+        if(isset($objJSON->categorie)){
+            echo $gestionArticles->listerParCategorie($objJSON->categorie);
         }
-        elseif(isset($_GET["categorie"])){//lister par catégorie
-            echo $gestionArticles->listerParCategorie($_GET["categorie"]);
+        elseif(isset($objJSON->mot)){
+            echo $gestionArticles->listerParMot($objJSON->mot);
         }
-        elseif(isset($_GET["mot"])){//lister par mot
-            echo $gestionArticles->listerParMot($_GET["mot"]);
+        elseif(isset($objJSON->noArticle)){
+            echo $gestionArticles->getArticle((int) $objJSON->noArticle);
         }
-        else {//lister tous les articles
+        else {
             echo $gestionArticles->getListeArticles();
-        }
-        
-    }
-    if($_GET["q"] == "panier"){
-        if(isset($_GET["r"])){
-            switch($_GET["r"]) {
-                case "total": //compter le nombre d'articles dans le panier
+        }    
+        break;
+    case "panier":
+        if(isset($objJSON->requete)){
+             switch($objJSON->requete){
+                case "compteur" :
                     echo $panier->getNbArticlesTotal();
                     break;
-                case "sommaire": //afficher le sommaire du panier
+                case "ajouter" :
+                    $article = json_decode($objJSON->article);
+                    $noArticle = (int) $article->noArticle;
+                    $libelle = $article->libelle;
+                    $cheminImage = $article->cheminImage;
+                    $quantite = (int) $article->quantite;
+                    $prixUnitaire = $article->prixUnitaire;
+                    $gestionArticles->debuterTransaction();
+                    try {
+                        $gestionArticles->reserverArticle($noArticle, $quantite);
+                        $gestionArticles->confirmer();
+                        $panier->ajouterArticle($noArticle, $libelle, $cheminImage, $quantite, $prixUnitaire);
+                        $reponse["statut"] = "succes";
+                        $reponse["message"] = "L'article a été ajouté au panier avec succès.";
+                    }
+                    catch (Exception $e) {
+                        $gestionArticles->annuler();
+                        $reponse["statut"] = "echec";
+                        $reponse["message"] = $e->getMessage();
+                    }
+                    echo json_encode($reponse);
+                    break;
+                case "supprimer" :
+                    $noArticle = (int) $objJSON->noArticle;
+                    $gestionArticles->debuterTransaction();
+                    try {
+                        $panier->supprimerArticle($noArticle);
+                        $gestionArticles->supprimerDuPanier($noArticle);
+                        $gestionArticles->confirmer();
+                        $reponse["statut"] = "succes";
+                        $reponse["message"] = "L'article a été supprimé au panier avec succès.";
+                    }
+                    catch(Exception $e) {
+                        $gestionArticles->annuler();
+                        $reponse["statut"] = "echec";
+                        $reponse["message"] = $e->getMessage();
+                    } 
+                    echo json_encode($reponse);
+                    break;
+                case "modifier" :
+                    $tabNoArticle = json_decode($objJSON->tabNoArticle);
+                    $tabQuantite = json_decode($objJSON->tabQuantite);
+                    $gestionArticles->debuterTransaction();
+                    try {
+                        $gestionArticles->modifierPanier($tabNoArticle, $tabQuantite);
+                        $gestionArticles->confirmer();
+                        $panier->modifierQteArticles($tabNoArticle, $tabQuantite);
+                        $reponse["statut"] = "succes";
+                        $reponse["message"] = "Modification effectuée avec succès.";
+                    }
+                    catch (Exception $e) {
+                        $gestionArticles->annuler();
+                        $reponse["statut"] = "echec";
+                        $reponse["message"] = $e->getMessage();
+                    }
+                    echo json_encode($reponse);
+                    break;
+                case "sommaire" :
                     echo $panier->getSommaire();
                     break;
-                case "liste": //afficher chaque article du panier
+                case "liste" :
                     echo $panier->getPanier();
                     break;
-                case "detruire" ://détruire le panier (appel manuel de la fonction pour tester)
+                case "detruire" ://appel manuel seulement
                     $gestionArticles->detruirePanier(); 
-                    $panier->supprimerPanier(); 
+                    $panier->supprimerPanier();    
+                    break;
+             }
+        }
+        break;
+    case "membre" :
+        if(isset($objJSON->requete)){
+            switch ($objJSON->requete){
+                case "anonyme" :
+                    //Ajouter le membre
+                    $donneesMembre = json_decode($objJSON->client, true);
+                    $membreAnonyme = new Membre($donnees);
+                    $membre = $gestionMembres->getMembre((int) $membreAnonyme->getNoMembre());
+                    //Ajouter la commande
                     break;
             }
         }
-    }
+}
+
+
+
+/* REQUÊTES GET */
+/*if(isset($_GET["q"])){
+    
+   
     if($_GET["q"] == "commande"){//retourner le numéro de confirmation et le courriel
         $commande = $gestionCommandes->getDerniereCommande();
         $paypalOrderId = $commande->getPaypalOrderId();
@@ -73,54 +147,12 @@ echo($objJson);
             );
 
     }
-}
+}*/
 
 /* REQUÊTES POST */
 /*elseif(isset($_POST["x"])){
     $obj = json_decode($_POST["x"], false);
     switch($obj->requete) {
-        case "ajouter" : //ajouter un article dans le panier
-            $noArticle = (int) $obj->noArticle;
-            $libelle = $obj->libelle;
-            $cheminImage = $obj->cheminImage;
-            $quantite = (int) $obj->quantite;
-            $prixUnitaire = $obj->prixUnitaire;
-            try {
-                $gestionArticles->reserverArticle($noArticle, $quantite);
-                $gestionArticles->confirmer();
-                $panier->ajouterArticle($noArticle, $libelle, $cheminImage, $quantite, $prixUnitaire);
-                $reponse["statut"] = "succes";
-                $reponse["message"] = "L'article a été ajouté au panier avec succès.";
-            }
-            catch (Exception $e) {
-                $gestionArticles->annuler();
-                $reponse["statut"] = "echec";
-                $reponse["message"] = $e->getMessage();
-            }
-            echo json_encode($reponse);
-            break;
-        case "supprimer" : //supprimer un article dans le panier
-            $noArticle = (int) $obj->noArticle;
-            $panier->supprimerArticle($noArticle);
-            $gestionArticles->supprimerDuPanier($noArticle);
-            break;
-        case "modifier" : //modifier la quantité des articles dans le panier
-            $tabNoArticle = json_decode($obj->tabNoArticle);
-            $tabQuantite = json_decode($obj->tabQuantite);
-            try {
-                $gestionArticles->modifierPanier($tabNoArticle, $tabQuantite);
-                $gestionArticles->confirmer();
-                $panier->modifierQteArticles($tabNoArticle, $tabQuantite);
-                $reponse["statut"] = "succes";
-                $reponse["message"] = "Modification effectuée avec succès.";
-            }
-            catch (Exception $e) {
-                $gestionArticles->annuler();
-                $reponse["statut"] = "echec";
-                $reponse["message"] = $e->getMessage();
-            }
-            echo json_encode($reponse);
-            break;
         case "inscription" ://inscrire un client
             $donneesMembre = json_decode($obj->client, true);
             $client = new Membre($donneesMembre);
@@ -176,6 +208,6 @@ echo($objJson);
             break;
     }
    
-} */
+}*/
 
 ?>

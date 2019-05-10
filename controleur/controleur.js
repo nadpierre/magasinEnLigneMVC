@@ -3,7 +3,7 @@
  */
 $(document).ready(function(){
     $("#gabarit").load("vue/gabarit.html", function(){
-        afficherInventaire(listerArticles, '', '');
+        afficherInventaire(listerArticles);
         getTotalPanier();
     })
 });
@@ -17,43 +17,75 @@ $(document).ready(function(){
 /**
 * Affiche l'élément HTML qui la contenir la liste des articles
 * @param {function} callback - la fonction à appeler après avoir affiché le HTML
-* @param {string} filtre - le critère de sélection
-* @param {string} valeur - la valeur du critère de sélection
 */
-function afficherInventaire(callback, filtre, valeur) {
+function afficherInventaire(callback) {
     let modeleInventaire = new ModeleMagasin("affichage-articles");
     modeleInventaire.appliquerModele("", "milieu-page");
-    callback(filtre, valeur);
+    callback();
 }
 
 /**
  * Liste chaque élément de l'inventaire
- * @param {string} filtre - le critère de sélection
- * @param {string} valeur - la valeur du critère de sélection
  */
-function listerArticles(filtre, valeur) {
-    
+function listerArticles() {
     //Afficher tous les articles
-    let requete = new RequeteAjax("controleur/controleur.php?q=inventaire" +
-        ((filtre != "" && valeur != "") ? "&" + filtre + "=" + valeur : ""));
+    let requete = new RequeteAjax("controleur/controleur.php");
     let modeleListeArticles = new ModeleMagasin("modele-liste-articles");
     let objJSON = {
-        "requete": "inventaire"
+        "type": "inventaire",
     };
-    requete.getJSON(objJSON,function (reponse) {
+    requete.getJSON(objJSON, function(reponse) {
         modeleListeArticles.appliquerModele(reponse, "liste-articles");
     });
 }
 
+/**
+ * Liste chaque élément par catégorie de l'inventaire
+ * @param {string} valeur - la valeur du critère de sélection
+ */
+function listerParCategorie(valeur) {
+    
+    //Afficher tous les articles
+    let requete = new RequeteAjax("controleur/controleur.php");
+    let modeleListeArticles = new ModeleMagasin("modele-liste-articles");
+    let objJSON = {
+        "type": "inventaire",
+        "categorie" : valeur
+    };
+    requete.getJSON(objJSON, function(reponse) {
+        modeleListeArticles.appliquerModele(reponse, "liste-articles");
+    });
+}
+
+/**
+ * Liste chaque élément de l'inventaire qui sont recherché par le client
+ */
+function listerRecherche() {
+    let valeur = $("#recherche").val();
+    //Afficher tous les articles
+    let requete = new RequeteAjax("controleur/controleur.php");
+    let modeleListeArticles = new ModeleMagasin("modele-liste-articles");
+    let objJSON = {
+        "type": "inventaire",
+        "mot" : valeur
+    };
+    requete.getJSON(objJSON, function(reponse) {
+        modeleListeArticles.appliquerModele(reponse, "liste-articles");
+    });
+}
 
 /**
  * Affiche un seul article
  * @param {string} noArticle - l'identifiant de l'article
  */
 function afficherArticle(noArticle) {
-    let requete = new RequeteAjax("controleur/controleur.php?q=inventaire&noArticle=" + noArticle);
+    let requete = new RequeteAjax("controleur/controleur.php");
+    let objJSON = {
+        "type" : "inventaire",
+        "noArticle" : noArticle
+    };
     let modeleArticle = new ModeleMagasin("modele-article");
-    requete.getJSON(reponse => { modeleArticle.appliquerModele(reponse, "milieu-page"); });
+    requete.getJSON(objJSON, reponse => { modeleArticle.appliquerModele(reponse, "milieu-page"); });
 }
 
 
@@ -67,8 +99,12 @@ function afficherArticle(noArticle) {
  * Affiche le nombre total d'éléments dans le panier
  */
 function getTotalPanier() {
-    let requete = new RequeteAjax("controleur/controleur.php?q=panier&r=total");
-    requete.getJSON(reponse => {
+    let requete = new RequeteAjax("controleur/controleur.php");
+    let objJSON = {
+        "type" : "panier",
+        "requete" : "compteur"
+    };
+    requete.getJSON(objJSON, reponse => {
         $("#nombre-total").html(reponse);
     });
 }
@@ -95,31 +131,33 @@ function ajouterAuPanier() {
     let messageErreur = $("#message-erreur");
 
     let objJSON = {
+        "type" : "panier",
         "requete": "ajouter",
-        "noArticle": $("#identifiant").val(),
-        "description": $("#description").val(),
-        "cheminImage": $("#cheminImage").val(),
-        "prixUnitaire": d$("#prix").val(),
-        "quantite": $("#quantity").val()
+        "article" : {
+            "noArticle": $("#identifiant").val(),
+            "libelle": $("#libelle").val(),
+            "cheminImage": $("#cheminImage").val(),
+            "prixUnitaire": $("#prix").val(),
+            "quantite": $("#quantity").val()
+        }
+        
     };
 
-    let txtJSON = JSON.stringify(objJSON);
     let requete = new RequeteAjax("controleur/controleur.php");
-    requete.envoyerDonnees(txtJSON, function (reponse) {
-        let objJSON = reponse;
+    requete.getJSON(objJSON, function (reponse) {
         messageErreur.addClass('alert');
-        if (objJSON["statut"] === "succes") {
+        if (reponse["statut"] === "succes") {
             getTotalPanier();
             messageErreur.removeClass('alert-danger');
             messageErreur.addClass('alert-success');
             messageErreur.css("color", "green");   
         }
-        else if (objJSON["statut"] === "echec") {
+        else if (reponse["statut"] === "echec") {
             messageErreur.removeClass('alert-success');
             messageErreur.addClass('alert-danger');
             messageErreur.css("color", "red");
         }
-        messageErreur.html(objJSON["message"]);
+        messageErreur.html(reponse["message"]);
     });
 
 
@@ -131,9 +169,13 @@ function ajouterAuPanier() {
  * @param {function} callback - la fonction à appeler après que le sommaire soit chargé
  */
 function afficherSommaire() {
-    let requete = new RequeteAjax("controleur/controleur.php?q=panier&r=sommaire");
+    let requete = new RequeteAjax("controleur/controleur.php");
     let modelePanier = new ModeleMagasin("modele-panier");
-    requete.getJSON(reponse => {
+    let objJSON = {
+        "type" : "panier",
+        "requete" : "sommaire"
+    };
+    requete.getJSON(objJSON, reponse => {
         modelePanier.appliquerModele(reponse, "milieu-page");
         listerPanier();
     });
@@ -144,9 +186,13 @@ function afficherSommaire() {
  * Affiche tous les éléments du panier
  */
 function listerPanier() {
-    let requete = new RequeteAjax("controleur/controleur.php?q=panier&r=liste");
+    let requete = new RequeteAjax("controleur/controleur.php");
     let modeleListePanier = new ModeleMagasin("modele-liste-panier");
-    requete.getJSON(function (reponse) {
+    let objJSON = {
+        "type" : "panier",
+        "requete" : "liste"
+    };
+    requete.getJSON(objJSON,function (reponse) {
         modeleListePanier.appliquerModele(reponse, "liste-panier");
     })
 }
@@ -157,13 +203,12 @@ function listerPanier() {
 function supprimerDuPanier(noArticle) {
 
     let objJSON = {
+        "type" : "panier",
         "requete": "supprimer",
         "noArticle": noArticle
     };
-
-    let txtJSON = JSON.stringify(objJSON);
     let requete = new RequeteAjax("controleur/controleur.php");
-    requete.envoyerDonnees(txtJSON, getTotalPanier);
+    requete.getJSON(objJSON, getTotalPanier);
     afficherSommaire();
 }
 
@@ -187,20 +232,19 @@ function modifierPanier() {
     }
 
     let objJSON = {
+        "type": "panier",
         "requete": "modifier",
         "tabNoArticle": JSON.stringify(tabNoArticle),
         "tabQuantite": JSON.stringify(tabQuantite)
     };
 
-    let txtJSON = JSON.stringify(objJSON);
     let requete = new RequeteAjax("controleur/controleur.php");
-    requete.envoyerDonnees(txtJSON, function(reponse) {
-        let objJSON = reponse;
-        if(objJSON["statut"] === "echec"){
+    requete.getJSON(objJSON, function(reponse) {
+        if(reponse["statut"] === "echec"){
             messageErreur.addClass('alert');
             messageErreur.addClass('alert-danger');
             messageErreur.css("color", "red");
-            messageErreur.html(objJSON["message"]);
+            messageErreur.html(reponse["message"]);
         }
         else {
             getTotalPanier();
@@ -301,9 +345,9 @@ function validerFormulaire() {
         return;
     }
 
-    let client = {
-        "nomClient": nom,
-        "prenomClient": prenom,
+    let membre = {
+        "nomMembre": nom,
+        "prenomMembre": prenom,
         "adresse": adresse,
         "ville": ville,
         "province": province,
@@ -314,31 +358,30 @@ function validerFormulaire() {
     }
 
     let objJSON = {
+        "type" : "membre",
         "requete": "inscription",
-        "client": JSON.stringify(client)
+        "client": JSON.stringify(membre)
     };
 
-    let txtJSON = JSON.stringify(objJSON);
-    ajouterClient(txtJSON);
+    ajouterClient(objJSON);
 }
 
 
 /**
  * Ajoute le client à la base de données
- * @param {string} txtJSON - les données à envoyer
+ * @param {string} objJSON - les données à envoyer
  */
-function ajouterClient(txtJSON) {
+function ajouterMembre(objJSON) {
     let messageErreur = $("#message-erreur");
     let requete = new RequeteAjax("controleur/controleur.php");
-    requete.envoyerDonnees(txtJSON, function(reponse) {
-        let objJSON = reponse;
-        if (objJSON["statut"] === "succes") {
-            afficherCaisse(JSON.stringify(objJSON["client"]));
+    requete.getJSON(objJSON, function(reponse) {
+        if (reponse["statut"] === "succes") {
+            afficherCaisse(reponse["membre"]);
         }
-        else if (objJSON["statut"] === "echec") {
+        else if (reponse["statut"] === "echec") {
             messageErreur.addClass('alert');
             messageErreur.addClass('alert-danger');
-            messageErreur.html(objJSON["message"]);
+            messageErreur.html(objetJSON["message"]);
         }
     });
 }
@@ -362,23 +405,22 @@ function seConnecter() {
     let motDePasse = $("#mot-de-passe").val();
 
     let objJSON = {
+        "type" : "membre",
         "requete": "connexion",
         "courriel": courriel,
         "motDePasse": motDePasse
-    }
+    };
 
-    let txtJSON = JSON.stringify(objJSON);
     let requete = new RequeteAjax("controleur/controleur.php");
-    requete.envoyerDonnees(txtJSON, function (reponse) {
-        let objJSON = reponse;
-        if (objJSON["statut"] == "succes") {
-            afficherCaisse(JSON.stringify(objJSON["membre"]));
-        }
-        else if (objJSON["statut"] == "echec") {
+    requete.getJSON(objJSON, function (reponse) {
+        if (reponse["statut"] == "succes") {
+            //afficherCaisse(JSON.stringify(reponse["membre"]));
 
+        }
+        else if (reponse["statut"] == "echec") {
             messageErreur.addClass('alert');
             messageErreur.addClass('alert-danger');
-            messageErreur.html(objJSON["message"]);
+            messageErreur.html(reponse["message"]);
         }
     });
 
@@ -390,29 +432,48 @@ function seConnecter() {
 
 function seDeconnecter(){
     let objJSON = {
+        "type": "membre",
         "requete": "deconnexion",
         "courriel": courriel
     };
 
     let requete = new RequeteAjax("controleur/controleur.php");
-    requete.envoyerDonnees(objJSON, function(reponse){
-        let objJSON = reponse;
-        if (objJSON["statut"] == "succes") {
+    requete.getJSON(objJSON, function(reponse){
+        if (reponse["statut"] == "succes") {
             afficherInventaire(listerArticles);
         }
-        else if (objJSON["statut"] == "echec") {
+        else if (reponse["statut"] == "echec") {
 
             messageErreur.addClass('alert');
             messageErreur.addClass('alert-danger');
-            messageErreur.html(objJSON["message"]);
+            messageErreur.html(reponse["message"]);
         }
     });
 }
 
 /**
-* Supprime le compte du client
+* Désabonne le compte du client
 */
-function supprimerCompte(){}
+function desabonner(courriel){
+    let objJSON = {
+        "type" : "membre",
+        "requete" : "desabonner",
+        "courriel" : courriel
+    };
+
+    let requete = new RequeteAjax("controleur/controleur.php");
+    requete.getJSON(objJSON, function (reponse){
+        if(reponse["statut"] == "succes"){
+            afficherInventaire(listerArticles);
+            getTotalPanier();
+        }
+        else if (reponse["statut"] == "echec"){
+            messageErreur.addClass('alert');
+            messageErreur.addClass('alert-danger');
+            messageErreur.html(reponse["message"]);
+        }
+    })
+}
 
 
 /**
@@ -433,7 +494,14 @@ function supprimerCompte(){}
 * Supprimer d'un article
 */
 
+/**
+ * Affiche la liste des clients
+ */
 
+
+ /**
+  * Supprime le compte choisi
+  */
 
 /**
  * -----------------------
@@ -450,9 +518,13 @@ function afficherCaisse(reponse) {
     modeleCaisse.appliquerModele(reponse, "milieu-page");
 
     //Facture
-    let requete = new RequeteAjax("controleur/controleur.php?q=panier&r=sommaire");
+    let requete = new RequeteAjax("controleur/controleur.php");
     let modeleFacture = new ModeleMagasin("modele-facture");
-    requete.getJSON(donnees => {
+    let objJSON = {
+        "type" : "panier",
+        "requete" : "sommaire"
+    };
+    requete.getJSON(objJSON, donnees => {
         modeleFacture.appliquerModele(donnees, "facture");
         listerFacture();
         afficherPaypal();
@@ -464,9 +536,13 @@ function afficherCaisse(reponse) {
  * Liste chaque élément de la facture
  */
 function listerFacture() {
-    let requete = new RequeteAjax("controleur/controleur.php?q=panier&r=liste");
+    let requete = new RequeteAjax("controleur/controleur.php");
     let modeleDetailsFacture = new ModeleMagasin("modele-details-facture");
-    requete.getJSON(donnees => {
+    let objJSON = {
+        "type" : "panier",
+        "requete" : "liste"
+    };
+    requete.getJSON(objJSON, donnees => {
         modeleDetailsFacture.appliquerModele(donnees, "details-facture");
     });
 }
@@ -542,9 +618,13 @@ function placerCommande(paypalOrderId) {
  * le numéro de confirmation et le courriel du client
  */
 function commandeTerminee() {
-    let requete = new RequeteAjax("controleur/controleur.php?q=commande");
+    let requete = new RequeteAjax("controleur/controleur.php");
     let modeleComplete = new ModeleMagasin("modele-commande-complete");
-    requete.getJSON(reponse => {
+    let objJSON = {
+        "type" : "commande",
+        "requete" : "terminee"
+    }
+    requete.getJSON(objJSON, reponse => {
         modeleComplete.appliquerModele(reponse, "milieu-page");
     });
     getTotalPanier();
