@@ -97,6 +97,9 @@
      */
     public function modifierMembre(Membre $membre) {
 
+        //Encrypter le mot de passe
+        $motDePasse = password_hash($membre->getMotDePasse(), PASSWORD_DEFAULT);
+
         $requete = $this->bdd->prepare(
             'UPDATE membre
             SET
@@ -122,7 +125,7 @@
         $requete->bindValue(':codePostal', $membre->getCodePostal(), PDO::PARAM_STR);
         $requete->bindValue(':noTel', $membre->getNoTel(), PDO::PARAM_STR);
         $requete->bindValue(':courriel', $membre->getCourriel(), PDO::PARAM_STR);
-        $requete->bindValue(':motDePasse', $membre->getMotDePasse(), PDO::PARAM_STR);
+        $requete->bindValue(':motDePasse', $motDePasse, PDO::PARAM_STR);
         $requete->bindValue(':noMembre', $membre->getNoMembre(), PDO::PARAM_INT);
 
         $requete->execute();
@@ -143,32 +146,6 @@
         $requete->closeCursor();
     }
 
-
-    /**
-     * Authentifie un membre
-     * @param {string} $courriel - le courriel
-     * @param {string} $motDePasse - le mot de passe
-     * @return string - le JSON de l'objet si le membre existe
-     */
-    public function authentifierMembre($courriel, $motDePasse) {
-        $requete = $this->bdd->prepare(
-            'SELECT * FROM membre WHERE courriel = :courriel AND motDePasse = :motDePasse'
-        );
-        $requete->bindValue(':courriel', $courriel, PDO::PARAM_STR);
-        $requete->bindValue(':motDePasse', $motDePasse, PDO::PARAM_STR);
-        $requete->execute();
-        
-        $donnees = $requete->fetch(PDO::FETCH_ASSOC);
-        $requete->closeCursor();
-
-        if($donnees === false ){
-           throw new Exception("Courriel ou mot de passe non valide.");
-        }
-       
-        $membre = new Membre($donnees);
-        return '[' . $membre . ']';
-       
-    }
 
      /**
      * Récupère les information du dernier membre ajouté

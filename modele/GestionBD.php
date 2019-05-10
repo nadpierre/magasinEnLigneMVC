@@ -67,21 +67,21 @@ abstract class GestionBD {
     /**
      * Débuter une transaction (mettre le autocommit à 0)
      */
-    protected function debuterTransaction() {
+    public function debuterTransaction() {
         $this->bdd->beginTransaction();
     }
 
      /**
      * Confirmer une transaction
      */
-    protected function confirmer() {
+    public function confirmer() {
         $this->bdd->commit();
     }
 
     /**
      * Annuler une transaction
      */
-    protected function annuler() {
+    public function annuler() {
         $this->bdd->rollback();
     }
 

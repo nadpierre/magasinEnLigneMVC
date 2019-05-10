@@ -9,7 +9,7 @@ class Panier {
     const TAXES = 0.15;
     const FRAIS_LIVRAISON = 10;
     const MONTANT_MINIMUM = 75;
-    const RABAIS = 0.2;
+    const RABAIS = 0.20;
 
     /**
      * CONSTRUCTEUR : crée un objet de type Panier
@@ -47,14 +47,13 @@ class Panier {
             for ($i = 0; $i < count($_SESSION['panier']['description']); $i++) {
                 // Convertir le nombre décimal en format monétaire
                 $prixTotal = $_SESSION['panier']['quantiteDansPanier'][$i] * $_SESSION['panier']['prixUnitaire'][$i];
-                $prixTotal = number_format($prixTotal, 2, ',', ' ') . ' $';
                 $ligne = array(
                     "noArticle" => (int) $_SESSION['panier']['noArticle'][$i],
                     "description" => $_SESSION['panier']['description'][$i],
                     "cheminImage" => $_SESSION['panier']['cheminImage'][$i],
                     "quantiteDansPanier" => (int) $_SESSION['panier']['quantiteDansPanier'][$i],
-                    "prixUnitaire" => number_format($_SESSION['panier']['prixUnitaire'][$i], 2, ',', '') . ' $',
-                    "prixTotal" => $prixTotal,
+                    "prixUnitaire" => number_format($_SESSION['panier']['prixUnitaire'][$i], 2),
+                    "prixTotal" => number_format($prixTotal, 2)
                 );
                 array_push($listePanier, $ligne);
             }
@@ -109,16 +108,16 @@ class Panier {
         if (!$this->estVerrouille()) {
             $sousTotal = $this->getMontantTotal();
             $taxes = self::TAXES * $sousTotal;
-            $fraisLivraison = $sousTotal >= self::MONTANT_MINIMUM || $sousTotal == 0 ? 0 : self::FRAIS_LIVRAISON;
+            $fraisLivraison = $sousTotal >= self::MONTANT_MINIMUM || $sousTotal == 0 ? 0 : (double) self::FRAIS_LIVRAISON;
             $rabais = self::RABAIS * $sousTotal;
             $total = $sousTotal + $taxes + $fraisLivraison - $rabais;
 
             $sommaire = array(
-                "sousTotal" => $sousTotal,
-                "taxes" => $taxes,
-                "fraisLivraison" => $fraisLivraison,
-                "rabais" => 0.00 - $rabais,
-                "total" => $total
+                "sousTotal" => number_format($sousTotal, 2),
+                "taxes" => number_format($taxes, 2),
+                "fraisLivraison" => number_format($fraisLivraison, 2),
+                "rabais" => number_format((0.00 - $rabais), 2),
+                "total" => number_format($total, 2)
             );
 
             array_push($tabSommaire, $sommaire);
@@ -149,17 +148,12 @@ class Panier {
                 $_SESSION['panier']['quantiteDansPanier'][$indexArticle] += $quantite;
             } 
             else {
-                //Convertir le prix en numéro décimal
-                $prixUnitaire = substr($prixUnitaire, 0, -2);
-                $prixUnitaire = preg_replace('/,/', '.', $prixUnitaire);
-                $prixUnitaire = number_format($prixUnitaire, 2);
-
                 //Insérer les informations dans le tableau
                 array_push($_SESSION['panier']['noArticle'], $noArticle);
                 array_push($_SESSION['panier']['description'], $description);
                 array_push($_SESSION['panier']['cheminImage'], $cheminImage);
                 array_push($_SESSION['panier']['quantiteDansPanier'], $quantite);
-                array_push($_SESSION['panier']['prixUnitaire'], $prixUnitaire);
+                array_push($_SESSION['panier']['prixUnitaire'], round($prixUnitaire, 2));
             }
         } 
         else {
@@ -168,16 +162,33 @@ class Panier {
     }
 
     /**
+     * Vérifie si article est dans le panier
+     * @param {int} $noArticle - le numéro de l'article
+     * @return boolean
+     */
+    public function estDansLePanier($noArticle){     
+        if(!$this->estVerrouille()) {
+            for($i = 0; $i < count($_SESSION['panier']['noArticle']); $i++){
+                if($_SESSION['panier']['noArticle'][$i] == $noArticle){
+                    return true;
+                }
+            }
+        }
+        return false;
+    }
+
+    /**
      * Supprime un article dans le tableau de session
      * @param {string} $description - la description de l'article
+     * @throws Exception si l'article n'est pas le panier
      */
     public function supprimerArticle($noArticle) {
         $noArticle = (int) $noArticle;
-        if (!is_int($noArticle)) {
-            error_log('Le numéro d\'un article doit être un nombre entier', 3, 'erreurs.txt');
-            return;
-        }
 
+        if(!$this->estDansLePanier($noArticle)) {
+            throw new Exception("L'article que vous tentez de supprimer n'existe pas.");
+        }
+      
         if (!$this->estVerrouille()) {
             $tmp = array();
             $tmp['noArticle'] = array();
