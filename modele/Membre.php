@@ -9,7 +9,7 @@ class Membre {
     private $noMembre;
     private $nomMembre;
     private $prenomMembre;
-    private $estAdmin;
+    private $categorie;
     private $adresse;
     private $ville;
     private $province;
@@ -48,8 +48,8 @@ class Membre {
         return $this->prenomMembre;
     }
 
-    public function getEstAdmin() {
-        return $this->estAdmin;
+    public function getCategorie() {
+        return $this->categorie;
     }
 
     public function getAdresse() {
@@ -104,8 +104,8 @@ class Membre {
         $this->prenomMembre = $prenomMembre;
     }
 
-    public function setEstAdmin($estAdmin) {
-        $this->estAdmin = $estAdmin;
+    public function setCategorie($categorie) {
+        $this->categorie = $categorie;
     }
 
     public function setAdresse($adresse) {

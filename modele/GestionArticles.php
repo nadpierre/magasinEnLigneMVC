@@ -331,11 +331,11 @@ class GestionArticles extends GestionBD {
 
 
     /**
-     * Détruit le panier d'achat : rétablit la quantité en stock
+     * Vide le panier d'achat : rétablit la quantité en stock
      * et annule la quantité dans le panier
      * @return void
      */
-    public function detruirePanier(){
+    public function viderPanier(){
           
        $nbArticles = $this->getNbArticles();
        

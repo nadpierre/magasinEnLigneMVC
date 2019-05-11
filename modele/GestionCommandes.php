@@ -46,7 +46,10 @@ class GestionCommandes extends GestionBD {
      * @param {Commande} $commande - une instance de l'objet Commande
      * @return void
      */
-    public function ajouterCommande(Commande $commande) {
+    public function ajouterCommande(Panier $panier, Commande $commande) {
+        if(empty($panier->getPanier())) {
+            throw new Exception("Le panier est vide.");
+        }
 
         $requete = $this->bdd->prepare(
             'INSERT INTO commande (dateCommande, noMembre, paypalOrderId)

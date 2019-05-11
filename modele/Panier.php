@@ -27,7 +27,7 @@ class Panier {
         if (!isset($_SESSION['panier'])) {
             $_SESSION['panier'] = array();
             $_SESSION['panier']['noArticle'] = array();
-            $_SESSION['panier']['description'] = array();
+            $_SESSION['panier']['libelle'] = array();
             $_SESSION['panier']['cheminImage'] = array();
             $_SESSION['panier']['quantiteDansPanier'] = array();
             $_SESSION['panier']['prixUnitaire'] = array();
@@ -44,12 +44,12 @@ class Panier {
         $listePanier = array();
 
         if (!$this->estVerrouille()) {
-            for ($i = 0; $i < count($_SESSION['panier']['description']); $i++) {
+            for ($i = 0; $i < count($_SESSION['panier']['libelle']); $i++) {
                 // Convertir le nombre décimal en format monétaire
                 $prixTotal = $_SESSION['panier']['quantiteDansPanier'][$i] * $_SESSION['panier']['prixUnitaire'][$i];
                 $ligne = array(
                     "noArticle" => (int) $_SESSION['panier']['noArticle'][$i],
-                    "description" => $_SESSION['panier']['description'][$i],
+                    "libelle" => $_SESSION['panier']['libelle'][$i],
                     "cheminImage" => $_SESSION['panier']['cheminImage'][$i],
                     "quantiteDansPanier" => (int) $_SESSION['panier']['quantiteDansPanier'][$i],
                     "prixUnitaire" => number_format($_SESSION['panier']['prixUnitaire'][$i], 2),
@@ -65,6 +65,35 @@ class Panier {
         
         return json_encode($listePanier);
     }
+
+    /**
+     * Retourne tous les numéros d'articles
+     * @return array
+     */
+    public function getTabNoArticle(){
+        if (!$this->estVerrouille()) {
+            $tabNoArticle = array();
+            for($i = 0; $i < count($_SESSION['panier']['noArticle']); $i++){
+                array_push($tabNoArticle, (int) $_SESSION['panier']['noArticle'][$i]);
+            }  
+        }
+        return $tabNoArticle;
+    }
+
+    /**
+     * Retourne toutes les quantités
+     * @return array
+     */
+    public function getTabQuantite(){
+        if (!$this->estVerrouille()) {
+            $tabQuantite = array();
+            for($i = 0; $i < count($_SESSION['panier']['quantiteDansPanier']); $i++){
+                array_push($tabQuantite, (int) $_SESSION['panier']['quantiteDansPanier'][$i]);
+            }  
+        }
+        return $tabQuantite;
+    }
+
 
     /**
      * Retourne le nombre total d'articles
@@ -128,16 +157,12 @@ class Panier {
 
     /**
      * Ajoute un article dans le tableau de session
-     * @param {string} $description - la description de l'article
+     * @param {string} $libelle - la libelle de l'article
      * @param {int} $quantiteDansPanier - la quantité par article
      * @param {double} $prixUnitaire - le prix à l'unité
      */
-    public function ajouterArticle($noArticle, $description, $cheminImage, $quantite, $prixUnitaire){
+    public function ajouterArticle($noArticle, $libelle, $cheminImage, $quantite, $prixUnitaire){
         $noArticle = (int) $noArticle;
-        if (!is_int($noArticle)) {
-            error_log('Le numéro d\'un article doit être un nombre entier', 3, 'erreurs.txt');
-            return;
-        }
 
         if (!$this->estVerrouille()) {
 
@@ -150,7 +175,7 @@ class Panier {
             else {
                 //Insérer les informations dans le tableau
                 array_push($_SESSION['panier']['noArticle'], $noArticle);
-                array_push($_SESSION['panier']['description'], $description);
+                array_push($_SESSION['panier']['libelle'], $libelle);
                 array_push($_SESSION['panier']['cheminImage'], $cheminImage);
                 array_push($_SESSION['panier']['quantiteDansPanier'], $quantite);
                 array_push($_SESSION['panier']['prixUnitaire'], round($prixUnitaire, 2));
@@ -179,7 +204,7 @@ class Panier {
 
     /**
      * Supprime un article dans le tableau de session
-     * @param {string} $description - la description de l'article
+     * @param {string} $libelle - la libelle de l'article
      * @throws Exception si l'article n'est pas le panier
      */
     public function supprimerArticle($noArticle) {
@@ -192,7 +217,7 @@ class Panier {
         if (!$this->estVerrouille()) {
             $tmp = array();
             $tmp['noArticle'] = array();
-            $tmp['description'] = array();
+            $tmp['libelle'] = array();
             $tmp['cheminImage'] = array();
             $tmp['quantiteDansPanier'] = array();
             $tmp['prixUnitaire'] = array();
@@ -201,7 +226,7 @@ class Panier {
             for ($i = 0; $i < count($_SESSION['panier']['noArticle']); $i++) {
                 if ($_SESSION['panier']['noArticle'][$i] !== $noArticle) {
                     array_push($tmp['noArticle'], $_SESSION['panier']['noArticle'][$i]);
-                    array_push($tmp['description'], $_SESSION['panier']['description'][$i]);
+                    array_push($tmp['libelle'], $_SESSION['panier']['libelle'][$i]);
                     array_push($tmp['cheminImage'], $_SESSION['panier']['cheminImage'][$i]);
                     array_push($tmp['quantiteDansPanier'], $_SESSION['panier']['quantiteDansPanier'][$i]);
                     array_push($tmp['prixUnitaire'], $_SESSION['panier']['prixUnitaire'][$i]);
@@ -262,13 +287,20 @@ class Panier {
     }
 
     /**
+     * Dévérouille le panier
+     */
+    public function deverrouillerPanier(){
+        if ($this->creerPanier()) {
+            $_SESSION['panier']['estVerrouille'] == false;
+        }
+    }
+
+    /**
      * Supprime le panier
      */
-    public function supprimerPanier() {
+    public function viderPanier() {
         if ($this->creerPanier()) {
             unset($_SESSION['panier']);
-            session_unset();
-            session_destroy();
         }
     }
 }

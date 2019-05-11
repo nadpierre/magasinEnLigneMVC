@@ -16,11 +16,11 @@
 
         if(is_int($info)){//Il s'agit d'un numéro de membre
             $info = (int) $info;
-            $requete = $this->bdd->prepare('SELECT * FROM membre WHERE noMembre = ?');
+            $requete = $this->bdd->prepare('SELECT * FROM membre WHERE (noMembre = ? AND categorie != 0)');
             $requete->bindValue(1, $info, PDO::PARAM_INT);
         }
         else {//Sinon, c'est un courriel
-            $requete = $this->bdd->prepare('SELECT * FROM membre WHERE courriel = ?');
+            $requete = $this->bdd->prepare('SELECT * FROM membre WHERE (courriel = ? AND categorie != 0)');
             $requete->bindValue(1, $info, PDO::PARAM_STR);
         }
 
@@ -61,23 +61,29 @@
      */
     public function ajouterMembre(Membre $membre) {
 
-        if($this->existeDeja($membre)) {
+        if($this->existeDeja($membre) && $membre->getCategorie() != 0) {
            throw new Exception("Un compte est déjà associé à ce courriel");
         }
 
         //Encrypter le mot de passe
-        $motDePasse = password_hash($membre->getMotDePasse(), PASSWORD_DEFAULT);
+        if($membre->getCategorie() != 0){
+            $motDePasse = password_hash($membre->getMotDePasse(), PASSWORD_DEFAULT);
+        }
+        else {
+            $motDePasse = "";
+        }
+        
 
         $requete = $this->bdd->prepare(
-            'INSERT INTO membre (nomMembre, prenomMembre, estAdmin, adresse, ville, province,
+            'INSERT INTO membre (nomMembre, prenomMembre, categorie, adresse, ville, province,
                 codePostal, noTel, courriel, motDePasse)
-            VALUES (:nomMembre, :prenomMembre, :estAdmin, :adresse, :ville, :province,
+            VALUES (:nomMembre, :prenomMembre, :categorie, :adresse, :ville, :province,
                 :codePostal, :noTel, :courriel, :motDePasse)'
         );
 
         $requete->bindValue(':nomMembre', $membre->getNomMembre(), PDO::PARAM_STR);
         $requete->bindValue(':prenomMembre', $membre->getPrenomMembre(), PDO::PARAM_STR);
-        $requete->bindValue(':estAdmin', $membre->getEstAdmin(), PDO::PARAM_INT);
+        $requete->bindValue(':categorie', $membre->getCategorie(), PDO::PARAM_INT);
         $requete->bindValue(':adresse', $membre->getAdresse(), PDO::PARAM_STR);
         $requete->bindValue(':ville', $membre->getVille(), PDO::PARAM_STR);
         $requete->bindValue(':province', $membre->getProvince(), PDO::PARAM_STR);
@@ -97,35 +103,26 @@
      */
     public function modifierMembre(Membre $membre) {
 
-        //Encrypter le mot de passe
-        $motDePasse = password_hash($membre->getMotDePasse(), PASSWORD_DEFAULT);
-
         $requete = $this->bdd->prepare(
             'UPDATE membre
             SET
                 nomMembre = :nomMembre,
                 prenomMembre = :prenomMembre,
-                estAdmin = :estAdmin,
                 adresse = :adresse,
                 ville = :ville,
                 province = :province,
                 codePostal = :codePostal,
-                noTel = :noTel,
-                courriel = :courriel,
-                motDePasse = :motDePasse
+                noTel = :noTel
             WHERE noMembre = :noMembre' 
         );
 
         $requete->bindValue(':nomMembre', $membre->getNomMembre(), PDO::PARAM_STR);
         $requete->bindValue(':prenomMembre', $membre->getPrenomMembre(), PDO::PARAM_STR);
-        $requete->bindValue(':estAdmin', $membre->getEstAdmin(), PDO::PARAM_INT);
         $requete->bindValue(':adresse', $membre->getAdresse(), PDO::PARAM_STR);
         $requete->bindValue(':ville', $membre->getVille(), PDO::PARAM_STR);
         $requete->bindValue(':province', $membre->getProvince(), PDO::PARAM_STR);
         $requete->bindValue(':codePostal', $membre->getCodePostal(), PDO::PARAM_STR);
         $requete->bindValue(':noTel', $membre->getNoTel(), PDO::PARAM_STR);
-        $requete->bindValue(':courriel', $membre->getCourriel(), PDO::PARAM_STR);
-        $requete->bindValue(':motDePasse', $motDePasse, PDO::PARAM_STR);
         $requete->bindValue(':noMembre', $membre->getNoMembre(), PDO::PARAM_INT);
 
         $requete->execute();
@@ -139,9 +136,9 @@
      * @param {Membre} - un membre déjà instancié
      * @return void
      */
-    public function supprimerMembre(Membre $membre) {
+    public function supprimerMembre($noMembre) {
         $requete = $this->bdd->prepare('DELETE FROM membre WHERE noMembre = ?');
-        $requete->bindValue(1, $membre->getNoMembre(), PDO::PARAM_INT);
+        $requete->bindValue(1, $noMembre, PDO::PARAM_INT);
         $requete->execute();
         $requete->closeCursor();
     }
@@ -149,7 +146,7 @@
 
      /**
      * Récupère les information du dernier membre ajouté
-     * @return string - le JSON de l'objet si le membre existe
+     * @return Membre 
      */
     public function getDernierMembre() {
     
@@ -158,7 +155,7 @@
         $requete->closeCursor();
         $membre = new Membre($donnees);
 
-        return '[' . $membre . ']';
+        return $membre;
     }
 
 }
