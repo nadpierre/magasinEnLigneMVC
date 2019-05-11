@@ -9,19 +9,12 @@ class Connexion {
     public function creerConnexion(Membre $membre) {
         if(!isset($_SESSION['connexion'])){
             session_regenerate_id();
-            $_SESSION['connexion']['estConnecte'] = true;
-            $_SESSION['connexion']['nom'] = $membre->getPrenomMembre() . ' ' . $membre->getNomMembre();
             $_SESSION['connexion']['id'] = $membre->getNoMembre();
+            $_SESSION['connexion']['categorie'] = $membre->getCategorie();
+            $_SESSION['connexion']['estConnecte'] = true;
         }
     }
 
-    /**
-     * Retourne le nom complet de l'utilisateur
-     * @return string
-     */
-    public function getNomUtilisateur(){
-        return isset($_SESSION['connexion'])? $_SESSION['connexion']['nom'] : null;
-    }
 
     /**
      * Retourne le numéro de l'utilisateur
@@ -29,6 +22,14 @@ class Connexion {
      */
     public function getIdUtilisateur() {
         return isset($_SESSION['connexion'])? $_SESSION['connexion']['id'] : null;
+    }
+
+    /**
+     * Retourne la catégorie de l'utilisateur
+     * @return int - 1 pour membre, 2 pour administrateur
+     */
+    public function getCategorie(){
+        return isset($_SESSION['connexion'])? $_SESSION['connexion']['categorie'] : null;
     }
 
     /**

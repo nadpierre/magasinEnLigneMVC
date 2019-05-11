@@ -22,8 +22,7 @@ class GestionCommandes extends GestionBD {
         $donnees = $requete->fetch(PDO::FETCH_ASSOC);
         $requete->closeCursor();
 
-        $commande = new Commande($donnees);
-        return $commande;
+        return new Commande($donnees);
     }
 
     /**
@@ -37,14 +36,14 @@ class GestionCommandes extends GestionBD {
         $donnees = $requete->fetch(PDO::FETCH_ASSOC);
         $requete->closeCursor();
 
-        $commande = new Commande($donnees);
-        return $commande;
+        return new Commande($donnees);
     }
 
     /**
      * Ajoute une commande
      * @param {Commande} $commande - une instance de l'objet Commande
      * @return void
+     * @throws Exception si le panier est vide
      */
     public function ajouterCommande(Panier $panier, Commande $commande) {
         if(empty($panier->getPanier())) {

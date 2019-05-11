@@ -32,10 +32,8 @@
            throw new Exception("Courriel invalide");
         }
 
-        $membre = new Membre($donnees);
-        
-        return $membre;
-       
+        return new Membre($donnees);
+          
     }
 
     /**
@@ -153,9 +151,8 @@
         $requete = $this->bdd->query('SELECT * FROM membre ORDER BY noMembre DESC LIMIT 1');
         $donnees = $requete->fetch(PDO::FETCH_ASSOC);
         $requete->closeCursor();
-        $membre = new Membre($donnees);
 
-        return $membre;
+        return new Membre($donnees);
     }
 
 }
