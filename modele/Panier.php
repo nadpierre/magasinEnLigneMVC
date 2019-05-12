@@ -180,9 +180,6 @@ class Panier {
                 array_push($_SESSION['panier']['quantiteDansPanier'], $quantite);
                 array_push($_SESSION['panier']['prixUnitaire'], round($prixUnitaire, 2));
             }
-        } 
-        else {
-            echo "Un problème est survenu, contactez l'administrateur du site.";
         }
     }
 
@@ -236,9 +233,6 @@ class Panier {
             $_SESSION['panier'] = $tmp;
             unset($tmp);
         } 
-        else {
-            echo "Un problème est survenu, contactez l'administrateur du site.";
-        }
     }
 
     /**
@@ -263,10 +257,6 @@ class Panier {
             }
 
         } 
-        else {
-            echo "Un problème est survenu, contactez l'administrateur du site.";
-        }
-
     }
 
     /**

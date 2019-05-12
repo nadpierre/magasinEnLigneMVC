@@ -20,6 +20,7 @@
 --
 DROP DATABASE IF EXISTS magasin_en_ligne;
 CREATE DATABASE magasin_en_ligne CHARACTER SET utf8 COLLATE utf8_general_ci;
+USE magasin_en_ligne;
 
 --
 -- Table structure for table `article`
