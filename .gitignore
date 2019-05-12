@@ -5,6 +5,7 @@ fonts/*
 images/*
 js/*
 sass/*
+test/*
 vue/*
 index.html
 prepros-6.config
