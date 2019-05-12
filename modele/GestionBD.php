@@ -48,23 +48,6 @@ abstract class GestionBD {
 
     }
 
-
-    /**
-     * Filtre un paramètre pour prévenir les injections SQL
-     * et les failles XSS
-     * @param {string} - l'expression à filtrer
-     */
-    protected function filtrerParametre($parametre){
-        if (get_magic_quotes_gpc()){
-            $parametre = stripslashes($parametre);
-            $parametre = $this->bdd->real_escape_string($parametre);
-            $parametre = htmlentities($parametre);
-        }
-
-        return $parametre;
-    }
-
-
 }
 
 ?>

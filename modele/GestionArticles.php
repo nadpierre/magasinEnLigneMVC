@@ -63,13 +63,18 @@ class GestionArticles extends GestionBD {
      * @return string - un JSON du tableau d'articles
      */
     public function listerParMot($mot){
-        //S'assurer que la paramètre ne contient pas du code SQL et/ou HTML
-        $mot = $this->filtrerParametre($mot);
 
         $mot = strtolower($mot);
         $listeArticles = array();
 
-        $requete = $this->bdd->query("SELECT * FROM article WHERE LOWER(libelle) LIKE '%$mot%' ORDER BY libelle");
+        $requete = $this->bdd->prepare(
+            'SELECT * FROM article
+            WHERE LOWER(libelle) LIKE :mot
+            ORDER BY libelle'
+        );
+
+        $requete->bindValue(':mot', '%'.$mot.'%', PDO::PARAM_STR);
+        $requete->execute();
         
         while ($donnees = $requete->fetch(PDO::FETCH_ASSOC)) {
             $article = new Article($donnees);
