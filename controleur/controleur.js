@@ -3,10 +3,105 @@
  */
 $(document).ready(function(){
     $("#gabarit").load("vue/gabarit.html", function(){
-        afficherInventaire(listerArticles);
-        getTotalPanier();
+        afficherListe("modele-inventaire-admin");
+        /*  afficherInventaire(listerArticles);
+        getTotalPanier(); */
     })
 });
+/**
+ * ============================== Function pour Afficher le profile ==============================
+ */
+function test(){
+    let modeleInventaire = new ModeleMagasin("modele-profile-client");
+    modeleInventaire.appliquerModele("", "milieu-page");
+ }
+ function iconConnexionBACKUP(){
+    // recuperer le test sur le boutton
+    let text = $("#btn-msg").text();
+    
+    // changer le text sur le bouton est text == Connexion alors changer le text pour Profile
+   $("#btn-msg").text(text == "Connexion" ? "Compte" : "Connexion");
+   
+   if(text == "Connexion"){
+       $("#btn-msg").attr("onclick" , "profileClient()");
+   }
+
+
+   // A partir du id btn-login, chercher les tags 'i' et remove et ajouter la class selon le texte 
+   $('#btn-login').find("i").removeClass(text== "Connexion" ? "fas fa-user-alt" : "fas fa-user-check").addClass( text== "Connexion" ? "fas fa-user-check" : "fas fa-user-alt");
+   
+   // Ajouter une balise 'a' selon le texte 
+   $('.menu-login').append(text == "Connexion" ? "<a href=\"index.html\" class=\"btn-logout\"><i class=\"fas fa-sign-out-alt\" onclick=\"seDeconnecter()\"></i>Logout</a>" : "");
+   
+   $('.btn-logout').remove(text == "Connexion");
+   
+}
+
+ function iconConnexion(){
+     // recuperer le test sur le boutton
+     let text = $("#btn-msg").text();
+     
+     // changer le text sur le bouton est text == Connexion alors changer le text pour Profile
+    $("#btn-msg").text("Compte");
+    
+    $("#btn-msg").attr("onclick","profileClient()");
+
+
+
+    // A partir du id btn-login, chercher les tags 'i' et remove et ajouter la class selon le texte 
+    $('#btn-login').find("i").removeClass(text== "Connexion" ? "fas fa-user-alt" : "fas fa-user-check").addClass( text== "Connexion" ? "fas fa-user-check" : "fas fa-user-alt");
+    
+    // Ajouter une balise 'a' selon le texte 
+    $('.menu-login').append(text == "Connexion" ? "<a href=\"index.html\" class=\"btn-logout\" onclick=\"seDeconnecter()\"><i class=\"fas fa-sign-out-alt\"></i>Logout</a>" : "");
+    
+    $('.btn-logout').remove(text == "Connexion");
+    
+ }
+
+ function profileClient(){
+    let requete = new RequeteAjax("controleur/controleur.php")
+    let modele = new ModeleMagasin("modele-profile-client");
+   // modeleInscription.appliquerModele('', "milieu-page");
+
+    let objJSON = {
+        "type" : "membre",
+        "requete" : "profil"
+    };
+
+    requete.getJSON(objJSON, function(reponse){
+        let temp = JSON.parse(reponse.membre);
+        
+        console.log(temp);
+        modele.appliquerModele(temp, "milieu-page");
+        
+    });
+ 
+
+}
+
+function modifierProfile(){
+    let requete = new RequeteAjax("controleur/controleur.php")
+    let modele = new ModeleMagasin("modele-profile-modification");
+
+    let objJSON = {
+        "type" : "membre",
+        "requete" : "profil"
+    };
+
+    requete.getJSON(objJSON, function(reponse){
+        let temp = JSON.parse(reponse.membre);
+        
+        console.log(temp);
+        modele.appliquerModele(temp, "milieu-page");
+        
+
+    });
+
+ 
+}
+/**
+ * ==============================FIN Function pour Afficher le profile ==============================
+ */
 
 /**
  * -----------------------
@@ -32,8 +127,9 @@ function listerArticles() {
     let requete = new RequeteAjax("controleur/controleur.php");
     let modeleListeArticles = new ModeleMagasin("modele-liste-articles");
     let objJSON = {
-        "type": "inventaire",
+        "type": "inventaire"
     };
+    
     requete.getJSON(objJSON, function(reponse) {
         modeleListeArticles.appliquerModele(reponse, "liste-articles");
     });
@@ -53,6 +149,7 @@ function listerParCategorie(valeur) {
         "categorie" : valeur
     };
     requete.getJSON(objJSON, function(reponse) {
+        
         modeleListeArticles.appliquerModele(reponse, "liste-articles");
     });
 }
@@ -259,7 +356,6 @@ function modifierPanier() {
  * -----------------------
  */
 
-
 /**
   * Affiche le formulaire d'inscription
   */
@@ -279,6 +375,9 @@ function formulaireInscription() {
 
 /**
  * Valide les données du formulaire
+ * 0 = invité
+ * 1 = membre
+ * 2 = admin
  */
 function validerFormulaire() {
     //Message d'erreur
@@ -354,7 +453,8 @@ function validerFormulaire() {
         "codePostal": codePostal,
         "noTel": noTel,
         "courriel": courriel,
-        "motDePasse": motDePasse
+        "motDePasse": motDePasse,
+        "categorie" : 1
     }
 
     let objJSON = {
@@ -401,20 +501,25 @@ function formulaireConnexion() {
  */
 function seConnecter() {
     let messageErreur = $("#message-erreur");
-    let courriel = $("#pseudo").val(); 
+    let courriel = $("#courriel").val(); 
     let motDePasse = $("#mot-de-passe").val();
 
     let objJSON = {
         "type" : "membre",
         "requete": "connexion",
         "courriel": courriel,
-        "motDePasse": motDePasse
+        "motDePasse": motDePasse,
+        "categorie" : 1
     };
 
     let requete = new RequeteAjax("controleur/controleur.php");
     requete.getJSON(objJSON, function (reponse) {
         if (reponse["statut"] == "succes") {
             //afficherCaisse(JSON.stringify(reponse["membre"]));
+            
+            profileClient();
+            iconConnexion();
+
 
         }
         else if (reponse["statut"] == "echec") {
@@ -440,10 +545,10 @@ function seDeconnecter(){
     let requete = new RequeteAjax("controleur/controleur.php");
     requete.getJSON(objJSON, function(reponse){
         if (reponse["statut"] == "succes") {
+            iconConnexion();
             afficherInventaire(listerArticles);
         }
         else if (reponse["statut"] == "echec") {
-
             messageErreur.addClass('alert');
             messageErreur.addClass('alert-danger');
             messageErreur.html(reponse["message"]);
@@ -475,6 +580,24 @@ function desabonner(courriel){
     })
 }
 
+/**
+ * Valider si le client est connecté
+ */
+function estConnecte(){
+    let objJSON = {
+        "type" : "membre",
+        "requete" : "estConnecte"
+    };
+    let requete = new RequeteAjax("controleur/controleur.php");
+    requete.getJSON(objJSON, function(){
+        if(reponse["statut"] == "succes") {
+            return true;
+        }
+        else if (reponse["statut"] == "echec"){
+            return false;
+        }
+    })
+}
 
 /**
  * -----------------------
@@ -495,8 +618,46 @@ function desabonner(courriel){
 */
 
 /**
- * Affiche la liste des clients
+ * Affiche la liste de membre ou articles
  */
+function afficherListe(modeleChoisi) {
+    let requete = new RequeteAjax("controleur/controleur.php");
+    let modele = new ModeleMagasin(modeleChoisi);
+    let objJSON;
+    let modeleSolo;
+    if (modeleChoisi == "modele-inventaire-admin"){
+        objJSON = {
+            "type" : "panier",
+            "requete" : "sommaire"
+        };
+        modeleSolo = "modele-liste-panier-admin";
+    }
+    else {
+        objJSON = {
+            "type" : "panier",
+            "requete" : "sommaire"
+        };
+        modeleSolo = "modele-liste-client-admin";
+    }
+    requete.getJSON(objJSON, reponse => {
+        modele.appliquerModele(reponse, "milieu-page");
+        listeSolo(modeleSolo);
+    });
+}
+
+/**
+ * Affiche le membre ou l'article individuel
+ */
+function listeSolo(solo) {
+    let requete = new RequeteAjax("controleur/controleur.php");
+    let modele = new ModeleMagasin(solo);
+    let objJSON = {
+        "type" : "inventaire"
+    };
+    requete.getJSON(objJSON,function (reponse) {
+        modele.appliquerModele(reponse, "liste-panier");
+    })
+}
 
 
  /**
