@@ -16,7 +16,7 @@ class GestionArticles extends GestionBD {
 
         $requete = $this->bdd->query('SELECT * FROM article ORDER BY libelle');
        
-        while ($donnees = $requete->fetch(PDO::FETCH_ASSOC)) {
+        while ($donnees = $requete->fetch()) {
             $article = new Article($donnees);
             array_push($listeArticles, $article->getTableau());
         }
@@ -43,7 +43,7 @@ class GestionArticles extends GestionBD {
         $requete->bindValue(1, $categorie, PDO::PARAM_STR);
         $requete->execute();
 
-        while ($donnees = $requete->fetch(PDO::FETCH_ASSOC)) {
+        while ($donnees = $requete->fetch()) {
             $article = new Article($donnees);
             array_push($listeArticles, $article->getTableau());
         }
@@ -76,7 +76,7 @@ class GestionArticles extends GestionBD {
         $requete->bindValue(':mot', '%'.$mot.'%', PDO::PARAM_STR);
         $requete->execute();
         
-        while ($donnees = $requete->fetch(PDO::FETCH_ASSOC)) {
+        while ($donnees = $requete->fetch()) {
             $article = new Article($donnees);
             array_push($listeArticles, $article->getTableau());
         }
@@ -106,6 +106,7 @@ class GestionArticles extends GestionBD {
      * Retourne un seul article
      * @param {int} $id - l'identifiant de l'article
      * @return string - un JSON de l'article
+     * @throws Exception si l'article n'existe pas
      */
     public function getArticle($noArticle) {
         $noArticle = (int) $noArticle;
@@ -113,11 +114,28 @@ class GestionArticles extends GestionBD {
         $requete = $this->bdd->prepare('SELECT * FROM article WHERE noArticle = ?');
         $requete->bindValue(1, $noArticle, PDO::PARAM_INT);
         $requete->execute();
-        $donnees = $requete->fetch(PDO::FETCH_ASSOC);
+        $donnees = $requete->fetch();
         $requete->closeCursor();
 
+        if($donnees === false){
+            throw new Exception("L'article n'existe pas.");
+        }
+
         $article = new Article($donnees);
-        return '[' . $article . ']';
+        return "".$article;
+    }
+
+
+    /**
+     * Retourne le dernier article ajouté
+     * @return string
+     */
+    public function getDernierArticle(){
+        $requete = $this->bdd->query("SELECT * FROM article ORDER BY noArticle DESC LIMIT 1");
+        $donnees = $requete->fetch();
+        $requete->closeCursor();
+        $article = new Article($donnees);
+        return "".$article;
     }
 
     /**
@@ -155,41 +173,129 @@ class GestionArticles extends GestionBD {
     }
 
     /**
-     * Ajoute un article dans l'inventaire
-     * @param {Article} - une instance de l'objet Article
+     * Vérifier si l'image reçue est valide pour téléverser
+     * @param {array} $image - la variable superglobale $_FILES["image"]
+     * @return boolean
+     */
+    public function isUploadable(array $image){
+        $valide = true;
+
+        //Vérifier si une image a bel et bien été envoyée
+        if($image["name"] == ""){
+            $valide = false;
+        }
+
+        //Vérifier si c'est une vraie image
+        $imgTemp = getimagesize($image["tmp_name"]);
+        if($imgTemp == false || $img){
+            $valide = false;
+        }
+
+        //Limiter la taille de l'image à 500 Ko
+        if($image["size"] > 500000){
+            $valide = false;
+        }
+
+       //Seulement accepter les formats correspondant à une image
+        if(!($extension == "jpg" || $extension == "jpeg" || 
+             $extension == "png" || $extension == "gif")){
+            $valide = false;
+        }
+       
+        return $valide;
+    }
+
+
+    /**
+     * Téléverser l'image de l'article
+     * @param {string} $libelle - la variable superglobale $_POST["libelle"]
+     * @param {array} $image - la variable superglobale $_FILES["image"]
+     * @return string - le chemin de l'image à insérer dans la base de données
+     * @throws Exception si l'image n'a pas pu être téléchargée
+     */
+    public function uploadImage($libelle, array $image){
+        $dossier = "../images/";
+        $libelle = explode(" ", strtolower($libelle));
+        $nomFichier = implode("_", $libelle);
+        $extension = strtolower(pathinfo($image["name"], PATHINFO_EXTENSION));
+        $chemin = $dossier . $nomFichier . '.' .$extension;
+
+        //Retirer l'image si le nom existe déjà
+        if(file_exists($chemin)){
+            unlink($chemin);
+        }
+        
+        if(!$this->isUploadable()){
+            throw new Exception("L'image n'a pas pu être téléversée");   
+        }
+        
+        move_uploaded_file($image["tmp_name"], $chemin);
+        
+        return str_replace("../", "", $chemin);   
+    }
+
+    /**
+     * Ajoute un article dans l'inventaire avec le libellé et le chemin de l'image
+     * @param {Article}
+     * @return void
+     */
+    public function ajouterImage(Article $article){
+        $requete = $this->bdd->prepare(
+            'INSERT INTO article(libelle, cheminImage)
+            VALUES(:libelle, :cheminImage)'
+        );
+        $requete->bindValue(':libelle', $article->getLibelle(), PDO::PARAM_STR);
+        $requete->bindValue(':cheminImage', $article->getCheminImage(), PDO::PARAM_STR);
+        $requete->execute();
+        $requete->closeCursor();
+    }
+
+    /**
+     * Ajoute les données manquantes de l'article
+     * @param {Article}
      * @return void
      */
     public function ajouterArticle(Article $article){
         $requete = $this->bdd->prepare(
-            'INSERT INTO article (
-                categorie, 
-                libelle, 
-                cheminImage, 
-                prixUnitaire, 
-                quantiteEnStock, 
-                quantiteDansPanier
-            )
-            VALUES (
-                :categorie,
-                :libelle,
-                :cheminImage,
-                :prixUnitaire,
-                :quantiteEnStock,
-                :quantiteDansPanier
-            )
-            '
+            'UPDATE article
+            SET 
+                categorie = :categorie,
+                prixUnitaire = :prixUnitaire,
+                quantiteEnStock = :quantiteEnStock
+            WHERE noArticle = :noArticle'
         );
 
         $requete->bindValue(':categorie', $article->getCategorie(), PDO::PARAM_STR);
-        $requete->bindValue(':libelle', $article->getLibelle(), PDO::PARAM_STR);
-        $requete->bindValue(':cheminImage', $article->getCheminImage(), PDO::PARAM_STR);
         $requete->bindValue(':prixUnitaire', $article->getPrixUnitaire(), PDO::PARAM_STR);
         $requete->bindValue(':quantiteEnStock', $article->getQuantiteEnStock(), PDO::PARAM_INT);
-        $requete->bindValue(':quantiteDansPanier', $article->getQuantiteDansPanier(), PDO::PARAM_INT);
-
+        $requete->bindValue(':noArticle', $article->getNoArticle(), PDO::PARAM_INT);
         $requete->execute();
         $requete->closeCursor();
     }
+
+    /**
+     * Modifie une image d'un article
+     * @param {Article} - une instance de l'objet Article
+     * @return void
+     */
+    public function modifierImage(Article $article){
+        $requete = $this->bdd->prepare(
+            'UPDATE article
+            SET 
+                libelle = :libelle,
+                cheminImage = :cheminImage
+
+            WHERE noArticle = :noArticle'
+        );
+
+        $requete->bindValue(':libelle', $article->getLibelle(), PDO::PARAM_STR);
+        $requete->bindValue(':cheminImage', $article->getCheminImage(), PDO::PARAM_STR);
+        $requete->bindValue(':noArticle', $article->getNoArticle(), PDO::PARAM_INT);
+        $requete->execute();
+        $requete->closeCursor();
+    }
+
+
 
     /**
      * Modifie les informations d'un article existant
@@ -201,21 +307,15 @@ class GestionArticles extends GestionBD {
             'UPDATE article
             SET  
                 categorie = :categorie, 
-                libelle = :libelle,
-                cheminImage = :cheminImage, 
                 prixUnitaire = :prixUnitaire,
-                quantiteEnStock = :quantiteEnStock,
-                quantiteDansPanier = :quantiteDansPanier
+                quantiteEnStock = :quantiteEnStock
             WHERE noArticle = :noArticle
             '
         );
 
         $requete->bindValue(':categorie', $article->getCategorie(), PDO::PARAM_STR);
-        $requete->bindValue(':libelle', $article->getLibelle(), PDO::PARAM_STR);
-        $requete->bindValue(':cheminImage', $article->getCheminImage(), PDO::PARAM_STR);
         $requete->bindValue(':prixUnitaire', $article->getPrixUnitaire(), PDO::PARAM_STR);
         $requete->bindValue(':quantiteEnStock', $article->getQuantiteEnStock(), PDO::PARAM_INT);
-        $requete->bindValue(':quantiteDansPanier', $article->getQuantiteDansPanier(), PDO::PARAM_INT);
         $requete->bindValue(':noArticle', $article->getNoArticle(), PDO::PARAM_INT);
 
         $requete->execute();
@@ -225,13 +325,23 @@ class GestionArticles extends GestionBD {
     /**
      * Supprime un article de l'inventaire
      * @param {Article} - une instance de l'objet Article
-     * @return void
+     * @return string - le JSON de l'article qui vient d'être supprimé
+     * @throws Exception si l'article n'a pas pu être supprimé
      */
-    public function supprimerArticle(Article $article) {
-        $requete = $this->bdd->prepare('DELETE FROM article WHERE noArticle = ?');
-        $requete->bindValue(1, $article->getNoArticle(), PDO::PARAM_INT);
-        $requete->execute();
-        $requete->closeCursor();
+    public function supprimerArticle($noArticle) {
+        try{
+            $article= $this->getArticle((int) $noArticle);
+            $requete = $this->bdd->prepare('DELETE FROM article WHERE noArticle = ?');
+            $requete->bindValue(1, $article->getNoArticle(), PDO::PARAM_INT);
+            $requete->execute();
+            $requete->closeCursor();
+        }
+        
+        catch(Exception $e){
+            throw $e;
+        }
+
+        return "".$article;
     }
 
 

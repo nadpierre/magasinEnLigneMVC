@@ -14,8 +14,7 @@ class Article {
     private $quantiteEnStock;
     private $quantiteDansPanier;
 
-    /* CONSTANTES (regex) */
-   const CHEMIN_IMAGE = '/^images\/(.*)\.(jpg|jpeg|png|gif)$/';
+
 
     /**
      * CONSTRUCTEUR : crée un objet de type Article
@@ -72,10 +71,6 @@ class Article {
     }
 
     public function setCheminImage($cheminImage) {
-        if(!preg_match(self::CHEMIN_IMAGE, $cheminImage)){
-            throw new Exception('Format de chemin d\'image invalide');
-            return;
-        }
         $this->cheminImage = $cheminImage;
     }
 

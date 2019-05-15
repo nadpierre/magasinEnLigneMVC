@@ -25,7 +25,7 @@
         }
 
         $requete->execute();
-        $donnees = $requete->fetch(PDO::FETCH_ASSOC);
+        $donnees = $requete->fetch();
         $requete->closeCursor();
 
         if($donnees === false){
@@ -59,7 +59,7 @@
      */
     public function ajouterMembre(Membre $membre) {
 
-        if($this->existeDeja($membre) && $membre->getCategorie() != 0) {
+        if($this->existeDeja($membre)) {
            throw new Exception("Un compte est déjà associé à ce courriel");
         }
 
@@ -128,6 +128,27 @@
 
     }
 
+    /**
+     * Réinitialise le mot de passe
+     * @param {int} $noMembre - le numéro du membre
+     * @param {string} $motDePasse - le nouveau mot de passe
+     * @return void
+     */
+    public function changerMotDePasse($noMembre, $motDePasse) {
+        
+        $motDePasse = password_hash($motDePasse, PASSWORD_DEFAULT);
+        
+        $requete = $this->bdd->prepare(
+            'UPDATE membre 
+            SET motDePasse = :motDePasse 
+            WHERE (noMembre = :noMembre AND categorie != 0)'
+        );
+        $requete->bindValue(':motDePasse', $motDePasse, PDO::PARAM_STR);
+        $requete->bindValue(':noMembre', $noMembre, PDO::PARAM_INT);
+        $requete->execute();
+      
+    }
+
 
     /**
      * Supprime un membre
@@ -143,13 +164,13 @@
 
 
      /**
-     * Récupère les information du dernier membre ajouté
+     * Récupère les information de l'invité (dernier membre ajouté)
      * @return Membre 
      */
-    public function getDernierMembre() {
+    public function getInvite() {
     
         $requete = $this->bdd->query('SELECT * FROM membre ORDER BY noMembre DESC LIMIT 1');
-        $donnees = $requete->fetch(PDO::FETCH_ASSOC);
+        $donnees = $requete->fetch();
         $requete->closeCursor();
 
         return new Membre($donnees);

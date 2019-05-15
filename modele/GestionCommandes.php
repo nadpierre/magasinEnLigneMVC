@@ -19,7 +19,7 @@ class GestionCommandes extends GestionBD {
         );
         $requete->bindValue(1, $noCommande, PDO::PARAM_INT);
         $requete->execute();
-        $donnees = $requete->fetch(PDO::FETCH_ASSOC);
+        $donnees = $requete->fetch();
         $requete->closeCursor();
 
         return new Commande($donnees);
@@ -33,7 +33,7 @@ class GestionCommandes extends GestionBD {
         $requete = $this->bdd->query(
             'SELECT * FROM commande ORDER BY dateCommande DESC LIMIT 1'
         );
-        $donnees = $requete->fetch(PDO::FETCH_ASSOC);
+        $donnees = $requete->fetch();
         $requete->closeCursor();
 
         return new Commande($donnees);
