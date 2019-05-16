@@ -60,6 +60,7 @@ $objJSON = json_decode(file_get_contents("php://input"));
 
 if($objJSON !== null){
     switch($objJSON->type){
+        /**** INVENTAIRE ****/
         case "inventaire" :
             if(isset($objJSON->categorie)){//lister par catégorie
                 echo $gestionArticles->listerParCategorie($objJSON->categorie);
@@ -95,14 +96,15 @@ if($objJSON !== null){
                 echo $gestionArticles->getListeArticles();
             }
             break;      
-               
+       
+        /**** PANIER D'ACHAT ****/
         case "panier":
             if(isset($objJSON->requete)){
                  switch($objJSON->requete){
-                    case "compteur" :
+                    case "compteur" ://compter le nombre d'articles
                         echo $panier->getNbArticlesTotal();
                         break;
-                    case "ajouter" :
+                    case "ajouter" ://ajouter un article 
                         $article = json_decode($objJSON->article);
                         $noArticle = (int) $article->noArticle;
                         $libelle = $article->libelle;
@@ -121,7 +123,7 @@ if($objJSON !== null){
                         }
                         echo json_encode($reponse);
                         break;
-                    case "supprimer" :
+                    case "supprimer" ://supprimer un article
                         $noArticle = (int) $objJSON->noArticle;
                         try {
                             $panier->supprimerArticle($noArticle);
@@ -135,7 +137,7 @@ if($objJSON !== null){
                         } 
                         echo json_encode($reponse);
                         break;
-                    case "modifier" :
+                    case "modifier" :// modifier la quantité
                         $tabNoArticle = json_decode($objJSON->tabNoArticle);
                         $tabQuantite = json_decode($objJSON->tabQuantite);
                         try {
@@ -150,23 +152,25 @@ if($objJSON !== null){
                         }
                         echo json_encode($reponse);
                         break;
-                    case "sommaire" :
+                    case "sommaire" :// sommaire du panier (ou de la facture)
                         echo $panier->getSommaire();
                         break;
-                    case "liste" :
+                    case "liste" ://lister les éléments du panier (ou facture)
                         echo $panier->getPanier();
                         break;
-                    case "vider" :
+                    case "vider" ://vider le panier
                         $gestionArticles->viderPanier(); 
                         $panier->viderPanier();    
                         break;
                  }
             }
             break;
+
+        /**** MEMBRE ****/    
         case "membre" :
             if(isset($objJSON->requete)){
                 switch ($objJSON->requete){
-                    case "inscription" :
+                    case "inscription" : //inscription d'un membre
                         try{
                             //Ajouter le membre
                             $donneesMembre = json_decode($objJSON->membre, true);
@@ -185,7 +189,7 @@ if($objJSON !== null){
                         }
                         echo json_encode($reponse);
                         break;
-                    case "connexion" :
+                    case "connexion" ://authentification 
                         $courriel = $objJSON->courriel;
                         $motDePasse = $objJSON->motDePasse;
                         try {
@@ -206,12 +210,12 @@ if($objJSON !== null){
                         }
                         echo json_encode($reponse);
                         break;
-                    case "deconnexion" :
+                    case "deconnexion" ://déconnection
                         $connexion->seDeconnecter();
                         $reponse["estConnecte"] = $connexion->estConnecte();
                         echo json_encode($reponse);
                         break;
-                    case "profil" :
+                    case "profil" ://afficher le détail d'un membre
                         if($connexion->estConnecte()){
                             $membre = $gestionMembres->getMembre($connexion->getIdUtilisateur());
                             $reponse["statut"] = "succes";
@@ -223,7 +227,7 @@ if($objJSON !== null){
                         }
                         echo json_encode($reponse);  
                         break;
-                    case "modifier" :
+                    case "modifier" ://modifier les renseignements
                         if($connexion->estConnecte()){
                             $donneesMembre = json_decode($objJSON->membre, true);
                             $donneesMembre["noMembre"] = $connexion->getIdUtilisateur();
@@ -239,7 +243,7 @@ if($objJSON !== null){
                         }
                         echo json_encode($reponse);  
                         break;
-                    case "supprimer" :
+                    case "supprimer" ://se désabonner (ou supprimer pour un admin)
                         if($connexion->estConnecte()){
                             $gestionMembres->supprimerMembre($connexion->getIdUtilisateur());
                             $connexion->seDeconnecter();
@@ -252,7 +256,7 @@ if($objJSON !== null){
                         }
                         echo json_encode($reponse);  
                         break;
-                    case "motDePasse" :
+                    case "motDePasse" ://mdifier le mot de passe
                         if($connexion->estConnecte()){
                             $noMembre = $connexion->getIdUtilisateur();
                             $motDePasse = $objJSON->motDePasse;
@@ -269,10 +273,12 @@ if($objJSON !== null){
                 }
             }
             break;
+
+        /**** COMMANDE ****/    
         case "commande" :
             if(isset($objJSON->requete)){
                 switch ($objJSON->requete){
-                    case "invite" :
+                    case "invite" : //effectuer une commande en tant qu'invité
                         try {
                             $panier->verrouillerPanier();
                             
@@ -310,7 +316,7 @@ if($objJSON !== null){
                         }
                         echo json_encode($reponse);
                         break;
-                    case "membre" :
+                    case "membre" ://commande pour un membre existant
                         if($connexion->estConnecte()){
                             try {
                                 $panier->verrouillerPanier();
@@ -348,7 +354,7 @@ if($objJSON !== null){
                         }
                         echo json_encode($reponse); 
                         break;
-                    case "confirmation" :
+                    case "confirmation" ://afficher la confirmation de commande
                             $derniereCommande = $gestionCommandes->getDerniereCommande();
                             $paypalOrderId = $derniereCommande->getPaypalOrderId();
                         
