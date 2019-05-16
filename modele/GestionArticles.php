@@ -105,7 +105,7 @@ class GestionArticles extends GestionBD {
     /**
      * Retourne un seul article
      * @param {int} $id - l'identifiant de l'article
-     * @return string - un JSON de l'article
+     * @return Article 
      * @throws Exception si l'article n'existe pas
      */
     public function getArticle($noArticle) {
@@ -121,21 +121,19 @@ class GestionArticles extends GestionBD {
             throw new Exception("L'article n'existe pas.");
         }
 
-        $article = new Article($donnees);
-        return "".$article;
+        return new Article($donnees);
     }
 
 
     /**
      * Retourne le dernier article ajouté
-     * @return string
+     * @return Article
      */
     public function getDernierArticle(){
         $requete = $this->bdd->query("SELECT * FROM article ORDER BY noArticle DESC LIMIT 1");
         $donnees = $requete->fetch();
         $requete->closeCursor();
-        $article = new Article($donnees);
-        return "".$article;
+        return new Article($donnees);
     }
 
     /**
@@ -179,11 +177,6 @@ class GestionArticles extends GestionBD {
      */
     public function isUploadable(array $image){
         $valide = true;
-
-        //Vérifier si une image a bel et bien été envoyée
-        if($image["name"] == ""){
-            $valide = false;
-        }
 
         //Vérifier si c'est une vraie image
         $imgTemp = getimagesize($image["tmp_name"]);
@@ -235,68 +228,42 @@ class GestionArticles extends GestionBD {
     }
 
     /**
-     * Ajoute un article dans l'inventaire avec le libellé et le chemin de l'image
-     * @param {Article}
-     * @return void
-     */
-    public function ajouterImage(Article $article){
-        $requete = $this->bdd->prepare(
-            'INSERT INTO article(libelle, cheminImage)
-            VALUES(:libelle, :cheminImage)'
-        );
-        $requete->bindValue(':libelle', $article->getLibelle(), PDO::PARAM_STR);
-        $requete->bindValue(':cheminImage', $article->getCheminImage(), PDO::PARAM_STR);
-        $requete->execute();
-        $requete->closeCursor();
-    }
-
-    /**
-     * Ajoute les données manquantes de l'article
+     * Ajoute un article dans l'inventaire 
      * @param {Article}
      * @return void
      */
     public function ajouterArticle(Article $article){
         $requete = $this->bdd->prepare(
-            'UPDATE article
-            SET 
-                categorie = :categorie,
-                prixUnitaire = :prixUnitaire,
-                quantiteEnStock = :quantiteEnStock
-            WHERE noArticle = :noArticle'
+            'INSERT INTO article(categorie, libelle, cheminImage, prixUnitaire, quantiteEnStock)
+            VALUES(:categorie, :libelle, :cheminImage, :prixUnitaire, :quantiteEnStock)'
         );
-
         $requete->bindValue(':categorie', $article->getCategorie(), PDO::PARAM_STR);
+        $requete->bindValue(':libelle', $article->getLibelle(), PDO::PARAM_STR);
+        $requete->bindValue(':cheminImage', $article->getCheminImage(), PDO::PARAM_STR);
         $requete->bindValue(':prixUnitaire', $article->getPrixUnitaire(), PDO::PARAM_STR);
-        $requete->bindValue(':quantiteEnStock', $article->getQuantiteEnStock(), PDO::PARAM_INT);
-        $requete->bindValue(':noArticle', $article->getNoArticle(), PDO::PARAM_INT);
+        $requete->bindValue(':quantiteEnStock', $article->getQuantiteEnStock(), PDO::PARAM_STR);
         $requete->execute();
         $requete->closeCursor();
     }
 
     /**
-     * Modifie une image d'un article
-     * @param {Article} - une instance de l'objet Article
+     * Ajoute ou modifie le chemin d'image d'un article
+     * @param {string} $cheminImage
      * @return void
      */
-    public function modifierImage(Article $article){
+    public function ajouterImage(Article $article){
         $requete = $this->bdd->prepare(
             'UPDATE article
-            SET 
-                libelle = :libelle,
-                cheminImage = :cheminImage
-
+            SET cheminImage = :cheminImage
             WHERE noArticle = :noArticle'
         );
-
-        $requete->bindValue(':libelle', $article->getLibelle(), PDO::PARAM_STR);
         $requete->bindValue(':cheminImage', $article->getCheminImage(), PDO::PARAM_STR);
         $requete->bindValue(':noArticle', $article->getNoArticle(), PDO::PARAM_INT);
         $requete->execute();
         $requete->closeCursor();
     }
 
-
-
+    
     /**
      * Modifie les informations d'un article existant
      * @param {Article} - une instance de l'objet Article
@@ -306,7 +273,8 @@ class GestionArticles extends GestionBD {
         $requete = $this->bdd->prepare(
             'UPDATE article
             SET  
-                categorie = :categorie, 
+                categorie = :categorie,
+                libelle = :libelle,
                 prixUnitaire = :prixUnitaire,
                 quantiteEnStock = :quantiteEnStock
             WHERE noArticle = :noArticle
@@ -314,6 +282,7 @@ class GestionArticles extends GestionBD {
         );
 
         $requete->bindValue(':categorie', $article->getCategorie(), PDO::PARAM_STR);
+        $requete->bindValue(':libelle', $article->getLibelle(), PDO::PARAM_STR);
         $requete->bindValue(':prixUnitaire', $article->getPrixUnitaire(), PDO::PARAM_STR);
         $requete->bindValue(':quantiteEnStock', $article->getQuantiteEnStock(), PDO::PARAM_INT);
         $requete->bindValue(':noArticle', $article->getNoArticle(), PDO::PARAM_INT);
@@ -322,10 +291,11 @@ class GestionArticles extends GestionBD {
         $requete->closeCursor();
     }
 
+
     /**
      * Supprime un article de l'inventaire
      * @param {Article} - une instance de l'objet Article
-     * @return string - le JSON de l'article qui vient d'être supprimé
+     * @return Article - le JSON de l'article qui vient d'être supprimé
      * @throws Exception si l'article n'a pas pu être supprimé
      */
     public function supprimerArticle($noArticle) {
@@ -341,7 +311,7 @@ class GestionArticles extends GestionBD {
             throw $e;
         }
 
-        return "".$article;
+        return $article;
     }
 
 

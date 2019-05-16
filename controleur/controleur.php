@@ -18,28 +18,40 @@ $gestionAC = new GestionArticlesCommande();
 $panier = new Panier();
 $connexion = new Connexion();
 
-/* Télécharger une image */
-if(isset($_FILES["image"]) && isset($_POST["libelle"])){   
-    try {
-        $chemin = $gestionArticles->uploadImage($_POST["libelle"], $_FILES["image"]);
-        $donnees["libelle"] = $_POST["libelle"];
-        $donnees["cheminImage"] = $chemin;
-        $donnees["noArticle"] = (int) $_POST["noArticle"];
+/* Ajouter ou modifier un article */
+if(isset($_FILES["image"])){
+    if($connexion->estConnecte() && $connexion->getCategorie() == 2){
+        $donnees = json_decode($_POST["article"], true);
         $article = new Article($donnees);
         if($_POST["requete"] == "ajouter"){
-            $gestionArticles->ajouterImage($article);
-            $reponse["article"] = $gestionArticles->getDernierArticle();
+            $gestionArticles->ajouterArticle($article);
+            $article->setNoArticle($gestionArticles->getDernierArticle()->getNoArticle());
         }
         elseif($_POST["requete"] == "modifier"){
-            $gestionArticles->modifierImage($article);
-            $reponse["article"] = $gestionArticles->getArticle($article->getNoArticle());
+            $gestionArticles->modifierArticle($article);
         }
-        $reponse["statut"] = "succes";        
+
+        $reponse["statut"] = "succes";
+        $reponse["message"] = "L'article a été ajouté avec succès.";
+
+        if($_FILES["image"]["name"] != ""){
+            try {
+                $article->setCheminImage(uploadImage($article->getLibelle(), $_FILES["image"]));
+                $gestionArticles->modifierImage($article);
+                $reponse["message"] = "L'image a été modifiée avec succès.";
+            }
+            catch(Exception $e) {
+                $reponse["statut"] = "echec";
+                $reponse["message"] = $e->getMessage();
+            }   
+        }
     }
-    catch(Exception $e) {
+    else {
         $reponse["statut"] = "echec";
-        $reponse["message"] = $e->getMessage();
-    }  
+        $reponse["message"] = "Vous n'êtes pas autorisé à ajouter ou modifier un article.";
+    }
+
+    echo json_encode($reponse);  
 }
 
 
@@ -58,61 +70,32 @@ if($objJSON !== null){
             elseif(isset($objJSON->noArticle)){//détails d'un article
                 echo '[' . $gestionArticles->getArticle((int) $objJSON->noArticle) . ']';
             }
-            elseif(isset($objJSON->requete)){
-                switch($objJSON->requete){
-                    case "ajouter" :
-                        if($connexion->estConnecte() && $connexion->getCategorie() == 2){
-                            $donnees = json_decode($objJSON->article, true);
-                            $article = new Article($donnees);
-                            $gestionArticles->ajouterArticle($article);
+            elseif(isset($objJSON->requete)){//admin : supprimer un article
+                if($objJSON->requete == "supprimer"){
+                    if($connexion->estConnecte() && $connexion->getCategorie() == 2){
+                        $noArticle = $objJSON->noArticle;
+                        try {
+                            $reponse["article"] = '[' . $gestionArticles->supprimerArticle($noArticle). ']';
                             $reponse["statut"] = "succes";
-                            $reponse["article"] = '[' . $gestionArticles->getDernierArticle() . ']';
+
                         }
-                        else{
+                        catch(Exception $e){
                             $reponse["statut"] = "echec";
-                            $reponse["message"] = "Vous n'êtes pas autorisé à ajouter un article.";
-                        }                       
-                        echo json_encode($reponse);
-                        break;
-                    case "modifier" :
-                        if($connexion->estConnecte() && $connexion->getCategorie() == 2){
-                            $donnees = json_decode($objJSON->article, true);
-                            $article = new Article($donnees);
-                            $gestionArticles->modifierArticle($article);     
-                            $reponse["statut"] = "succes";
-                            $reponse["article"] = '[' . $gestionArticles->getArticle((int) $article->getNoArticle()) . ']';
+                            $reponse["message"] = $e->getMessage();
                         }
-                        else {
-                            $reponse["statut"] = "echec";
-                            $reponse["message"] = "Vous n'êtes pas autorisé à modifier un article.";
-                        }                     
-                        echo json_encode($reponse);
-                        break;
-                    case "supprimer" :
-                        if($connexion->estConnecte() && $connexion->getCategorie() == 2){
-                            $noArticle = $objJSON->noArticle;
-                            try {
-                                $reponse["article"] = '[' . $gestionArticles->supprimerArticle($noArticle). ']';
-                                $reponse["statut"] = "succes";
-    
-                            }
-                            catch(Exception $e){
-                                $reponse["statut"] = "echec";
-                                $reponse["message"] = $e->getMessage();
-                            }
-                        }
-                        else {
-                            $reponse["statut"] = "echec";
-                            $reponse["message"] = "Vous n'êtes pas autorisé à supprimer un article.";
-                        }                        
-                        echo json_encode($reponse);
-                        break;
+                    }
+                    else {
+                        $reponse["statut"] = "echec";
+                        $reponse["message"] = "Vous n'êtes pas autorisé à supprimer un article.";
+                    }                        
+                    echo json_encode($reponse);
                 }
             }
             else {//lister tous les articles
                 echo $gestionArticles->getListeArticles();
-            }    
-            break;
+            }
+            break;      
+               
         case "panier":
             if(isset($objJSON->requete)){
                  switch($objJSON->requete){
