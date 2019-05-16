@@ -36,8 +36,8 @@ if(isset($_FILES["image"])){
 
         if($_FILES["image"]["name"] != ""){
             try {
-                $article->setCheminImage(uploadImage($article->getLibelle(), $_FILES["image"]));
-                $gestionArticles->modifierImage($article);
+                $article->setCheminImage($gestionArticles->uploadImage($article->getLibelle(), $_FILES["image"]));
+                $gestionArticles->ajouterImage($article);
                 $reponse["message"] = "L'image a été modifiée avec succès.";
             }
             catch(Exception $e) {

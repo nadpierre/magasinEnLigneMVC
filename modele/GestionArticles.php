@@ -234,12 +234,11 @@ class GestionArticles extends GestionBD {
      */
     public function ajouterArticle(Article $article){
         $requete = $this->bdd->prepare(
-            'INSERT INTO article(categorie, libelle, cheminImage, prixUnitaire, quantiteEnStock)
-            VALUES(:categorie, :libelle, :cheminImage, :prixUnitaire, :quantiteEnStock)'
+            'INSERT INTO article(categorie, libelle, prixUnitaire, quantiteEnStock)
+            VALUES(:categorie, :libelle, :prixUnitaire, :quantiteEnStock)'
         );
         $requete->bindValue(':categorie', $article->getCategorie(), PDO::PARAM_STR);
         $requete->bindValue(':libelle', $article->getLibelle(), PDO::PARAM_STR);
-        $requete->bindValue(':cheminImage', $article->getCheminImage(), PDO::PARAM_STR);
         $requete->bindValue(':prixUnitaire', $article->getPrixUnitaire(), PDO::PARAM_STR);
         $requete->bindValue(':quantiteEnStock', $article->getQuantiteEnStock(), PDO::PARAM_STR);
         $requete->execute();
