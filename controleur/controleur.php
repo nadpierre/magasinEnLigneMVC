@@ -32,13 +32,12 @@ if(isset($_FILES["image"])){
         }
 
         $reponse["statut"] = "succes";
-        $reponse["message"] = "L'article a été ajouté avec succès.";
+        $reponse["message"] = "L'article a été ajouté avec succès";
 
         if($_FILES["image"]["name"] != ""){
             try {
-                $article->setCheminImage($gestionArticles->uploadImage($article->getLibelle(), $_FILES["image"]));
-                $gestionArticles->ajouterImage($article);
-                $reponse["message"] = $reponse["message"] . " et l'image a été modifiée avec succès.";
+                $gestionArticles->uploadImage($article->getNoArticle(),$article->getLibelle(),$_FILES["image"]);
+                $reponse["message"] = $reponse["message"] . " et l'image a été téléversée avec succès.";
             }
             catch(Exception $e) {
                 $reponse["statut"] = "echec";

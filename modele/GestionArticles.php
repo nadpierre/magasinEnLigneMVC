@@ -203,10 +203,10 @@ class GestionArticles extends GestionBD {
      * Téléverser l'image de l'article
      * @param {string} $libelle - la variable superglobale $_POST["libelle"]
      * @param {array} $image - la variable superglobale $_FILES["image"]
-     * @return string - le chemin de l'image à insérer dans la base de données
+     * @return void- le chemin de l'image à insérer dans la base de données
      * @throws Exception si l'image n'a pas pu être téléchargée
      */
-    public function uploadImage($libelle, array $image){
+    public function uploadImage($noArticle, $libelle, array $image){
         $dossier = "../images/";
         $libelle = explode(" ", strtolower($libelle));
         $nomFichier = implode("_", $libelle);
@@ -223,8 +223,7 @@ class GestionArticles extends GestionBD {
         }
         
         move_uploaded_file($image["tmp_name"], $chemin);
-        
-        return str_replace("../", "", $chemin);   
+        $this->ajouterImage((int) $noArticle, str_replace("../", "", $chemin)); 
     }
 
     /**
@@ -250,14 +249,14 @@ class GestionArticles extends GestionBD {
      * @param {string} $cheminImage
      * @return void
      */
-    public function ajouterImage(Article $article){
+    public function ajouterImage($noArticle, $cheminImage){
         $requete = $this->bdd->prepare(
             'UPDATE article
             SET cheminImage = :cheminImage
             WHERE noArticle = :noArticle'
         );
-        $requete->bindValue(':cheminImage', $article->getCheminImage(), PDO::PARAM_STR);
-        $requete->bindValue(':noArticle', $article->getNoArticle(), PDO::PARAM_INT);
+        $requete->bindValue(':cheminImage', $cheminImage, PDO::PARAM_STR);
+        $requete->bindValue(':noArticle', $noArticle, PDO::PARAM_INT);
         $requete->execute();
         $requete->closeCursor();
     }
