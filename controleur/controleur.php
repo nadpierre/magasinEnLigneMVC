@@ -38,7 +38,7 @@ if(isset($_FILES["image"])){
             try {
                 $article->setCheminImage($gestionArticles->uploadImage($article->getLibelle(), $_FILES["image"]));
                 $gestionArticles->ajouterImage($article);
-                $reponse["message"] = "L'image a été modifiée avec succès.";
+                $reponse["message"] = $reponse["message"] . " et l'image a été modifiée avec succès.";
             }
             catch(Exception $e) {
                 $reponse["statut"] = "echec";
