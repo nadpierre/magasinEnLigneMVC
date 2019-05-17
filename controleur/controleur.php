@@ -19,7 +19,7 @@ $panier = new Panier();
 $connexion = new Connexion();
 
 /* Ajouter ou modifier un article */
-if(isset($_FILES["image"])){
+if(isset($_POST["requete"]) && isset($_FILES["image"])){
     if($connexion->estConnecte() && $connexion->getCategorie() == 2){
         $donnees = json_decode($_POST["article"], true);
         $article = new Article($donnees);
@@ -214,9 +214,26 @@ if($objJSON !== null){
                         $reponse["estConnecte"] = $connexion->estConnecte();
                         echo json_encode($reponse);
                         break;
-                    case "profil" ://afficher le détail d'un membre
+                    case "liste" : //afficher tous les membres (admin)
+                        if($connexion->estConnecte() && $connexion->getCategorie() == 2){
+                            $reponse["statut"] = "succes";
+                            $reponse["membres"] = $gestionMembres->getListeMembres();
+                        }
+                        else{
+                            $reponse["statut"] = "echec";
+                            $reponse["message"] = "Vous n'êtes pas autorisé à consulter tous les membres.";
+                        }
+                        echo json_encode($reponse);
+                        break;
+                    case "profil" ://consulter le detail d'un membre
                         if($connexion->estConnecte()){
-                            $membre = $gestionMembres->getMembre($connexion->getIdUtilisateur());
+                            if($connexion->getCategorie() == 1){
+                                $membre = $gestionMembres->getMembre($connexion->getIdUtilisateur());  
+                            }
+                            elseif($connexion->getCategorie() == 2){
+                                $noMembre = (int) $objJSON->$noMembre;
+                                $membre = $gestionMembres->getMembre($noMembre);  
+                            }
                             $reponse["statut"] = "succes";
                             $reponse["membre"] = '['.$membre.']';
                         }
@@ -229,12 +246,14 @@ if($objJSON !== null){
                     case "modifier" ://modifier les renseignements
                         if($connexion->estConnecte()){
                             $donneesMembre = json_decode($objJSON->membre, true);
-                            $donneesMembre["noMembre"] = $connexion->getIdUtilisateur();
                             $membre = new Membre($donneesMembre);
+                            if($connexion->getCategorie() == 1){
+                                $membre->setNoMembre($connexion->getIdUtilisateur());
+                            }
                             $gestionMembres->modifierMembre($membre);
                             $membre = $gestionMembres->getMembre($connexion->getIdUtilisateur());
                             $reponse["statut"] = "succes";
-                            $reponse["membre"] = '['.$membre.']';   
+                            $reponse["membre"] = '['.$membre.']'; 
                         }
                         else {
                             $reponse["statut"] = "echec";
@@ -242,20 +261,26 @@ if($objJSON !== null){
                         }
                         echo json_encode($reponse);  
                         break;
-                    case "supprimer" ://se désabonner (ou supprimer pour un admin)
+                    case "supprimer" ://se désabonner (ou supprimer un compte pour un admin)
                         if($connexion->estConnecte()){
-                            $gestionMembres->supprimerMembre($connexion->getIdUtilisateur());
-                            $connexion->seDeconnecter();
+                            if($connexion->getCategorie() == 1){
+                                $gestionMembres->supprimerMembre($connexion->getIdUtilisateur());
+                                $connexion->seDeconnecter();
+                            }
+                            elseif($connexion->getCategorie() == 2){
+                                $noMembre = $objJSON->noMembre;
+                                $gestionMembres->supprimerMembre($noMembre);
+                            } 
                             $reponse["statut"] = "succes";
                             $reponse["membre"] = "Le membre a bel et bien été supprimé."; 
-                        }
+                        } 
                         else {
                             $reponse["statut"] = "echec";
                             $reponse["message"] = "Vous n'êtes pas connecté.";
                         }
                         echo json_encode($reponse);  
-                        break;
-                    case "motDePasse" ://mdifier le mot de passe
+                        break;        
+                    case "motDePasse" ://modifier le mot de passe
                         if($connexion->estConnecte()){
                             $noMembre = $connexion->getIdUtilisateur();
                             $motDePasse = $objJSON->motDePasse;
@@ -374,9 +399,7 @@ if($objJSON !== null){
                                     )
                                 )
                             );
-                            break;
-      
-                    
+                            break;    
                 }
             }
             break;

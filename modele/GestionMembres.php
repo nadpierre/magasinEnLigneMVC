@@ -7,6 +7,25 @@
  class GestionMembres extends GestionBD {
 
     /**
+     * Retourne tous les membres
+     * @return string - un JSON du tableau de membres
+     */
+    public function getListeMembres(){
+        $listeMembres = array();
+
+        $requete = $this->bdd->query('SELECT * FROM membre ORDER BY nomMembre');
+       
+        while ($donnees = $requete->fetch()) {
+            $membre = new Membre($donnees);
+            array_push($listeMembres, $membre->getTableau());
+        }
+
+        $requete->closeCursor();
+  
+        return json_encode($listeMembres);
+    }
+
+    /**
      * Retourne les informations du membre
      * @param {string} $info - le critère de recherche
      * @return Membre - une instance d'un objet Membre
