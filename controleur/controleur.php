@@ -250,7 +250,7 @@ if($objJSON !== null){
                             if(!isset($objJSON->noMembre)){//modifier son propre compte
                                 $membre->setNoMembre($connexion->getIdUtilisateur());
                             }
-                            //pour l'admin, le JSON qu'il envoie contient déjà le numéro de membre
+                            //pour l'admin, le JSON reçu du front end contient déjà le numéro de membre
                             $gestionMembres->modifierMembre($membre);
                             $reponse["statut"] = "succes";
                         }
@@ -283,7 +283,7 @@ if($objJSON !== null){
                             $noMembre = $connexion->getIdUtilisateur();
                             $membre = $gestionMembres->getMembre($noMembre);
                             if(password_verify($objJSON->ancien, $membre->getMotDePasse())){
-                                $gestionMembres->changerMotDePasse((int) $noMembre, $objJSON->nouveau);
+                                $gestionMembres->changerMotDePasse($noMembre, $objJSON->nouveau);
                                 $reponse["statut"] = "succes";
                                 $reponse["message"] = "Mot de passe modifié avec succès";
                             }
@@ -297,6 +297,21 @@ if($objJSON !== null){
                             $reponse["message"] = "Vous n'êtes pas connecté.";
                         } 
                         echo json_encode($reponse); 
+                        break;
+                    case "oubli" : //réinitialiser le mot de passe
+                        $courriel = $objJSON->courriel;
+                        try{
+                            $membre = $gestionMembres->getMembre($courriel);
+                            $noMembre = $membre->getNoMembre();
+                            $temp = $gestionMembres->genererMotDePasse();
+                            $gestionMembres->changerMotDePasse($noMembre, $temp);
+                            $reponse["statut"] = "succes";
+                            $reponse["message"] = 'Votre mot de passe temporaire est le ' . $temp;
+                        }
+                        catch(Exception $e){
+                            $reponse["statut"] = "echec";
+                            $reponse["message"] = $e->getMessage();
+                        }
                         break;
                 }
             }

@@ -168,8 +168,7 @@
      * @param {string} $motDePasse - le nouveau mot de passe
      * @return void
      */
-    public function changerMotDePasse($noMembre, $motDePasse) {
-        
+    public function changerMotDePasse($noMembre, $motDePasse) {    
         $motDePasse = password_hash($motDePasse, PASSWORD_DEFAULT);
         
         $requete = $this->bdd->prepare(
@@ -177,10 +176,10 @@
             SET motDePasse = :motDePasse 
             WHERE (noMembre = :noMembre AND categorie != 0)'
         );
+
         $requete->bindValue(':motDePasse', $motDePasse, PDO::PARAM_STR);
-        $requete->bindValue(':noMembre', $noMembre, PDO::PARAM_INT);
+        $requete->bindValue(':noMembre', (int) $noMembre, PDO::PARAM_INT);
         $requete->execute();
-      
     }
 
 
