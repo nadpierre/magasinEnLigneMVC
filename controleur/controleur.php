@@ -278,12 +278,14 @@ if($objJSON !== null){
                         }
                         echo json_encode($reponse);  
                         break;        
-                    case "motDePasse" ://modifier ou réinitialiser le mot de passe
+                    case "motDePasse" ://modifier le mot de passe
                         if($connexion->estConnecte()){
                             $noMembre = $connexion->getIdUtilisateur();
                             $membre = $gestionMembres->getMembre($noMembre);
                             if(password_verify($objJSON->ancien, $membre->getMotDePasse())){
-                                $gestionMembres->changerMotDePasse($noMembre, $objJSON->nouveau);
+                                $gestionMembres->changerMotDePasse((int) $noMembre, $objJSON->nouveau);
+                                $reponse["statut"] = "succes";
+                                $reponse["message"] = "Mot de passe modifié avec succès";
                             }
                             else{
                                 $reponse["statut"] = "echec";
