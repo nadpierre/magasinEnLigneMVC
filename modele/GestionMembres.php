@@ -147,8 +147,23 @@
 
     }
 
+
     /**
-     * Réinitialise le mot de passe
+     * Génère un mot de passe temporaire de 8 caractères
+     * @return string
+     */
+    function genererMotDePasse(){ 
+        $characteres = '0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ';
+        $longueur = strlen($characteres);
+        $motDePasse = '';  
+        for ($i = 0; $i < 8; $i++) {
+            $motDePasse .= $characteres[rand(0, $longueur - 1)];
+        }   
+        return $motDePasse;
+    }
+
+    /**
+     * Modifie ou réinitialise le mot de passe
      * @param {int} $noMembre - le numéro du membre
      * @param {string} $motDePasse - le nouveau mot de passe
      * @return void
@@ -187,11 +202,9 @@
      * @return Membre 
      */
     public function getInvite() {
-    
         $requete = $this->bdd->query('SELECT * FROM membre ORDER BY noMembre DESC LIMIT 1');
         $donnees = $requete->fetch();
         $requete->closeCursor();
-
         return new Membre($donnees);
     }
 

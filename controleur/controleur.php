@@ -37,7 +37,7 @@ if(isset($_POST["requete"]) && isset($_FILES["image"])){
         if($_FILES["image"]["name"] != ""){
             try {
                 $gestionArticles->uploadImage($article->getNoArticle(),$article->getLibelle(),$_FILES["image"]);
-                $reponse["message"] = $reponse["message"] . " et l'image a été téléversée avec succès.";
+                $reponse["message"] .= " et l'image a été téléversée avec succès.";
             }
             catch(Exception $e) {
                 $reponse["statut"] = "echec";
@@ -225,15 +225,15 @@ if($objJSON !== null){
                         }
                         echo json_encode($reponse);
                         break;
-                    case "profil" ://consulter le detail d'un membre
+                    case "profil" ://afficher un membre
                         if($connexion->estConnecte()){
-                            if($connexion->getCategorie() == 1){
-                                $membre = $gestionMembres->getMembre($connexion->getIdUtilisateur());  
+                            if(!isset($objJSON->noMembre)){//consulter son propre compte
+                                $noMembre = $connexion->getIdUtilisateur();
                             }
-                            elseif($connexion->getCategorie() == 2){
-                                $noMembre = (int) $objJSON->$noMembre;
-                                $membre = $gestionMembres->getMembre($noMembre);  
+                            else {//admin qui consulte le profil d'un autre membre
+                                $noMembre = (int) $objJSON->noMembre;
                             }
+                            $membre = $gestionMembres->getMembre($noMembre); 
                             $reponse["statut"] = "succes";
                             $reponse["membre"] = '['.$membre.']';
                         }
@@ -247,13 +247,12 @@ if($objJSON !== null){
                         if($connexion->estConnecte()){
                             $donneesMembre = json_decode($objJSON->membre, true);
                             $membre = new Membre($donneesMembre);
-                            if($connexion->getCategorie() == 1){
+                            if(!isset($objJSON->noMembre)){//modifier son propre compte
                                 $membre->setNoMembre($connexion->getIdUtilisateur());
                             }
+                            //pour l'admin, le JSON qu'il envoie contient déjà le numéro de membre
                             $gestionMembres->modifierMembre($membre);
-                            $membre = $gestionMembres->getMembre($connexion->getIdUtilisateur());
                             $reponse["statut"] = "succes";
-                            $reponse["membre"] = '['.$membre.']'; 
                         }
                         else {
                             $reponse["statut"] = "echec";
@@ -261,37 +260,40 @@ if($objJSON !== null){
                         }
                         echo json_encode($reponse);  
                         break;
-                    case "supprimer" ://se désabonner (ou supprimer un compte pour un admin)
+                    case "supprimer" ://supprimer un compte
                         if($connexion->estConnecte()){
-                            if($connexion->getCategorie() == 1){
-                                $gestionMembres->supprimerMembre($connexion->getIdUtilisateur());
-                                $connexion->seDeconnecter();
+                            if(!isset($objJSON->noMembre)){//un membre qui se désabonne
+                                $noMembre = $connexion->getIdUtilisateur();
                             }
-                            elseif($connexion->getCategorie() == 2){
-                                $noMembre = $objJSON->noMembre;
-                                $gestionMembres->supprimerMembre($noMembre);
-                            } 
+                            else {//un admin qui supprime un autre compte
+                                $noMembre = (int) $objJSON->noMembre;
+                            }
+                            $gestionMembres->supprimerMembre($noMembre);
                             $reponse["statut"] = "succes";
                             $reponse["membre"] = "Le membre a bel et bien été supprimé."; 
-                        } 
+                        }
                         else {
                             $reponse["statut"] = "echec";
                             $reponse["message"] = "Vous n'êtes pas connecté.";
                         }
                         echo json_encode($reponse);  
                         break;        
-                    case "motDePasse" ://modifier le mot de passe
+                    case "motDePasse" ://modifier ou réinitialiser le mot de passe
                         if($connexion->estConnecte()){
                             $noMembre = $connexion->getIdUtilisateur();
-                            $motDePasse = $objJSON->motDePasse;
-                            $gestionMembres->changerMotDePasse($noMembre, $motDePasse);
-                            $reponse["statut"] = "succes";
-                            $reponse["membre"] = "Le mot de passe a été modifié avec succès"; 
+                            $membre = $gestionMembres->getMembre($noMembre);
+                            if(password_verify($objJSON->ancien, $membre->getMotDePasse())){
+                                $gestionMembres->changerMotDePasse($noMembre, $objJSON->nouveau);
+                            }
+                            else{
+                                $reponse["statut"] = "echec";
+                                $reponse["message"] = "Mot de passe invalide";
+                            }    
                         }
-                        else{
+                        else {
                             $reponse["statut"] = "echec";
                             $reponse["message"] = "Vous n'êtes pas connecté.";
-                        }
+                        } 
                         echo json_encode($reponse); 
                         break;
                 }
