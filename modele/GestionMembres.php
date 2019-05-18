@@ -20,8 +20,6 @@
             array_push($listeMembres, $membre->getTableau());
         }
 
-        $requete->closeCursor();
-  
         return json_encode($listeMembres);
     }
 
@@ -45,7 +43,7 @@
 
         $requete->execute();
         $donnees = $requete->fetch();
-        $requete->closeCursor();
+        
 
         if($donnees === false){
            throw new Exception("Courriel invalide");
@@ -110,7 +108,7 @@
         $requete->bindValue(':motDePasse', $motDePasse, PDO::PARAM_STR);
 
         $requete->execute();
-        $requete->closeCursor();
+        
     }   
         
     /**
@@ -143,8 +141,7 @@
         $requete->bindValue(':noMembre', $membre->getNoMembre(), PDO::PARAM_INT);
 
         $requete->execute();
-        $requete->closeCursor();
-
+        
     }
 
 
@@ -161,6 +158,7 @@
         }   
         return $motDePasse;
     }
+
 
     /**
      * Modifie ou réinitialise le mot de passe
@@ -192,7 +190,7 @@
         $requete = $this->bdd->prepare('DELETE FROM membre WHERE noMembre = ?');
         $requete->bindValue(1, $noMembre, PDO::PARAM_INT);
         $requete->execute();
-        $requete->closeCursor();
+        
     }
 
 
@@ -203,7 +201,7 @@
     public function getInvite() {
         $requete = $this->bdd->query('SELECT * FROM membre ORDER BY noMembre DESC LIMIT 1');
         $donnees = $requete->fetch();
-        $requete->closeCursor();
+        
         return new Membre($donnees);
     }
 

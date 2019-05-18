@@ -104,7 +104,7 @@ if($objJSON !== null){
                         echo $panier->getNbArticlesTotal();
                         break;
                     case "ajouter" ://ajouter un article 
-                        $article = json_decode($objJSON->article);
+                        $article = $objJSON->article;
                         $noArticle = (int) $article->noArticle;
                         $libelle = $article->libelle;
                         $cheminImage = $article->cheminImage;
@@ -227,10 +227,12 @@ if($objJSON !== null){
                         break;
                     case "profil" ://afficher un membre
                         if($connexion->estConnecte()){
-                            if(!isset($objJSON->noMembre)){//consulter son propre compte
+                            //consulter son propre compte
+                            if(!isset($objJSON->noMembre)){
                                 $noMembre = $connexion->getIdUtilisateur();
                             }
-                            else {//admin qui consulte le profil d'un autre membre
+                            //admin qui consulte le profil d'un autre membre
+                            elseif($connexion->getCategorie() == 2 && isset($objJSON->noMembre)) {
                                 $noMembre = (int) $objJSON->noMembre;
                             }
                             $membre = $gestionMembres->getMembre($noMembre); 
@@ -247,7 +249,8 @@ if($objJSON !== null){
                         if($connexion->estConnecte()){
                             $donneesMembre = json_decode($objJSON->membre, true);
                             $membre = new Membre($donneesMembre);
-                            if(!isset($objJSON->noMembre)){//modifier son propre compte
+                            //modifier son propre compte
+                            if(!isset($objJSON->noMembre)){
                                 $membre->setNoMembre($connexion->getIdUtilisateur());
                             }
                             //pour l'admin, le JSON reçu du front end contient déjà le numéro de membre
@@ -306,7 +309,7 @@ if($objJSON !== null){
                             $temp = $gestionMembres->genererMotDePasse();
                             $gestionMembres->changerMotDePasse($noMembre, $temp);
                             $reponse["statut"] = "succes";
-                            $reponse["message"] = 'Votre mot de passe temporaire est le ' . $temp;
+                            $reponse["message"] =  "Votre mot de passe temporaire est '$temp'.";
                         }
                         catch(Exception $e){
                             $reponse["statut"] = "echec";

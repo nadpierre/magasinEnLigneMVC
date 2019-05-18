@@ -21,8 +21,6 @@ class GestionArticles extends GestionBD {
             array_push($listeArticles, $article->getTableau());
         }
 
-        $requete->closeCursor();
-  
         return json_encode($listeArticles);
           
     }
@@ -44,8 +42,6 @@ class GestionArticles extends GestionBD {
             array_push($listeArticles, $article->getTableau());
         }
 
-        $requete->closeCursor();
-        
         return json_encode($listeArticles);
     }
 
@@ -73,8 +69,6 @@ class GestionArticles extends GestionBD {
             array_push($listeArticles, $article->getTableau());
         }
 
-        $requete->closeCursor();
-
         if(count($listeArticles) == 0) {
             return "AUCUN ARTICLE SÉLECTIONNÉ";
         }
@@ -90,7 +84,7 @@ class GestionArticles extends GestionBD {
     private function getNbArticles(){
         $requete = $this->bdd->query('SELECT COUNT(*) FROM article');
         $somme = $requete->fetch(PDO::FETCH_NUM);
-        $requete->closeCursor();
+        
         return (int) $somme[0];
     }
 
@@ -107,7 +101,7 @@ class GestionArticles extends GestionBD {
         $requete->bindValue(1, $noArticle, PDO::PARAM_INT);
         $requete->execute();
         $donnees = $requete->fetch();
-        $requete->closeCursor();
+        
 
         if($donnees === false){
             throw new Exception("L'article n'existe pas.");
@@ -124,7 +118,7 @@ class GestionArticles extends GestionBD {
     public function getDernierArticle(){
         $requete = $this->bdd->query("SELECT * FROM article ORDER BY noArticle DESC LIMIT 1");
         $donnees = $requete->fetch();
-        $requete->closeCursor();
+        
         return new Article($donnees);
     }
 
@@ -140,8 +134,7 @@ class GestionArticles extends GestionBD {
         $requete->bindValue(1, $noArticle, PDO::PARAM_INT);
         $requete->execute();
         $donnees = $requete->fetch(PDO::FETCH_NUM);
-        $requete->closeCursor();
-        
+         
         return (int) $donnees[0];
     }
 
@@ -157,8 +150,7 @@ class GestionArticles extends GestionBD {
         $requete->bindValue(1, $noArticle, PDO::PARAM_INT);
         $requete->execute();
         $donnees = $requete->fetch(PDO::FETCH_NUM);
-        $requete->closeCursor();
-        
+          
         return (int) $donnees[0];
     }
 
@@ -233,7 +225,7 @@ class GestionArticles extends GestionBD {
         $requete->bindValue(':prixUnitaire', $article->getPrixUnitaire(), PDO::PARAM_STR);
         $requete->bindValue(':quantiteEnStock', $article->getQuantiteEnStock(), PDO::PARAM_STR);
         $requete->execute();
-        $requete->closeCursor();
+        
     }
 
     /**
@@ -250,7 +242,7 @@ class GestionArticles extends GestionBD {
         $requete->bindValue(':cheminImage', $cheminImage, PDO::PARAM_STR);
         $requete->bindValue(':noArticle', $noArticle, PDO::PARAM_INT);
         $requete->execute();
-        $requete->closeCursor();
+        
     }
 
     
@@ -278,7 +270,7 @@ class GestionArticles extends GestionBD {
         $requete->bindValue(':noArticle', $article->getNoArticle(), PDO::PARAM_INT);
 
         $requete->execute();
-        $requete->closeCursor();
+        
     }
 
 
@@ -294,7 +286,7 @@ class GestionArticles extends GestionBD {
             $requete = $this->bdd->prepare('DELETE FROM article WHERE noArticle = ?');
             $requete->bindValue(1, $article->getNoArticle(), PDO::PARAM_INT);
             $requete->execute();
-            $requete->closeCursor();
+            
         }
         
         catch(Exception $e){
@@ -331,7 +323,7 @@ class GestionArticles extends GestionBD {
             $requete->bindValue(2, $quantite, PDO::PARAM_INT);
             $requete->bindValue(3, $noArticle, PDO::PARAM_INT);
             $requete->execute();
-            $requete->closeCursor();
+            
         }
 
     }
@@ -354,7 +346,7 @@ class GestionArticles extends GestionBD {
         );
         $requete->bindValue(1, $noArticle, PDO::PARAM_INT);
         $requete->execute();
-        $requete->closeCursor();
+        
     }
 
 
@@ -387,7 +379,7 @@ class GestionArticles extends GestionBD {
             $requete->bindValue(':quantite2', (int) $tabQuantite[$i], PDO::PARAM_INT);
             $requete->bindValue(':noArticle', (int) $tabNoArticle[$i], PDO::PARAM_INT);
             $requete->execute();
-            $requete->closeCursor();  
+              
         }
        
     }
@@ -401,7 +393,7 @@ class GestionArticles extends GestionBD {
             'UPDATE article
             SET quantiteDansPanier = 0'
         );
-        $requete->closeCursor();  
+          
     }
 
 
@@ -425,7 +417,7 @@ class GestionArticles extends GestionBD {
             $requete->bindValue(':quantite', $this->getQteDansPanier($i), PDO::PARAM_INT);
             $requete->bindValue(':noArticle', $i, PDO::PARAM_INT);
             $requete->execute();
-            $requete->closeCursor();
+            
        }
     }
 }
