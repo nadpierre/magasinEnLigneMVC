@@ -3,27 +3,26 @@
  */
 $(document).ready(function(){
     $("#gabarit").load("vue/gabarit.html", function(){
-        afficherListe("modele-inventaire-admin");
-        /*  afficherInventaire(listerArticles);
-        getTotalPanier(); */
+        afficherInventaire(listerArticles);
+        getTotalPanier();
     })
 });
 /**
- * ============================== Function pour Afficher le profile ==============================
+ * ============================== Function pour Afficher le profil ==============================
  */
 function test(){
-    let modeleInventaire = new ModeleMagasin("modele-profile-client");
+    let modeleInventaire = new ModeleMagasin("modele-profil-client");
     modeleInventaire.appliquerModele("", "milieu-page");
  }
  function iconConnexionBACKUP(){
     // recuperer le test sur le boutton
     let text = $("#btn-msg").text();
     
-    // changer le text sur le bouton est text == Connexion alors changer le text pour Profile
+    // changer le text sur le bouton est text == Connexion alors changer le text pour profil
    $("#btn-msg").text(text == "Connexion" ? "Compte" : "Connexion");
    
    if(text == "Connexion"){
-       $("#btn-msg").attr("onclick" , "profileClient()");
+       $("#btn-msg").attr("onclick" , "profilClient()");
    }
 
 
@@ -41,10 +40,10 @@ function test(){
      // recuperer le test sur le boutton
      let text = $("#btn-msg").text();
      
-     // changer le text sur le bouton est text == Connexion alors changer le text pour Profile
+     // changer le text sur le bouton est text == Connexion alors changer le text pour profil
     $("#btn-msg").text("Compte");
     
-    $("#btn-msg").attr("onclick","profileClient()");
+    $("#btn-msg").attr("onclick","profilClient()");
 
 
 
@@ -58,9 +57,9 @@ function test(){
     
  }
 
- function profileClient(){
+ function profilClient(){
     let requete = new RequeteAjax("controleur/controleur.php")
-    let modele = new ModeleMagasin("modele-profile-client");
+    let modele = new ModeleMagasin("modele-profil-client");
    // modeleInscription.appliquerModele('', "milieu-page");
 
     let objJSON = {
@@ -75,13 +74,31 @@ function test(){
         modele.appliquerModele(temp, "milieu-page");
         
     });
- 
-
 }
 
-function modifierProfile(){
+function profil(){
+    let requete = new RequeteAjax("controleur/controleur.php");
+    let objJSON = {
+        "type" : "membre",
+        "requete" : "profil"
+    };
+    requete.getJSON(objJSON, function(reponse){
+        let temp = JSON.parse(reponse.membre);
+        console.log(temp[0].categorie);
+        if(temp[0].categorie == 2){
+            let modele = new ModeleMagasin("modele-profil-admin");
+            modele.appliquerModele(temp, "milieu-page");
+        }
+        else if (temp[0].categorie == 1){
+            let modele = new ModeleMagasin("modele-profil-client");
+            modele.appliquerModele(temp, "milieu-page");
+        }
+    });
+}
+
+function modifierprofil(){
     let requete = new RequeteAjax("controleur/controleur.php")
-    let modele = new ModeleMagasin("modele-profile-modification");
+    let modele = new ModeleMagasin("modele-profil-modification");
 
     let objJSON = {
         "type" : "membre",
@@ -99,8 +116,31 @@ function modifierProfile(){
 
  
 }
+
+function modifierMotDePasse(){
+
+    let modeleInventaire = new ModeleMagasin("modele-mot-de-passe");
+    modeleInventaire.appliquerModele("", "milieu-page");
+
+}
+function validerModificationPassword(){
+    let motDePasse = $("#mot-de-passe").val();
+    let nouveauMotDePasse = $("#nouveau-mot-de-passe").val();
+    let confMotDePasse = $("#confirme-mot-de-passe").val();
+
+    if(nouveauMotDePasse == confMotDePasse){
+        let objJSON = {
+            "type" : "membre",
+            "requete": "motDePasse",
+            "ancien": motDePasse,
+            "nouveau": confMotDePasse
+        };
+
+        modifierMembre(objJSON);
+    }
+}
 /**
- * ==============================FIN Function pour Afficher le profile ==============================
+ * ==============================FIN Function pour Afficher le profil ==============================
  */
 
 /**
@@ -316,10 +356,10 @@ function modifierPanier() {
     let messageErreur = $("#message-erreur");
 
     //Tableau des numéros d'article
-    let liensNoArticle = $(".closed");
+    let liensNoArticle = $(".noArticle");
     let tabNoArticle = new Array();
     for (let i = 0; i < liensNoArticle.length; i++) {
-        tabNoArticle.push(liensNoArticle[i].dataset.value);
+        tabNoArticle.push(liensNoArticle[i].value);
     }
     //Tableau des quantités
     let champsQuantite = $(".quantite");
@@ -516,8 +556,11 @@ function seConnecter() {
     requete.getJSON(objJSON, function (reponse) {
         if (reponse["statut"] == "succes") {
             //afficherCaisse(JSON.stringify(reponse["membre"]));
-            
-            profileClient();
+            //Vérification si c'est un admin ou pas!!
+            //let temp = JSON.parse(reponse.membre);
+            console.log(reponse);
+            profil();
+            //profilClient();
             iconConnexion();
 
 
@@ -599,6 +642,88 @@ function estConnecte(){
     })
 }
 
+function modificationProfil(){
+    //Message d'erreur
+    messageErreur = $("#message-erreur");
+
+    //Données du formulaire
+    let nom = $("#lname").val();
+    let prenom = $("#fname").val();
+    let adresse1 = $("#address").val();
+    let adresse2 = $("#address2").val();
+    let adresse = adresse1 + (adresse2 !== "" ? " " + adresse2 : "");
+    let ville = $("#towncity").val();
+    let province = $("#province").val();
+    let codePostal = $("#zippostalcode").val();
+    let noTel = $("#phone").val();
+
+    //Expression régulières
+    const LETTRES_SEULEMENT = /[a-zA-ZáàäâéèëêíìïîóòöôúùüûçñÁÀÄÂÉÈËÊÍÌÏÎÓÒÖÔÚÙÜÛÑÇ\'\-]+/;
+    const CODE_POSTAL = /^[A-Z][0-9][A-Z] ?[0-9][A-Z][0-9]$/;
+    const NO_TEL = /^\(?([0-9]{3})\)?[-. ]?([0-9]{3})[-. ]?([0-9]{4})$/;
+    const COURRIEL = /[^@]+@[^\.]+\..+/g;
+
+    //Vérifier si le nom, le prénom et la ville ont seulement des lettres
+    if (!nom.match(LETTRES_SEULEMENT) || !prenom.match(LETTRES_SEULEMENT) ||
+        !ville.match(LETTRES_SEULEMENT)) {
+        messageErreur.addClass('alert');
+        messageErreur.addClass('alert-danger');
+        messageErreur.html("Ce champ ne doit contenir que des lettres.");
+        return;
+    }
+
+    //Vérifier si le code postal est valide
+    if (!codePostal.match(CODE_POSTAL)) {
+        messageErreur.addClass('alert');
+        messageErreur.addClass('alert-danger');
+        messageErreur.hml("Format de code postal invalide.");
+        return;
+    }
+
+    //Vérifier si le numéro de téléphone est valide
+    if (!noTel.match(NO_TEL)) {
+        messageErreur.addClass('alert');
+        messageErreur.addClass('alert-danger');
+        messageErreur.html("Format de numéro de téléphone invalide.");
+        return;
+    }
+
+
+    let membre = {
+        "nomMembre": nom,
+        "prenomMembre": prenom,
+        "adresse": adresse,
+        "ville": ville,
+        "province": province,
+        "codePostal": codePostal,
+        "noTel": noTel
+    }
+
+    let objJSON = {
+        "type" : "membre",
+        "requete": "modifier",
+        "membre": JSON.stringify(membre)
+    };
+
+    modifierMembre(objJSON);
+
+}
+
+function modifierMembre(objJSON) {
+    let messageErreur = $("#message-erreur");
+    let requete = new RequeteAjax("controleur/controleur.php");
+    requete.getJSON(objJSON, function(reponse) {
+        if (reponse["statut"] === "succes") {
+           ProfilClient();
+        }
+        else if (reponse["statut"] === "echec") {
+            messageErreur.addClass('alert');
+            messageErreur.addClass('alert-danger');
+            messageErreur.html(objetJSON["message"]);
+        }
+    });
+}
+
 /**
  * -----------------------
  * ADMINISTRATEUR
@@ -606,16 +731,117 @@ function estConnecte(){
  */
 
  /**
+  * Affiche le profil d'un administrateur 
+  */
+ function profilAdmin(){
+    let requete = new RequeteAjax("controleur/controleur.php")
+    let modele = new ModeleMagasin("modele-profil-admin");
+
+    let objJSON = {
+        "type" : "membre",
+        "requete" : "profilAdmin"
+    };
+
+    requete.getJSON(objJSON, function(reponse){
+        let temp = JSON.parse(reponse.membre);
+        modele.appliquerModele(temp, "milieu-page");
+        
+    });
+ }
+
+ /**
 * Ajout d'un article
 */
+function ajouterArticle(){
+    event.preventDefault();
+
+    let objArticle = {
+        "libelle" : $("#libelle").val(),
+        "categorie" : $("#categorie").val(),
+        "prixUnitaire" : $("#prix").val(),
+        "quantiteEnStock" : $("#quantite").val() 
+    }
+    
+    var donnees = new FormData();
+    donnees.append("requete", "ajouter");
+    donnees.append("image", $("#photo").get(0).files[0]);
+    donnees.append("article", JSON.stringify(objArticle));
+    
+    let requete = new RequeteAjax("controleur/controleur.php")
+    let modele = new ModeleMagasin("modele-inventaire-admin");
+    requete.envoyerArticle(donnees, reponse => {
+        console.log(reponse);
+        requete.getJSON(objJSON, reponse => {
+            modele.appliquerModele(reponse, "milieu-page");
+            listeSolo("modele-liste-panier-admin");
+        }); 
+    })
+    
+}
 
 /**
 * Modifier un article
 */
+function modifierArticle(noArticle){
+    event.preventDefault();
+
+    let objArticle = {
+        "noArticle" : noArticle,
+        "libelle" : $("#libelle").val(),
+        "categorie" : $("#categorie").val(),
+        "prixUnitaire" : $("#prix").val(),
+        "quantiteEnStock" : $("#quantite").val() 
+    }
+
+    var donnees = new FormData();
+    donnees.append("requete", "modifier");
+    donnees.append("image", $("#photo").get(0).files[0]);
+    donnees.append("article", JSON.stringify(objArticle));
+
+    let requete = new RequeteAjax("controleur/controleur.php");
+    let modele = new ModeleMagasin("modele-inventaire-admin");
+    requete.envoyerArticle(donnees, reponse => {
+        modele.appliquerModele(reponse, "milieu-page");
+            listeSolo("modele-liste-panier-admin");
+    });
+}
 
 /**
 * Supprimer d'un article
 */
+function supprimerArticle(noArticle){
+    event.preventDefault();
+
+    let objJSON = {
+        "type" : "inventaire",
+        "requete" : "supprimer",
+        "noArticle" : noArticle
+    }
+    let requete = new RequeteAjax("controleur/controleur.php");
+    let modele = new ModeleMagasin("modele-inventaire-admin");
+    requete.getJSON(objJSON, reponse => {
+        modele.appliquerModele(reponse, "milieu-page");
+        listeSolo("modele-liste-panier-admin");
+    })
+}
+
+/*
+* Rechercher l'article
+*/
+function rechercher(produit){
+    if(event.keyCode == 13){
+        let requete = new RequeteAjax("controleur/controleur.php");
+        let modele = new ModeleMagasin("modele-inventaire-admin");
+        let objJSON = {
+            "type": "inventaire",
+            "mot" : produit
+        };
+        requete.getJSON(objJSON, reponse => {
+            modele.appliquerModele(reponse, "milieu-page");
+            listeSolo("modele-liste-panier-admin");
+        }); 
+    }
+}
 
 /**
  * Affiche la liste de membre ou articles
