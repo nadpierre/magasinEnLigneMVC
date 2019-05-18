@@ -2,7 +2,6 @@
 
 class GestionArticlesCommande extends GestionBD {
 
-
     /**
      * Ajoute les articles dans le panier dans la base de données
      * @param {int} $noCommande - le numéro de la commande
@@ -77,6 +76,6 @@ class GestionArticlesCommande extends GestionBD {
         $requete->execute();
         $donnees = $requete->fetch();
     
-        return $donnees["total"];    
+        return $donnees["total"];   
     }
 }

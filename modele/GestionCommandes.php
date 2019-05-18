@@ -1,11 +1,12 @@
 <?php
+
 /**
  * Représente un objet de type GestionCommandes
  * Son rôle est de gérer les commandes dans la base de données MySQL
  * Hérite de la classe GestionBD
  */
 class GestionCommandes extends GestionBD {
-
+     
     /**
      * Retourne la liste de toutes les commandes
      * @return string - le JSON de la liste
@@ -89,7 +90,8 @@ class GestionCommandes extends GestionBD {
             array(
                 array(
                     "commande" => $this->getCommande($noCommande)->getTableau(),
-                    "total" => $gestionAC->getMontantTotal($noCommande),
+                    "total" => (double) $gestionAC->getMontantTotal($noCommande) * 
+                                Panier::TAXES * (1 - Panier::RABAIS),
                     "articles" => $gestionAC->getArticlesCommande($noCommande)
                 )
             )        
