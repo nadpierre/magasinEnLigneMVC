@@ -57,7 +57,7 @@ if(isset($_POST["requete"]) && isset($_FILES["image"])){
 /* APPELER LA BONNE FONCTION EN FONCTION DU JSON REÇU */
 $objJSON = json_decode(file_get_contents("php://input"));
 
-if($objJSON !== null){
+if(isset($objJSON)){
     switch($objJSON->type){
         /**** INVENTAIRE ****/
         case "inventaire" :
@@ -159,7 +159,10 @@ if($objJSON !== null){
                         break;
                     case "vider" ://vider le panier
                         $gestionArticles->viderPanier(); 
-                        $panier->viderPanier();    
+                        $panier->viderPanier(); 
+                        $reponse["statut"] = "succes";
+                        $reponse["message"] = "Le panier a été vidé.";
+                        echo json_encode($reponse);
                         break;
                  }
             }
@@ -266,14 +269,15 @@ if($objJSON !== null){
                     case "supprimer" ://supprimer un compte
                         if($connexion->estConnecte()){
                             if(!isset($objJSON->noMembre)){//un membre qui se désabonne
-                                $noMembre = $connexion->getIdUtilisateur();
+                                $gestionMembres->supprimerMembre($connexion->getIdUtilisateur());
+                                $connexion->seDeconnecter();
+                                $reponse["message"] = "Votre compte a bel et bien été désabonné"; 
                             }
                             else {//un admin qui supprime un autre compte
-                                $noMembre = (int) $objJSON->noMembre;
-                            }
-                            $gestionMembres->supprimerMembre($noMembre);
-                            $reponse["statut"] = "succes";
-                            $reponse["membre"] = "Le membre a bel et bien été supprimé."; 
+                                $gestionMembres->supprimerMembre((int) $objJSON->noMembre);
+                                $reponse["message"] = "Le membre a bel et bien été supprimé."; 
+                            }       
+                            $reponse["statut"] = "succes";  
                         }
                         else {
                             $reponse["statut"] = "echec";

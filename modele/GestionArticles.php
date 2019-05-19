@@ -69,7 +69,7 @@ class GestionArticles extends GestionBD {
             array_push($listeArticles, $article->getTableau());
         }
 
-        if(count($listeArticles) == 0) {
+        if(empty($listeArticles)) {
             return "AUCUN ARTICLE SÉLECTIONNÉ";
         }
         
