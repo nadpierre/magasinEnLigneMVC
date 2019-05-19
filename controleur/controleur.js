@@ -3,8 +3,9 @@
  */
 $(document).ready(function(){
     $("#gabarit").load("vue/gabarit.html", function(){
-        afficherInventaire(listerArticles);
-        getTotalPanier();
+        afficherListe("modele-inventaire-admin");
+        /* afficherInventaire(listerArticles);
+        getTotalPanier(); */
     })
 });
 /**
@@ -57,43 +58,47 @@ function test(){
     
  }
 
- function profilClient(){
-    let requete = new RequeteAjax("controleur/controleur.php")
-    let modele = new ModeleMagasin("modele-profil-client");
-   // modeleInscription.appliquerModele('', "milieu-page");
-
-    let objJSON = {
-        "type" : "membre",
-        "requete" : "profil"
-    };
-
-    requete.getJSON(objJSON, function(reponse){
-        let temp = JSON.parse(reponse.membre);
-        
-        console.log(temp);
-        modele.appliquerModele(temp, "milieu-page");
-        
-    });
-}
-
-function profil(){
+/**
+ * Affiche le profile selon la personne connectée
+ * Le paramètre est seulement prit en compte si un admin est connecté
+ * La validation est fait par le controleur.php
+ * 
+ * @param {*} noMembre 
+ */
+function profil(noMembre){
     let requete = new RequeteAjax("controleur/controleur.php");
-    let objJSON = {
-        "type" : "membre",
-        "requete" : "profil"
-    };
-    requete.getJSON(objJSON, function(reponse){
-        let temp = JSON.parse(reponse.membre);
-        console.log(temp[0].categorie);
-        if(temp[0].categorie == 2){
-            let modele = new ModeleMagasin("modele-profil-admin");
+
+    if (noMembre == "") {
+        let objJSON = {
+            "type" : "membre",
+            "requete" : "profil"
+        };
+        requete.getJSON(objJSON, function (reponse) {
+            let temp = JSON.parse(reponse["membre"]);
+            console.log(temp);
+
+            if (temp[0].categorie == 2) {
+                let modele = new ModeleMagasin("modele-profil-admin");
+                modele.appliquerModele(temp, "milieu-page");
+            }
+            else if (temp[0].categorie == 1) {
+                let modele = new ModeleMagasin("modele-profil-client");
+                modele.appliquerModele(temp, "milieu-page");
+            }
+        });
+    }
+    else{
+        let objJSON = {
+            "type" : "membre",
+            "requete" : "profil",
+            "noMembre" : noMembre
+        };
+        requete.getJSON(objJSON, function (reponse) {
+            let temp = JSON.parse(reponse["membre"]);
+            let modele = new ModeleMagasin("modele-admin-affiche-profil-client");
             modele.appliquerModele(temp, "milieu-page");
-        }
-        else if (temp[0].categorie == 1){
-            let modele = new ModeleMagasin("modele-profil-client");
-            modele.appliquerModele(temp, "milieu-page");
-        }
-    });
+        });
+    }
 }
 
 function modifierprofil(){
@@ -110,11 +115,44 @@ function modifierprofil(){
         
         console.log(temp);
         modele.appliquerModele(temp, "milieu-page");
-        
-
     });
 
  
+}
+
+function formulaireProfil(noMembre) {
+    let requete = new RequeteAjax("controleur/controleur.php")
+    let modele = new ModeleMagasin("modele-profil-modification");
+
+    if(noMembre == ""){
+    let objJSON = {
+        "type": "membre",
+        "requete": "profil"
+    };
+
+    requete.getJSON(objJSON, function (reponse) {
+        let temp = JSON.parse(reponse["membre"]);
+        modele.appliquerModele(temp, "milieu-page");
+    });
+    }
+    else{
+        let objJSON = {
+            "type": "membre",
+            "requete": "profil",
+            "noMembre": noMembre
+        };
+
+        requete.getJSON(objJSON, function (reponse) {
+            let temp = JSON.parse(reponse["membre"]);
+            console.log(temp);
+            
+            modele.appliquerModele(temp, "milieu-page");
+            // Changer le titre de la page
+            $(".formulaire-h2").text("INFORMATIONX DU CLIENT #"+noMembre);
+            // changer le onclick pour rajouter le noMembre
+            $("#btn-membre").attr("onclick", "modificationProfil("+noMembre+")");
+        });
+    }
 }
 
 function modifierMotDePasse(){
@@ -541,26 +579,20 @@ function formulaireConnexion() {
  */
 function seConnecter() {
     let messageErreur = $("#message-erreur");
-    let courriel = $("#courriel").val(); 
+    let courriel = $("#courriel").val();
     let motDePasse = $("#mot-de-passe").val();
 
     let objJSON = {
-        "type" : "membre",
+        "type": "membre",
         "requete": "connexion",
         "courriel": courriel,
-        "motDePasse": motDePasse,
-        "categorie" : 1
+        "motDePasse": motDePasse
     };
 
     let requete = new RequeteAjax("controleur/controleur.php");
     requete.getJSON(objJSON, function (reponse) {
         if (reponse["statut"] == "succes") {
-            //afficherCaisse(JSON.stringify(reponse["membre"]));
-            //Vérification si c'est un admin ou pas!!
-            //let temp = JSON.parse(reponse.membre);
-            console.log(reponse);
-            profil();
-            //profilClient();
+            profil("");
             iconConnexion();
 
 
@@ -642,7 +674,7 @@ function estConnecte(){
     })
 }
 
-function modificationProfil(){
+function modificationProfil(noMembre){
     //Message d'erreur
     messageErreur = $("#message-erreur");
 
@@ -656,12 +688,13 @@ function modificationProfil(){
     let province = $("#province").val();
     let codePostal = $("#zippostalcode").val();
     let noTel = $("#phone").val();
+    let objJSON = {};
+    let membre = {};
 
     //Expression régulières
     const LETTRES_SEULEMENT = /[a-zA-ZáàäâéèëêíìïîóòöôúùüûçñÁÀÄÂÉÈËÊÍÌÏÎÓÒÖÔÚÙÜÛÑÇ\'\-]+/;
     const CODE_POSTAL = /^[A-Z][0-9][A-Z] ?[0-9][A-Z][0-9]$/;
     const NO_TEL = /^\(?([0-9]{3})\)?[-. ]?([0-9]{3})[-. ]?([0-9]{4})$/;
-    const COURRIEL = /[^@]+@[^\.]+\..+/g;
 
     //Vérifier si le nom, le prénom et la ville ont seulement des lettres
     if (!nom.match(LETTRES_SEULEMENT) || !prenom.match(LETTRES_SEULEMENT) ||
@@ -686,35 +719,59 @@ function modificationProfil(){
         messageErreur.addClass('alert-danger');
         messageErreur.html("Format de numéro de téléphone invalide.");
         return;
+    } 
+  
+    if(noMembre == ""){
+        membre = {
+            "nomMembre": nom,
+            "prenomMembre": prenom,
+            "adresse": adresse,
+            "ville": ville,
+            "province": province,
+            "codePostal": codePostal,
+            "noTel": noTel
+        };
+        objJSON = {
+         "type": "membre",
+         "requete": "modifier",
+         "membre": JSON.stringify(membre)
+        };
     }
+    else{
+        membre = {
+            "noMembre": noMembre,
+            "nomMembre": nom,
+            "prenomMembre": prenom,
+            "adresse": adresse,
+            "ville": ville,
+            "province": province,
+            "codePostal": codePostal,
+            "noTel": noTel
+        };
 
-
-    let membre = {
-        "nomMembre": nom,
-        "prenomMembre": prenom,
-        "adresse": adresse,
-        "ville": ville,
-        "province": province,
-        "codePostal": codePostal,
-        "noTel": noTel
-    }
-
-    let objJSON = {
-        "type" : "membre",
+        objJSON = {
+        "type": "membre",
         "requete": "modifier",
-        "membre": JSON.stringify(membre)
-    };
-
-    modifierMembre(objJSON);
-
+        "membre": JSON.stringify(membre),
+        "noMembre": noMembre
+        };   
+    }
+    modifierMembre(objJSON,noMembre);
 }
 
-function modifierMembre(objJSON) {
+function modifierMembre(objJSON, noMembre) {
+    console.log(objJSON);
     let messageErreur = $("#message-erreur");
     let requete = new RequeteAjax("controleur/controleur.php");
-    requete.getJSON(objJSON, function(reponse) {
+    requete.getJSON(objJSON, function (reponse) {
         if (reponse["statut"] === "succes") {
-           ProfilClient();
+            if(noMembre == ""){
+                profil();
+            }
+            else{
+                profil(noMembre);
+            }
+            
         }
         else if (reponse["statut"] === "echec") {
             messageErreur.addClass('alert');
@@ -748,6 +805,16 @@ function modifierMembre(objJSON) {
         
     });
  }
+
+function soloArticleAdmin(noArticle){
+    let requete = new RequeteAjax("controleur/controleur.php");
+    let objJSON = {
+        "type" : "inventaire",
+        "noArticle" : noArticle
+    };
+    let modeleArticle = new ModeleMagasin("modele-article-admin");
+    requete.getJSON(objJSON, reponse => { modeleArticle.appliquerModele(reponse, "milieu-page"); });
+}
 
  /**
 * Ajout d'un article
@@ -858,12 +925,12 @@ function afficherListe(modeleChoisi) {
         };
         modeleSolo = "modele-liste-panier-admin";
     }
-    else {
+    else if (modeleChoisi == 'modele-membre-admin') {
         objJSON = {
-            "type" : "panier",
-            "requete" : "sommaire"
+            "type" : "membre",
+            "requete" : "liste"
         };
-        modeleSolo = "modele-liste-client-admin";
+        modeleSolo = "modele-membre-admin";
     }
     requete.getJSON(objJSON, reponse => {
         modele.appliquerModele(reponse, "milieu-page");
