@@ -268,12 +268,14 @@ if(isset($objJSON)){
                         break;
                     case "supprimer" ://supprimer un compte
                         if($connexion->estConnecte()){
-                            if(!isset($objJSON->noMembre)){//un membre qui se désabonne
+                            //un membre qui se désabonne
+                            if(!isset($objJSON->noMembre)){
                                 $gestionMembres->supprimerMembre($connexion->getIdUtilisateur());
                                 $connexion->seDeconnecter();
-                                $reponse["message"] = "Votre compte a bel et bien été désabonné"; 
+                                $reponse["message"] = "Votre avez bel et bien été désabonné"; 
                             }
-                            else {//un admin qui supprime un autre compte
+                            //un admin qui supprime un autre compte
+                            elseif($connexion->getCategorie() == 2 && isset($objJSON->noMembre)) {
                                 $gestionMembres->supprimerMembre((int) $objJSON->noMembre);
                                 $reponse["message"] = "Le membre a bel et bien été supprimé."; 
                             }       
@@ -310,15 +312,23 @@ if(isset($objJSON)){
                         try{
                             $membre = $gestionMembres->getMembre($courriel);
                             $noMembre = $membre->getNoMembre();
+                            $courriel = $membre->getCourriel();
                             $temp = $gestionMembres->genererMotDePasse();
                             $gestionMembres->changerMotDePasse($noMembre, $temp);
                             $reponse["statut"] = "succes";
-                            $reponse["message"] =  "Votre mot de passe temporaire est '$temp'.";
+                            $reponse["reset"] = array(
+                                array(
+                                    "message" => "Le mot de passe a été réinitialisé.",
+                                    "courriel" => $courriel,
+                                    "temp" => $temp
+                                )
+                            );  
                         }
                         catch(Exception $e){
                             $reponse["statut"] = "echec";
                             $reponse["message"] = $e->getMessage();
                         }
+                        echo json_encode($reponse);
                         break;
                 }
             }
@@ -416,7 +426,6 @@ if(isset($objJSON)){
                                 $dernierMembre = $gestionMembres->getInvite();
                                 $courriel = $dernierMembre->getCourriel();
                             }
-                        
                             echo json_encode(
                                 array(
                                     array(
