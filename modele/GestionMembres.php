@@ -33,11 +33,11 @@
 
         if(is_int($info)){//Il s'agit d'un numéro de membre
             $info = (int) $info;
-            $requete = $this->bdd->prepare('SELECT * FROM membre WHERE (noMembre = ? AND categorie != 0)');
+            $requete = $this->bdd->prepare('SELECT * FROM membre WHERE noMembre = ?');
             $requete->bindValue(1, $info, PDO::PARAM_INT);
         }
         else {//Sinon, c'est un courriel
-            $requete = $this->bdd->prepare('SELECT * FROM membre WHERE (courriel = ? AND categorie != 0)');
+            $requete = $this->bdd->prepare('SELECT * FROM membre WHERE courriel = ?');
             $requete->bindValue(1, $info, PDO::PARAM_STR);
         }
 
@@ -77,7 +77,17 @@
     public function ajouterMembre(Membre $membre) {
 
         if($this->existeDeja($membre)) {
-           throw new Exception("Un compte est déjà associé à ce courriel");
+            //Vérifier si le membre a déjà fait une commande en tant qu'invité
+            $invite = $this->getMembre($membre->getCourriel());
+            if($invite->getCategorie() == 0){
+                $invite->setCategorie(1);
+                $invite->setMotDePasse($membre->getMotDePasse());
+                $this->modifierMembre($invite);
+                $this->changerMotDePasse($invite->getNoMembre(), $invite->getMotDePasse());
+            }
+            else{
+                throw new Exception("Un compte est déjà associé à ce courriel");
+            }
         }
 
         //Encrypter le mot de passe
@@ -87,7 +97,7 @@
         else {
             $motDePasse = "";
         }
-        
+    
 
         $requete = $this->bdd->prepare(
             'INSERT INTO membre (nomMembre, prenomMembre, categorie, adresse, ville, province,
@@ -180,7 +190,6 @@
         $requete->execute();
     }
 
-
     /**
      * Supprime un membre
      * @param {Membre} - un membre déjà instancié
@@ -191,18 +200,6 @@
         $requete->bindValue(1, $noMembre, PDO::PARAM_INT);
         $requete->execute();
         
-    }
-
-
-     /**
-     * Récupère les information de l'invité (dernier membre ajouté)
-     * @return Membre 
-     */
-    public function getInvite() {
-        $requete = $this->bdd->query('SELECT * FROM membre ORDER BY noMembre DESC LIMIT 1');
-        $donnees = $requete->fetch();
-        
-        return new Membre($donnees);
     }
 
 }

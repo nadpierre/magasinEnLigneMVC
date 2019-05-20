@@ -9,7 +9,6 @@ function chargerClasse($classe) {
 }
 spl_autoload_register('chargerClasse');
 
-
 /* Instanciation du gestionnaire de la BD, du panier et de la connexion */
 $gestionArticles = new GestionArticles();
 $gestionMembres = new GestionMembres();
@@ -178,7 +177,7 @@ if(isset($objJSON)){
                             $donneesMembre = json_decode($objJSON->membre, true);
                             $membre = new Membre($donneesMembre);
                             $gestionMembres->ajouterMembre($membre);
-                            $dernierMembre = $gestionMembres->getInvite();
+                            $dernierMembre = $gestionMembres->getMembre($membre->getCourriel());
     
                             //Créer une connexion
                             $connexion->creerConnexion($dernierMembre);
@@ -312,7 +311,6 @@ if(isset($objJSON)){
                         try{
                             $membre = $gestionMembres->getMembre($courriel);
                             $noMembre = $membre->getNoMembre();
-                            $courriel = $membre->getCourriel();
                             $temp = $gestionMembres->genererMotDePasse();
                             $gestionMembres->changerMotDePasse($noMembre, $temp);
                             $reponse["statut"] = "succes";
@@ -348,7 +346,7 @@ if(isset($objJSON)){
                             $gestionMembres->ajouterMembre($membre);  
                             
                             // Ajouter la commande
-                            $dernierMembre = $gestionMembres->getInvite();
+                            $dernierMembre = $gestionMembres->getMembre($membre->getCourriel());
                             $noMembre = $dernierMembre->getNoMembre();
                             $paypalOrderId = $objJSON->paypalOrderId;
                             $commande = new Commande(array(
@@ -423,7 +421,8 @@ if(isset($objJSON)){
                                 $courriel = $gestionMembres->getMembre($noMembre)->getCourriel();
                             }
                             else {
-                                $dernierMembre = $gestionMembres->getInvite();
+                                $noMembre = $derniereCommande->getNoMembre();
+                                $dernierMembre = $gestionMembres->getMembre((int) $noMembre);
                                 $courriel = $dernierMembre->getCourriel();
                             }
                             echo json_encode(
