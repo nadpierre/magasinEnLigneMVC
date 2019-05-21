@@ -10,6 +10,7 @@ class Membre {
     private $nomMembre;
     private $prenomMembre;
     private $categorie;
+    private $actif;
     private $adresse;
     private $ville;
     private $province;
@@ -50,6 +51,10 @@ class Membre {
 
     public function getCategorie() {
         return $this->categorie;
+    }
+
+    public function getActif(){
+        return $this->actif;
     }
 
     public function getAdresse() {
@@ -106,6 +111,18 @@ class Membre {
 
     public function setCategorie($categorie) {
         $this->categorie = $categorie;
+    }
+
+    public function setActif($actif){
+        if(is_int($actif)){
+            $this->actif = $actif == 1 ? true : false;
+        }
+        elseif(is_bool($actif)){
+            $this->actif = $actif;
+        }
+        else{
+            $this->actif = true;
+        }     
     }
 
     public function setAdresse($adresse) {

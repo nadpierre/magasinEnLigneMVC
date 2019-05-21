@@ -211,6 +211,11 @@ if(isset($objJSON)){
                         }
                         echo json_encode($reponse);
                         break;
+                    case "estConnecte" ://valider si le membre est connecté
+                        $reponse["estConnecte"] = $connexion->estConnecte();
+                        $reponse["categorie"] = $connexion->getCategorie();
+                        echo json_encode($reponse);      
+                        break;
                     case "deconnexion" ://déconnection
                         $connexion->seDeconnecter();
                         $reponse["estConnecte"] = $connexion->estConnecte();
@@ -220,6 +225,18 @@ if(isset($objJSON)){
                         if($connexion->estConnecte() && $connexion->getCategorie() == 2){
                             $reponse["statut"] = "succes";
                             $reponse["membres"] = $gestionMembres->getListeMembres();
+                        }
+                        else{
+                            $reponse["statut"] = "echec";
+                            $reponse["message"] = "Vous n'êtes pas autorisé à consulter tous les membres.";
+                        }
+                        echo json_encode($reponse);
+                        break;
+                    case "recherche" : //recherche par nom (admin)
+                        if($connexion->estConnecte() && $connexion->getCategorie() == 2){
+                            $mot = $objJSON->mot;
+                            $reponse["statut"] = "succes";
+                            $reponse["membres"] = $gestionMembres->rechercherParNom($nom);
                         }
                         else{
                             $reponse["statut"] = "echec";
@@ -269,14 +286,14 @@ if(isset($objJSON)){
                         if($connexion->estConnecte()){
                             //un membre qui se désabonne
                             if(!isset($objJSON->noMembre)){
-                                $gestionMembres->supprimerMembre($connexion->getIdUtilisateur());
+                                $gestionMembres->desactiverMembre($connexion->getIdUtilisateur());
                                 $connexion->seDeconnecter();
-                                $reponse["message"] = "Votre avez bel et bien été désabonné"; 
+                                $reponse["message"] = "Vous êtes désabonné."; 
                             }
-                            //un admin qui supprime un autre compte
+                            //un admin qui désactive un autre compte
                             elseif($connexion->getCategorie() == 2 && isset($objJSON->noMembre)) {
-                                $gestionMembres->supprimerMembre((int) $objJSON->noMembre);
-                                $reponse["message"] = "Le membre a bel et bien été supprimé."; 
+                                $gestionMembres->desactiverMembre((int) $objJSON->noMembre);
+                                $reponse["message"] = "Le membre a bel et bien été désactivé."; 
                             }       
                             $reponse["statut"] = "succes";  
                         }
@@ -398,7 +415,7 @@ if(isset($objJSON)){
                                 $panier->viderPanier();
                                 
                                 $reponse["statut"] = "succes";
-                                $reponse["message"] = "Commande effectuée avec succès.";   
+                                $reponse["message"] = "Le panier a bel et bien été vidé";   
                             }
                             catch(Exception $e) {
                                 $panier->deverrouillerPanier();

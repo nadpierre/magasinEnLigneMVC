@@ -24,8 +24,35 @@
     }
 
     /**
+     * Permet de rechercher des membres par leur nom ou prénom
+     * @param {string} $noMembre
+     * @return string - un JSON du tableau de membres
+     */
+    public function rechercherParNom($nom){
+        $listeMembres = array();
+        $nom = strtolower($nom);
+
+        $requete = $this->bdd->prepare(
+            'SELECT * FROM membre 
+            WHERE (LOWER(nomMembre) LIKE :nomMembre 
+                OR LOWER(prenomMembre) LIKE :prenomMembre)'
+        );
+
+        $requete->bindValue(':nomMembre', $nom, PDO::PARAM_STR);
+        $requete->bindValue(':prenomMembre', $nom, PDO::PARAM_STR);
+        $requete->execute();
+
+        while ($donnees = $requete->fetch()) {
+            $membre = new Membre($donnees);
+            array_push($listeMembres, $membre->getTableau());
+        }
+
+        return json_encode($listeMembres);
+    }
+
+    /**
      * Retourne les informations du membre
-     * @param {string} $info - le critère de recherche
+     * @param {any} $info - le critère de recherche
      * @return Membre
      * @throws Exception si le membre n'existe pas
      */
@@ -188,16 +215,14 @@
     }
 
     /**
-     * Supprime un membre
+     * Désactive un membre
      * @param {int} $noMembre
      * @return void
      */
-    public function supprimerMembre($noMembre) {
-        
-        $requete = $this->bdd->prepare('DELETE FROM membre WHERE noMembre = ?');
+    public function desactiverMembre($noMembre) {    
+        $requete = $this->bdd->prepare('UPDATE membre SET actif = 0 WHERE noMembre = ?');
         $requete->bindValue(1, $noMembre, PDO::PARAM_INT);
         $requete->execute();
-        
     }
 
 }
