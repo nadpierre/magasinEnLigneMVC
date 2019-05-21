@@ -162,18 +162,18 @@ class GestionArticles extends GestionBD {
     public function isUploadable(array $image){
         $valide = true;
 
-        //Vérifier si c'est une vraie image
+        # Vérifier si c'est une vraie image
         $imgTemp = getimagesize($image["tmp_name"]);
         if($imgTemp == false || $img){
             $valide = false;
         }
 
-        //Limiter la taille de l'image à 500 Ko
+        # Limiter la taille de l'image à 500 Ko
         if($image["size"] > 500000){
             $valide = false;
         }
 
-       //Seulement accepter les formats correspondant à une image
+        # Seulement accepter les formats correspondant à une image
         if(!($extension == "jpg" || $extension == "jpeg" || 
              $extension == "png" || $extension == "gif")){
             $valide = false;
@@ -268,7 +268,6 @@ class GestionArticles extends GestionBD {
         $requete->bindValue(':prixUnitaire', $article->getPrixUnitaire(), PDO::PARAM_STR);
         $requete->bindValue(':quantiteEnStock', $article->getQuantiteEnStock(), PDO::PARAM_INT);
         $requete->bindValue(':noArticle', $article->getNoArticle(), PDO::PARAM_INT);
-
         $requete->execute();
         
     }
@@ -395,7 +394,6 @@ class GestionArticles extends GestionBD {
         );
           
     }
-
 
     /**
      * Vide le panier d'achat : rétablit la quantité en stock

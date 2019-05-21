@@ -26,17 +26,17 @@
     /**
      * Retourne les informations du membre
      * @param {string} $info - le critère de recherche
-     * @return Membre - une instance d'un objet Membre
+     * @return Membre
      * @throws Exception si le membre n'existe pas
      */
     public function getMembre($info) {
 
-        if(is_int($info)){//Il s'agit d'un numéro de membre
+        if(is_int($info)){
             $info = (int) $info;
             $requete = $this->bdd->prepare('SELECT * FROM membre WHERE noMembre = ?');
             $requete->bindValue(1, $info, PDO::PARAM_INT);
         }
-        else {//Sinon, c'est un courriel
+        else {
             $requete = $this->bdd->prepare('SELECT * FROM membre WHERE courriel = ?');
             $requete->bindValue(1, $info, PDO::PARAM_STR);
         }
@@ -46,7 +46,7 @@
         
 
         if($donnees === false){
-           throw new Exception("Courriel invalide");
+           throw new Exception("Le compte n'a pas été trouvé.");
         }
 
         return new Membre($donnees);
@@ -55,7 +55,7 @@
 
     /**
      * Vérifie si le membre existe déjà
-     * @param {Membre} - l'instance d'un membre
+     * @param {Membre} $membre
      * @return boolean
      */
     public function existeDeja(Membre $membre) {
@@ -70,34 +70,34 @@
 
     /**
      * Ajoute un nouveau membre
-     * @param {Membre} $membre - un membre déjà instancié
+     * @param {Membre} $membre
      * @return void
-     * @throws Exception si le membre existe déjà
+     * @throws Exception si le membre est déjà inscrit
      */
     public function ajouterMembre(Membre $membre) {
 
-        if($this->existeDeja($membre)) {
-            //Vérifier si le membre a déjà fait une commande en tant qu'invité
-            $invite = $this->getMembre($membre->getCourriel());
-            if($invite->getCategorie() == 0){
-                $invite->setCategorie(1);
-                $invite->setMotDePasse($membre->getMotDePasse());
-                $this->modifierMembre($invite);
-                $this->changerMotDePasse($invite->getNoMembre(), $invite->getMotDePasse());
-            }
-            else{
-                throw new Exception("Un compte est déjà associé à ce courriel");
-            }
-        }
-
-        //Encrypter le mot de passe
+        # Ne pas ajouter de mot de passe si c'est un invité
         if($membre->getCategorie() != 0){
             $motDePasse = password_hash($membre->getMotDePasse(), PASSWORD_DEFAULT);
         }
         else {
             $motDePasse = "";
         }
-    
+
+        
+         # Vérifier si la personne a déjà passé une commande en tant qu'invité
+         # et mettre à jour les renseignements si c'est le cas
+        if($this->existeDeja($membre)) {     
+            $invite = $this->getMembre($membre->getCourriel());
+            if($invite->getCategorie() != 0){
+                throw new Exception("Un compte est déjà associé à ce courriel");
+            }
+            else{
+                $membre->setNoMembre($invite->getNoMembre());
+                $this->modifierMembre($membre);
+                $this->changerMotDePasse($membre->getNoMembre(), $motDePasse);
+            }
+        }
 
         $requete = $this->bdd->prepare(
             'INSERT INTO membre (nomMembre, prenomMembre, categorie, adresse, ville, province,
@@ -116,14 +116,13 @@
         $requete->bindValue(':noTel', $membre->getNoTel(), PDO::PARAM_STR);
         $requete->bindValue(':courriel', $membre->getCourriel(), PDO::PARAM_STR);
         $requete->bindValue(':motDePasse', $motDePasse, PDO::PARAM_STR);
-
         $requete->execute();
         
     }   
         
     /**
      * Modifie les informations d'un membre existant
-     * @param {Membre} - un membre déjà instancié
+     * @param {Membre} $membre
      * @return void
      */
     public function modifierMembre(Membre $membre) {
@@ -149,11 +148,9 @@
         $requete->bindValue(':codePostal', $membre->getCodePostal(), PDO::PARAM_STR);
         $requete->bindValue(':noTel', $membre->getNoTel(), PDO::PARAM_STR);
         $requete->bindValue(':noMembre', $membre->getNoMembre(), PDO::PARAM_INT);
-
         $requete->execute();
         
     }
-
 
     /**
      * Génère un mot de passe temporaire de 8 caractères
@@ -169,7 +166,6 @@
         return $motDePasse;
     }
 
-
     /**
      * Modifie ou réinitialise le mot de passe
      * @param {int} $noMembre - le numéro du membre
@@ -177,6 +173,7 @@
      * @return void
      */
     public function changerMotDePasse($noMembre, $motDePasse) {    
+        
         $motDePasse = password_hash($motDePasse, PASSWORD_DEFAULT);
         
         $requete = $this->bdd->prepare(
@@ -192,10 +189,11 @@
 
     /**
      * Supprime un membre
-     * @param {Membre} - un membre déjà instancié
+     * @param {int} $noMembre
      * @return void
      */
     public function supprimerMembre($noMembre) {
+        
         $requete = $this->bdd->prepare('DELETE FROM membre WHERE noMembre = ?');
         $requete->bindValue(1, $noMembre, PDO::PARAM_INT);
         $requete->execute();
@@ -203,5 +201,3 @@
     }
 
 }
-
-?>
