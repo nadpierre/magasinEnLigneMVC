@@ -275,24 +275,13 @@ class GestionArticles extends GestionBD {
 
     /**
      * Supprime un article de l'inventaire
-     * @param {Article} - une instance de l'objet Article
-     * @return Article - le JSON de l'article qui vient d'être supprimé
-     * @throws Exception si l'article n'a pas pu être supprimé
+     * @param {int} $noArticle
+     * @return void
      */
     public function supprimerArticle($noArticle) {
-        try{
-            $article= $this->getArticle((int) $noArticle);
-            $requete = $this->bdd->prepare('DELETE FROM article WHERE noArticle = ?');
-            $requete->bindValue(1, $article->getNoArticle(), PDO::PARAM_INT);
-            $requete->execute();
-            
-        }
-        
-        catch(Exception $e){
-            throw $e;
-        }
-
-        return $article;
+        $requete = $this->bdd->prepare('DELETE FROM article WHERE noArticle = ?');
+        $requete->bindValue(1, (int) $noArticle, PDO::PARAM_INT);
+        $requete->execute();          
     }
 
 

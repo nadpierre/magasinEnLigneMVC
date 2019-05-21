@@ -73,15 +73,8 @@ if(isset($objJSON)){
                 if($objJSON->requete == "supprimer"){
                     if($connexion->estConnecte() && $connexion->getCategorie() == 2){
                         $noArticle = (int) $objJSON->noArticle;
-                        try {
-                            $gestionArticles->supprimerArticle($noArticle);
-                            $reponse["statut"] = "succes";
-
-                        }
-                        catch(Exception $e){
-                            $reponse["statut"] = "echec";
-                            $reponse["message"] = $e->getMessage();
-                        }
+                        $gestionArticles->supprimerArticle($noArticle);
+                         $reponse["statut"] = "succes";
                     }
                     else {
                         $reponse["statut"] = "echec";
