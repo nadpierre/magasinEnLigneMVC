@@ -72,9 +72,9 @@ if(isset($objJSON)){
             elseif(isset($objJSON->requete)){//admin : supprimer un article
                 if($objJSON->requete == "supprimer"){
                     if($connexion->estConnecte() && $connexion->getCategorie() == 2){
-                        $noArticle = $objJSON->noArticle;
+                        $noArticle = (int) $objJSON->noArticle;
                         try {
-                            $reponse["article"] = '[' . $gestionArticles->supprimerArticle($noArticle). ']';
+                            $gestionArticles->supprimerArticle($noArticle);
                             $reponse["statut"] = "succes";
 
                         }
