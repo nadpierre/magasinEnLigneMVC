@@ -66,26 +66,26 @@ if(isset($objJSON)){
             elseif(isset($objJSON->mot)){//rechercher par mot
                 echo $gestionArticles->listerParMot($objJSON->mot);
             }
-            elseif(isset($objJSON->noArticle)){//détails d'un article
+            elseif(isset($objJSON->noArticle) && !isset($objJSON->requete)){//détails d'un article
                 echo '[' . $gestionArticles->getArticle((int) $objJSON->noArticle) . ']';
             }
-            elseif(isset($objJSON->requete)){//admin : supprimer un article
-                if($objJSON->requete == "supprimer"){
+            elseif(isset($objJSON->requete)){//supprimer un article (admin)
+                $requete = $objJSON->requete;  
+                if($requete  == "supprimer"){
                     if($connexion->estConnecte() && $connexion->getCategorie() == 2){
-                        $noArticle = (int) $objJSON->noArticle;
-                        $gestionArticles->supprimerArticle($noArticle);
-                         $reponse["statut"] = "succes";
+                        $gestionArticles->supprimerArticle((int) $objJSON->noArticle);
+                        $reponse["statut"] = "succes";
                     }
                     else {
                         $reponse["statut"] = "echec";
                         $reponse["message"] = "Vous n'êtes pas autorisé à supprimer un article.";
                     }                        
-                    echo json_encode($reponse);
-                }
+                    echo json_encode($reponse);  
+                }     
             }
-            else {//lister tous les articles
+            else{//lister tous les articles
                 echo $gestionArticles->getListeArticles();
-            }
+            }               
             break;      
        
         /**** PANIER D'ACHAT ****/
@@ -191,7 +191,9 @@ if(isset($objJSON)){
                             if(password_verify($motDePasse, $membre->getMotDePasse())){
                                 $connexion->creerConnexion($membre);
                                 $reponse["statut"] = "succes";
+                                $reponse["membre"] = '['.$membre.']';
                                 $reponse["estConnecte"] = $connexion->estConnecte();
+                                $reponse["categorie"] = $connexion->getCategorie();
                             }
                             else {
                                 $reponse["statut"] = "echec";
@@ -450,4 +452,3 @@ if(isset($objJSON)){
     
     }
 }
-

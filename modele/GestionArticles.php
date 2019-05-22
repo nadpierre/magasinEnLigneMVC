@@ -408,5 +408,3 @@ class GestionArticles extends GestionBD {
        }
     }
 }
-
-?>
