@@ -833,7 +833,7 @@ function soloArticleAdmin(noArticle){
     requete.getJSON(objJSON, reponse => { modeleArticle.appliquerModele(reponse, "milieu-page"); });
 }
 
-/** UPDATE
+/** 
  * Ajout article template
  */
 function templateAjoutAA(){
@@ -841,7 +841,7 @@ function templateAjoutAA(){
     modele.appliquerModele("", "milieu-page");
 }
 
- /** UPDATE
+ /** 
 * Ajout d'un article
 */
 function ajouterArticle(){
@@ -872,7 +872,7 @@ function ajouterArticle(){
     
 }
 
-/** UPDATE
+/** 
 * Modifier un article
 */
 function modifierArticle(noArticle){
@@ -897,8 +897,8 @@ function modifierArticle(noArticle){
     });
 }
 
-/** UPDATE
-* Supprimer d'un article
+/** 
+* Supprimer un article
 */
 function supprimerArticle(noArticle){
     event.preventDefault();
@@ -913,7 +913,6 @@ function supprimerArticle(noArticle){
         requete.getJSON(objJSON, function(reponse){
             console.log(reponse);
             if (reponse["statut"] === "succes") {
-                console.log("ok!");
                 afficherListeArticles();
             }
             else if (reponse["statut"] === "echec") {
@@ -945,7 +944,7 @@ function rechercherArticleAdmin(mot){
     }
 }
 
-/**  UPDATE
+/**  
  * Affiche la liste d'articles
  */
 function afficherListeArticles() {
@@ -978,7 +977,7 @@ function articleLigne(){
 }
 
 
-/** UPDATE
+/** 
  * Affiche la liste de membres
  */
 function afficherListeMembres(){
@@ -988,7 +987,7 @@ function afficherListeMembres(){
     membreLigne();
 }
 
-/** UPDATE
+/** 
  * Affiche la ligne du membre dans le tableau
  */
 function membreLigne(){
@@ -1004,7 +1003,7 @@ function membreLigne(){
     });
 }
 
-/* UPDATE
+/* 
 * Rechercher un membre
 */
 function rechercherMembreAdmin(nom){
@@ -1026,9 +1025,30 @@ function rechercherMembreAdmin(nom){
     }
 }
 
- /**
+ /** UPDATE
   * Supprime le compte choisi
   */
+ function supprimerMembre(noMembre){
+    let messageErreur = $("#message-erreur");
+    if(confirm("Voulez-vous supprimer le membre "+ noMembre + "?")){
+        let objJSON = {
+            "type" : "membre",
+            "requete" : "supprimer",
+            "noMembre" : noMembre
+        }
+        let requete = new RequeteAjax("controleur/controleur.php");
+        requete.getJSON(objJSON, function(reponse){
+            if (reponse["statut"] === "succes") {
+                afficherListeMembres();
+            }
+            else if (reponse["statut"] === "echec") {
+                messageErreur.addClass('alert');
+                messageErreur.addClass('alert-danger');
+                messageErreur.html(objetJSON["message"]);
+            }            
+        });
+    }
+ }
 
 /**
  * -----------------------
