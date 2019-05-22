@@ -858,7 +858,7 @@ function ajouterArticle(){
     donnees.append("requete", "ajouter");
     donnees.append("image", $("#photo").get(0).files[0]);
     donnees.append("article", JSON.stringify(objArticle));
-    
+
     let requete = new RequeteAjax("controleur/controleur.php")
     let modele = new ModeleMagasin("modele-inventaire-admin");
     requete.envoyerArticle(donnees, reponse => {
@@ -928,17 +928,19 @@ function supprimerArticle(noArticle){
 /*
 * Rechercher l'article
 */
-function rechercher(produit){
+function rechercherArticleAdmin(mot){
     if(event.keyCode == 13){
-        let requete = new RequeteAjax("controleur/controleur.php");
         let modele = new ModeleMagasin("modele-inventaire-admin");
+        modele.appliquerModele("", "milieu-page");
+
+        let requete = new RequeteAjax("controleur/controleur.php");
         let objJSON = {
             "type": "inventaire",
-            "mot" : produit
+            "mot" : mot
         };
         requete.getJSON(objJSON, reponse => {
-            modele.appliquerModele(reponse, "milieu-page");
-            listeSolo("modele-liste-panier-admin");
+            let modele1 = new ModeleMagasin("modele-liste-panier-admin");
+            modele1.appliquerModele(reponse, "liste-panier");
         }); 
     }
 }
@@ -970,6 +972,7 @@ function articleLigne(){
         "type" : "inventaire"
     };
     requete.getJSON(objJSON, function(reponse){
+        console.log(reponse);
         modele.appliquerModele(reponse, "liste-panier");
     })
 }
@@ -979,22 +982,48 @@ function articleLigne(){
  * Affiche la liste de membres
  */
 function afficherListeMembres(){
-    let requete = new RequeteAjax("controleur/controleur.php");
     let modele = new ModeleMagasin("modele-liste-membres-admin");
+
+    modele.appliquerModele("", "milieu-page");
+    membreLigne();
+}
+
+/** UPDATE
+ * Affiche la ligne du membre dans le tableau
+ */
+function membreLigne(){
+    let requete = new RequeteAjax("controleur/controleur.php");
+    let modele = new ModeleMagasin("modele-membre-admin");
     let objJSON = {
         "type" : "membre",
         "requete" : "liste"
     };
-
-    requete.getJSON("", function(){
-        modele.appliquerModele("", "milieu-page");
-        let requete1 = new RequeteAjax("controleur/controleur.php");
-        let modele1 = new ModeleMagasin("modele-membre-admin");
-
-        requete1.getJSON(objJSON, function(reponse){
-            modele.appliquerModele(reponse, "liste-panier");
-        })
+    requete.getJSON(objJSON, function(reponse){
+        let membres = JSON.parse(reponse["membres"]);
+        modele.appliquerModele(membres, "liste-panier");
     });
+}
+
+/* UPDATE
+* Rechercher un membre
+*/
+function rechercherMembreAdmin(nom){
+    if(event.keyCode == 13){
+        let modele = new ModeleMagasin("modele-liste-membres-admin");
+        modele.appliquerModele("", "milieu-page");
+
+        let requete = new RequeteAjax("controleur/controleur.php");
+        let objJSON = {
+            "type": "membre",
+            "requete" : "recherche",
+            "nom" : nom
+        };
+        requete.getJSON(objJSON, reponse => {
+            let membres = JSON.parse(reponse["membres"]);
+            let modele1 = new ModeleMagasin("modele-membre-admin");
+            modele1.appliquerModele(membres, "liste-panier");
+        }); 
+    }
 }
 
  /**

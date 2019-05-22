@@ -31,8 +31,7 @@ class RequeteAjax {
         })
     }
 
-    envoyerArticle(donnees, callback){
-    
+    envoyerArticle(donnees, callback){    
         $.ajax({
            method : "POST",
            url : this.url,
