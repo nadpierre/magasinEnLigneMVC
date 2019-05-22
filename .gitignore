@@ -5,3 +5,4 @@ index.html
 controleur/._controleur.*
 ._.gitignore
 ._modele
+controleur/controleur.php

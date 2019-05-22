@@ -3,9 +3,8 @@
  */
 $(document).ready(function(){
     $("#gabarit").load("vue/gabarit.html", function(){
-        afficherListe("modele-inventaire-admin");
-        /* afficherInventaire(listerArticles);
-        getTotalPanier(); */
+        afficherInventaire(listerArticles);
+        getTotalPanier();
     })
 });
 /**
@@ -429,6 +428,24 @@ function modifierPanier() {
 }
 
 /**
+ * Vide le panier
+ */
+function viderPanier() {
+    let requete = new RequeteAjax("controleur/controleur.php");
+    let objJSON = {
+        "type" : "panier",
+        "requete" : "vider"
+    };
+
+    requete.getJSON(objJSON, reponse => {
+        console.log(reponse);
+        getTotalPanier();
+        afficherSommaire();
+    });
+    
+}
+
+/**
  * -----------------------
  * CLIENT
  * -----------------------
@@ -816,7 +833,15 @@ function soloArticleAdmin(noArticle){
     requete.getJSON(objJSON, reponse => { modeleArticle.appliquerModele(reponse, "milieu-page"); });
 }
 
- /**
+/** UPDATE
+ * Ajout article template
+ */
+function templateAjoutAA(){
+    let modele = new ModeleMagasin("modele-ajout-article-admin");
+    modele.appliquerModele("", "milieu-page");
+}
+
+ /** UPDATE
 * Ajout d'un article
 */
 function ajouterArticle(){
@@ -839,6 +864,7 @@ function ajouterArticle(){
     requete.envoyerArticle(donnees, reponse => {
         console.log(reponse);
         requete.getJSON(objJSON, reponse => {
+            console.log(reponse);
             modele.appliquerModele(reponse, "milieu-page");
             listeSolo("modele-liste-panier-admin");
         }); 
@@ -846,12 +872,11 @@ function ajouterArticle(){
     
 }
 
-/**
+/** UPDATE
 * Modifier un article
 */
 function modifierArticle(noArticle){
     event.preventDefault();
-
     let objArticle = {
         "noArticle" : noArticle,
         "libelle" : $("#libelle").val(),
@@ -866,30 +891,38 @@ function modifierArticle(noArticle){
     donnees.append("article", JSON.stringify(objArticle));
 
     let requete = new RequeteAjax("controleur/controleur.php");
-    let modele = new ModeleMagasin("modele-inventaire-admin");
     requete.envoyerArticle(donnees, reponse => {
-        modele.appliquerModele(reponse, "milieu-page");
-            listeSolo("modele-liste-panier-admin");
+        console.log(reponse);
+        afficherListeArticles();
     });
 }
 
-/**
+/** UPDATE
 * Supprimer d'un article
 */
 function supprimerArticle(noArticle){
     event.preventDefault();
-
-    let objJSON = {
-        "type" : "inventaire",
-        "requete" : "supprimer",
-        "noArticle" : noArticle
+    let messageErreur = $("#message-erreur");
+    if(confirm("Voulez-vous supprimer l'article "+ noArticle + "?")){
+        let objJSON = {
+            "type" : "inventaire",
+            "requete" : "supprimer",
+            "noArticle" : noArticle
+        }
+        let requete = new RequeteAjax("controleur/controleur.php");
+        requete.getJSON(objJSON, function(reponse){
+            console.log(reponse);
+            if (reponse["statut"] === "succes") {
+                console.log("ok!");
+                afficherListeArticles();
+            }
+            else if (reponse["statut"] === "echec") {
+                messageErreur.addClass('alert');
+                messageErreur.addClass('alert-danger');
+                messageErreur.html(objetJSON["message"]);
+            }            
+        });
     }
-    let requete = new RequeteAjax("controleur/controleur.php");
-    let modele = new ModeleMagasin("modele-inventaire-admin");
-    requete.getJSON(objJSON, reponse => {
-        modele.appliquerModele(reponse, "milieu-page");
-        listeSolo("modele-liste-panier-admin");
-    })
 }
 
 /*
@@ -910,48 +943,59 @@ function rechercher(produit){
     }
 }
 
-/**
- * Affiche la liste de membre ou articles
+/**  UPDATE
+ * Affiche la liste d'articles
  */
-function afficherListe(modeleChoisi) {
+function afficherListeArticles() {
     let requete = new RequeteAjax("controleur/controleur.php");
-    let modele = new ModeleMagasin(modeleChoisi);
-    let objJSON;
-    let modeleSolo;
-    if (modeleChoisi == "modele-inventaire-admin"){
-        objJSON = {
-            "type" : "panier",
-            "requete" : "sommaire"
-        };
-        modeleSolo = "modele-liste-panier-admin";
-    }
-    else if (modeleChoisi == 'modele-membre-admin') {
-        objJSON = {
-            "type" : "membre",
-            "requete" : "liste"
-        };
-        modeleSolo = "modele-membre-admin";
-    }
+    let modele = new ModeleMagasin("modele-inventaire-admin");
+    let objJSON = {
+        "type" : "panier",
+        "requete" : "sommaire" 
+    };
+
     requete.getJSON(objJSON, reponse => {
         modele.appliquerModele(reponse, "milieu-page");
-        listeSolo(modeleSolo);
+        articleLigne();
     });
 }
 
 /**
- * Affiche le membre ou l'article individuel
+ * Affiche la ligne du tableau dans la liste d'article
  */
-function listeSolo(solo) {
+function articleLigne(){
     let requete = new RequeteAjax("controleur/controleur.php");
-    let modele = new ModeleMagasin(solo);
+    let modele = new ModeleMagasin("modele-liste-panier-admin");
     let objJSON = {
         "type" : "inventaire"
     };
-    requete.getJSON(objJSON,function (reponse) {
+    requete.getJSON(objJSON, function(reponse){
         modele.appliquerModele(reponse, "liste-panier");
     })
 }
 
+
+/** UPDATE
+ * Affiche la liste de membres
+ */
+function afficherListeMembres(){
+    let requete = new RequeteAjax("controleur/controleur.php");
+    let modele = new ModeleMagasin("modele-liste-membres-admin");
+    let objJSON = {
+        "type" : "membre",
+        "requete" : "liste"
+    };
+
+    requete.getJSON("", function(){
+        modele.appliquerModele("", "milieu-page");
+        let requete1 = new RequeteAjax("controleur/controleur.php");
+        let modele1 = new ModeleMagasin("modele-membre-admin");
+
+        requete1.getJSON(objJSON, function(reponse){
+            modele.appliquerModele(reponse, "liste-panier");
+        })
+    });
+}
 
  /**
   * Supprime le compte choisi

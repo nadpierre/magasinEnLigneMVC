@@ -9,7 +9,6 @@ function chargerClasse($classe) {
 }
 spl_autoload_register('chargerClasse');
 
-
 /* Instanciation du gestionnaire de la BD, du panier et de la connexion */
 $gestionArticles = new GestionArticles();
 $gestionMembres = new GestionMembres();
@@ -57,7 +56,7 @@ if(isset($_POST["requete"]) && isset($_FILES["image"])){
 /* APPELER LA BONNE FONCTION EN FONCTION DU JSON REÇU */
 $objJSON = json_decode(file_get_contents("php://input"));
 
-if($objJSON !== null){
+if(isset($objJSON)){
     switch($objJSON->type){
         /**** INVENTAIRE ****/
         case "inventaire" :
@@ -73,16 +72,9 @@ if($objJSON !== null){
             elseif(isset($objJSON->requete)){//admin : supprimer un article
                 if($objJSON->requete == "supprimer"){
                     if($connexion->estConnecte() && $connexion->getCategorie() == 2){
-                        $noArticle = $objJSON->noArticle;
-                        try {
-                            $reponse["article"] = '[' . $gestionArticles->supprimerArticle($noArticle). ']';
-                            $reponse["statut"] = "succes";
-
-                        }
-                        catch(Exception $e){
-                            $reponse["statut"] = "echec";
-                            $reponse["message"] = $e->getMessage();
-                        }
+                        $noArticle = (int) $objJSON->noArticle;
+                        $gestionArticles->supprimerArticle($noArticle);
+                        $reponse["statut"] = "succes";
                     }
                     else {
                         $reponse["statut"] = "echec";
@@ -159,7 +151,10 @@ if($objJSON !== null){
                         break;
                     case "vider" ://vider le panier
                         $gestionArticles->viderPanier(); 
-                        $panier->viderPanier();    
+                        $panier->viderPanier(); 
+                        $reponse["statut"] = "succes";
+                        $reponse["message"] = "Le panier a été vidé.";
+                        echo json_encode($reponse);
                         break;
                  }
             }
@@ -175,7 +170,7 @@ if($objJSON !== null){
                             $donneesMembre = json_decode($objJSON->membre, true);
                             $membre = new Membre($donneesMembre);
                             $gestionMembres->ajouterMembre($membre);
-                            $dernierMembre = $gestionMembres->getInvite();
+                            $dernierMembre = $gestionMembres->getMembre($membre->getCourriel());
     
                             //Créer une connexion
                             $connexion->creerConnexion($dernierMembre);
@@ -209,6 +204,11 @@ if($objJSON !== null){
                         }
                         echo json_encode($reponse);
                         break;
+                    case "estConnecte" ://valider si le membre est connecté
+                        $reponse["estConnecte"] = $connexion->estConnecte();
+                        $reponse["categorie"] = $connexion->getCategorie();
+                        echo json_encode($reponse);      
+                        break;
                     case "deconnexion" ://déconnection
                         $connexion->seDeconnecter();
                         $reponse["estConnecte"] = $connexion->estConnecte();
@@ -218,6 +218,18 @@ if($objJSON !== null){
                         if($connexion->estConnecte() && $connexion->getCategorie() == 2){
                             $reponse["statut"] = "succes";
                             $reponse["membres"] = $gestionMembres->getListeMembres();
+                        }
+                        else{
+                            $reponse["statut"] = "echec";
+                            $reponse["message"] = "Vous n'êtes pas autorisé à consulter tous les membres.";
+                        }
+                        echo json_encode($reponse);
+                        break;
+                    case "recherche" : //recherche par nom (admin)
+                        if($connexion->estConnecte() && $connexion->getCategorie() == 2){
+                            $mot = $objJSON->mot;
+                            $reponse["statut"] = "succes";
+                            $reponse["membres"] = $gestionMembres->rechercherParNom($nom);
                         }
                         else{
                             $reponse["statut"] = "echec";
@@ -265,15 +277,18 @@ if($objJSON !== null){
                         break;
                     case "supprimer" ://supprimer un compte
                         if($connexion->estConnecte()){
-                            if(!isset($objJSON->noMembre)){//un membre qui se désabonne
-                                $noMembre = $connexion->getIdUtilisateur();
+                            //un membre qui se désabonne
+                            if(!isset($objJSON->noMembre)){
+                                $gestionMembres->desactiverMembre($connexion->getIdUtilisateur());
+                                $connexion->seDeconnecter();
+                                $reponse["message"] = "Vous êtes désabonné."; 
                             }
-                            else {//un admin qui supprime un autre compte
-                                $noMembre = (int) $objJSON->noMembre;
-                            }
-                            $gestionMembres->supprimerMembre($noMembre);
-                            $reponse["statut"] = "succes";
-                            $reponse["membre"] = "Le membre a bel et bien été supprimé."; 
+                            //un admin qui désactive un autre compte
+                            elseif($connexion->getCategorie() == 2 && isset($objJSON->noMembre)) {
+                                $gestionMembres->desactiverMembre((int) $objJSON->noMembre);
+                                $reponse["message"] = "Le membre a bel et bien été désactivé."; 
+                            }       
+                            $reponse["statut"] = "succes";  
                         }
                         else {
                             $reponse["statut"] = "echec";
@@ -309,12 +324,19 @@ if($objJSON !== null){
                             $temp = $gestionMembres->genererMotDePasse();
                             $gestionMembres->changerMotDePasse($noMembre, $temp);
                             $reponse["statut"] = "succes";
-                            $reponse["message"] =  "Votre mot de passe temporaire est '$temp'.";
+                            $reponse["reset"] = array(
+                                array(
+                                    "message" => "Le mot de passe a été réinitialisé.",
+                                    "courriel" => $courriel,
+                                    "temp" => $temp
+                                )
+                            );  
                         }
                         catch(Exception $e){
                             $reponse["statut"] = "echec";
                             $reponse["message"] = $e->getMessage();
                         }
+                        echo json_encode($reponse);
                         break;
                 }
             }
@@ -334,7 +356,7 @@ if($objJSON !== null){
                             $gestionMembres->ajouterMembre($membre);  
                             
                             // Ajouter la commande
-                            $dernierMembre = $gestionMembres->getInvite();
+                            $dernierMembre = $gestionMembres->getMembre($membre->getCourriel());
                             $noMembre = $dernierMembre->getNoMembre();
                             $paypalOrderId = $objJSON->paypalOrderId;
                             $commande = new Commande(array(
@@ -386,7 +408,7 @@ if($objJSON !== null){
                                 $panier->viderPanier();
                                 
                                 $reponse["statut"] = "succes";
-                                $reponse["message"] = "Commande effectuée avec succès.";   
+                                $reponse["message"] = "Le panier a bel et bien été vidé";   
                             }
                             catch(Exception $e) {
                                 $panier->deverrouillerPanier();
@@ -409,10 +431,10 @@ if($objJSON !== null){
                                 $courriel = $gestionMembres->getMembre($noMembre)->getCourriel();
                             }
                             else {
-                                $dernierMembre = $gestionMembres->getInvite();
+                                $noMembre = $derniereCommande->getNoMembre();
+                                $dernierMembre = $gestionMembres->getMembre((int) $noMembre);
                                 $courriel = $dernierMembre->getCourriel();
                             }
-                        
                             echo json_encode(
                                 array(
                                     array(

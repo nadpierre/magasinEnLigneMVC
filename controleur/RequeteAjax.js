@@ -30,4 +30,22 @@ class RequeteAjax {
             console.log(reponse);
         })
     }
+
+    envoyerArticle(donnees, callback){
+    
+        $.ajax({
+           method : "POST",
+           url : this.url,
+           enctype: 'multipart/form-data',
+           processData: false,
+           contentType: false,
+           cache: false,
+           data : donnees
+       })
+       .done(function(reponse){
+           callback(reponse);
+           console.log(reponse);
+       })
+   
+   }
 }
