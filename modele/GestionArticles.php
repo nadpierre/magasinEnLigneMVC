@@ -161,10 +161,11 @@ class GestionArticles extends GestionBD {
      */
     public function isUploadable(array $image){
         $valide = true;
+        $extension = strtolower(pathinfo($image["name"], PATHINFO_EXTENSION));
 
         # Vérifier si c'est une vraie image
         $imgTemp = getimagesize($image["tmp_name"]);
-        if($imgTemp == false || $img){
+        if($imgTemp == false){
             $valide = false;
         }
 
@@ -202,7 +203,7 @@ class GestionArticles extends GestionBD {
             unlink($chemin);
         }
         
-        if(!$this->isUploadable()){
+        if(!$this->isUploadable($image)){
             throw new Exception("L'image n'a pas pu être téléversée");   
         }
         

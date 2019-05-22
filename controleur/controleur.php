@@ -18,7 +18,7 @@ $panier = new Panier();
 $connexion = new Connexion();
 
 /* Ajouter ou modifier un article */
-if(isset($_POST["requete"]) && isset($_FILES["image"])){
+if(isset($_POST["requete"])){
     if($connexion->estConnecte() && $connexion->getCategorie() == 2){
         $donnees = json_decode($_POST["article"], true);
         $article = new Article($donnees);
@@ -31,9 +31,10 @@ if(isset($_POST["requete"]) && isset($_FILES["image"])){
         }
 
         $reponse["statut"] = "succes";
-        $reponse["message"] = "L'article a été ajouté avec succès";
+        $reponse["message"] = "L'article a été ajouté/modifié avec succès";
+        $reponse["article"] = '['.$article.']';
 
-        if($_FILES["image"]["name"] != ""){
+        if(isset($_FILES["image"]) && $_FILES["image"]["name"] != ""){
             try {
                 $gestionArticles->uploadImage($article->getNoArticle(),$article->getLibelle(),$_FILES["image"]);
                 $reponse["message"] .= " et l'image a été téléversée avec succès.";
@@ -191,7 +192,6 @@ if(isset($objJSON)){
                             if(password_verify($motDePasse, $membre->getMotDePasse())){
                                 $connexion->creerConnexion($membre);
                                 $reponse["statut"] = "succes";
-                                $reponse["membre"] = '['.$membre.']';
                                 $reponse["estConnecte"] = $connexion->estConnecte();
                                 $reponse["categorie"] = $connexion->getCategorie();
                             }
@@ -229,7 +229,7 @@ if(isset($objJSON)){
                         break;
                     case "recherche" : //recherche par nom (admin)
                         if($connexion->estConnecte() && $connexion->getCategorie() == 2){
-                            $mot = $objJSON->mot;
+                            $nom = $objJSON->nom;
                             $reponse["statut"] = "succes";
                             $reponse["membres"] = $gestionMembres->rechercherParNom($nom);
                         }
