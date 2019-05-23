@@ -439,6 +439,13 @@ if(isset($objJSON)){
                         }
                         echo json_encode($reponse); 
                         break;
+                    case "liste" :
+                        echo $gestionCommandes->getListeCommandes();
+                        break;
+                    case "listeMembre" :
+                        $noMembre = (int) $objJSON->noMembre;
+                        echo $gestionCommandes->trierParMembre($noMembre);
+                        break;
                 }
             }
             break;
