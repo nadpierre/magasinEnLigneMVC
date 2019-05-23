@@ -85,13 +85,17 @@ class GestionCommandes extends GestionBD {
      * @return string - le JSON de la commande
      */
     public function getCommandeDetaillee($noCommande){
+        $noCommande = (int) $noCommande;
         $gestionAC = new GestionArticlesCommande;
         return json_encode(
             array(
                 array(
                     "commande" => $this->getCommande($noCommande)->getTableau(),
-                    "total" => (double) $gestionAC->getMontantTotal($noCommande) * 
-                                Panier::TAXES * (1 - Panier::RABAIS),
+                    "total" => number_format(
+                        $gestionAC->getMontantTotal($noCommande) * 
+                        (1 + Panier::TAXES) * 
+                        (1 - Panier::RABAIS), 2
+                    ),
                     "articles" => $gestionAC->getArticlesCommande($noCommande)
                 )
             )        

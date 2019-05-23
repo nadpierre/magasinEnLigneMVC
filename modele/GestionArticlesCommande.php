@@ -62,7 +62,7 @@ class GestionArticlesCommande extends GestionBD {
     /**
      * Retourne le montant total de la commande
      * @param {int} $noCommande - le numéro de la commande
-     * @return double
+     * @return string
      */
     public function getMontantTotal($noCommande){
         $requete = $this->bdd->prepare(
@@ -76,6 +76,6 @@ class GestionArticlesCommande extends GestionBD {
         $requete->execute();
         $donnees = $requete->fetch();
     
-        return $donnees["total"];   
+        return number_format($donnees["total"], 2);   
     }
 }
