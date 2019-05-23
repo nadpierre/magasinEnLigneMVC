@@ -207,8 +207,12 @@ if(isset($objJSON)){
                         echo json_encode($reponse);
                         break;
                     case "estConnecte" ://valider si le membre est connecté
-                        $reponse["estConnecte"] = $connexion->estConnecte();
-                        $reponse["categorie"] = $connexion->getCategorie();
+                        if($connexion->estConnecte()){
+                            $reponse["statut"] = "succes";
+                        }
+                        else {
+                            $reponse["statut"] = "echec";
+                        }
                         echo json_encode($reponse);      
                         break;
                     case "deconnexion" ://déconnection
@@ -375,9 +379,15 @@ if(isset($objJSON)){
                             //Vider le panier
                             $gestionArticles->effacerQtePanierTous();
                             $panier->viderPanier();
+
+                            //Récupérer le courriel
+                            $noMembre = $derniereCommande->getNoMembre();
+                            $dernierMembre = $gestionMembres->getMembre((int) $noMembre);
+                            $courriel = $dernierMembre->getCourriel();
                             
+                            //Afficher la confirmation
                             $reponse["statut"] = "succes";
-                            $reponse["message"] = "Commande effectuée avec succès.";   
+                            $reponse["commande"] =  array(array("paypalOrderId" => $paypalOrderId, "courriel" => $courriel));
                         }
                         catch(Exception $e) {
                             $panier->deverrouillerPanier();
@@ -408,9 +418,14 @@ if(isset($objJSON)){
                                 //Vider le panier
                                 $gestionArticles->effacerQtePanierTous();
                                 $panier->viderPanier();
+
+                                //Récupérer le courriel
+                                $noMembre = $connexion->getIdUtilisateur();
+                                $courriel = $gestionMembres->getMembre($noMembre)->getCourriel();
                                 
+                                //Afficher la confirmation
                                 $reponse["statut"] = "succes";
-                                $reponse["message"] = "Le panier a bel et bien été vidé";   
+                                $reponse["commande"] =  array(array("paypalOrderId" => $paypalOrderId, "courriel" => $courriel));  
                             }
                             catch(Exception $e) {
                                 $panier->deverrouillerPanier();
@@ -424,28 +439,6 @@ if(isset($objJSON)){
                         }
                         echo json_encode($reponse); 
                         break;
-                    case "confirmation" ://afficher la confirmation de commande
-                            $derniereCommande = $gestionCommandes->getDerniereCommande();
-                            $paypalOrderId = $derniereCommande->getPaypalOrderId();
-                        
-                            if($connexion->estConnecte()) {
-                                $noMembre = $connexion->getIdUtilisateur();
-                                $courriel = $gestionMembres->getMembre($noMembre)->getCourriel();
-                            }
-                            else {
-                                $noMembre = $derniereCommande->getNoMembre();
-                                $dernierMembre = $gestionMembres->getMembre((int) $noMembre);
-                                $courriel = $dernierMembre->getCourriel();
-                            }
-                            echo json_encode(
-                                array(
-                                    array(
-                                        "paypalOrderId" => $paypalOrderId,
-                                        "courriel" => $courriel
-                                    )
-                                )
-                            );
-                            break;    
                 }
             }
             break;
