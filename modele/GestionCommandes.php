@@ -114,6 +114,7 @@ class GestionCommandes extends GestionBD {
         $tabArticles = $gestionAC->getArticlesCommande($noCommande);
         
         $objJSON["paypalOrderId"] = $commande->getPaypalOrderId();
+        $objJSON["nomMembre"] = $membre->getNomMembre();
         $objJSON["prenomMembre"] = $membre->getPrenomMembre();
         $objJSON["adresse"] = $membre->getAdresse();
         $objJSON["ville"] = $membre->getVille();
