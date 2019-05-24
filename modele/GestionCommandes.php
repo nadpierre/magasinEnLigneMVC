@@ -113,6 +113,7 @@ class GestionCommandes extends GestionBD {
         $membre = $gestionMembres->getMembre($commande->getNoMembre());
         $tabArticles = $gestionAC->getArticlesCommande($noCommande);
         
+        $objJSON["noCommande"] = $commande->getNoCommande();
         $objJSON["paypalOrderId"] = $commande->getPaypalOrderId();
         $objJSON["nomMembre"] = $membre->getNomMembre();
         $objJSON["prenomMembre"] = $membre->getPrenomMembre();
