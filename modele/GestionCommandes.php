@@ -77,6 +77,26 @@ class GestionCommandes extends GestionBD {
         return new Commande($donnees);
     }
 
+    /**
+     * Retourne le montant total de la commande
+     * @param {int} $noCommande - le numéro de la commande
+     * @return string
+     */
+    public function getMontantTotal($noCommande){
+        $requete = $this->bdd->prepare(
+            'SELECT
+                SUM(ac.quantite * ar.prixUnitaire) AS "total"
+            FROM article_en_commande ac
+            JOIN article ar ON ac.noArticle = ar.noArticle
+            WHERE ac.noCommande = ?'
+        );
+        $requete->bindValue(1, (int) $noCommande, PDO::PARAM_INT);
+        $requete->execute();
+        $donnees = $requete->fetch();
+    
+        return number_format($donnees["total"], 2);   
+    }
+
 
     /**
      * Retourne les informations d'une commande,
@@ -87,7 +107,27 @@ class GestionCommandes extends GestionBD {
     public function getCommandeDetaillee($noCommande){
         $noCommande = (int) $noCommande;
         $gestionAC = new GestionArticlesCommande;
-        return json_encode(
+        $gestionArticles = new GestionArticles();
+        $gestionMembres = new GestionMembres();
+
+        $commande = $this->getCommande($noCommande);
+        $membre = $gestionMembres->getMembre($commande->getNoMembre());
+        $ac = $gestionAC->getArticlesCommande($noCommande);
+        
+        $objJSON["paypalOrderId"] = $commande->getPaypalOrderId();
+        $objJSON["noMembre"] = $commande->getNoMembre();
+        $objJSON["nomMembre"] = $membre->getNomMembre();
+        $objJSON["prenomMembre"] = $membre->getPrenomMembre();
+        $objJSON["dateCommande"] = $commande->getDateCommande();
+        $objJSON["montantTotal"] = $this->getMontantTotal($noCommande);
+        $objJSON["articles"] = array();
+
+
+
+
+       
+        
+        /*return json_encode(
             array(
                 array(
                     "commande" => $this->getCommande($noCommande)->getTableau(),
@@ -99,7 +139,7 @@ class GestionCommandes extends GestionBD {
                     "articles" => $gestionAC->getArticlesCommande($noCommande)
                 )
             )        
-        );
+        );*/
     }
 
      

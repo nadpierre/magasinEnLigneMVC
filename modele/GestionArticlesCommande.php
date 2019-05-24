@@ -59,23 +59,4 @@ class GestionArticlesCommande extends GestionBD {
         return $listeArticles;
     }
 
-    /**
-     * Retourne le montant total de la commande
-     * @param {int} $noCommande - le numéro de la commande
-     * @return string
-     */
-    public function getMontantTotal($noCommande){
-        $requete = $this->bdd->prepare(
-            'SELECT
-                SUM(ac.quantite * ar.prixUnitaire) AS "total"
-            FROM article_en_commande ac
-            JOIN article ar ON ac.noArticle = ar.noArticle
-            WHERE ac.noCommande = ?'
-        );
-        $requete->bindValue(1, (int) $noCommande, PDO::PARAM_INT);
-        $requete->execute();
-        $donnees = $requete->fetch();
-    
-        return number_format($donnees["total"], 2);   
-    }
 }
