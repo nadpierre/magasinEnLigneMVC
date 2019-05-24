@@ -450,14 +450,9 @@ if(isset($objJSON)){
                         }
                         echo json_encode($reponse);
                         break;
-                    case "listeMembre" ://afficher les commandes d'un seul membre
+                    case "listeMembre" ://afficher les commandes d'un seul membre (membre et admin)
                         if($connexion->estConnecte()){
-                            if(!isset($objJSON->noMembre)){//consulter ses propres commandes
-                                $noMembre = $connexion->getIdUtilisateur();
-                            }
-                            else{//admin qui consulte les commandes d'un membre
-                                $noMembre = (int) $objJSON->noMembre;
-                            }
+                            $noMembre = (int) $objJSON->noMembre;
                             $reponse["statut"] = "succes";
                             $reponse["commandes"] = $gestionCommandes->trierParMembre($noMembre);
                         }
