@@ -1476,3 +1476,22 @@ function envoyerCommande(objJSON) {
         }
     });
 }
+
+/**
+ * Lister commande
+ */
+
+ function listerCommande(noMembre){
+    let modele = new ModeleMagasin("");
+    let requete = new RequeteAjax("controleur/controleur.php");
+
+    let objJSON = {
+        "type" : "commande",
+        "requete" : "listeMembre",
+        "noMembre" : noMembre
+    }
+
+    requete.getJSON(objJSON, function(reponse){
+        modele.appliquerModele(reponse,"");
+    })
+ }
