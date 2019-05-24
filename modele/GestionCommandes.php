@@ -1,5 +1,4 @@
 <?php
-
 /**
  * Représente un objet de type GestionCommandes
  * Son rôle est de gérer les commandes dans la base de données MySQL
@@ -94,7 +93,7 @@ class GestionCommandes extends GestionBD {
         $requete->execute();
         $donnees = $requete->fetch();
     
-        return number_format($donnees["total"], 2);   
+        return (double) $donnees["total"];   
     }
 
 
@@ -112,34 +111,51 @@ class GestionCommandes extends GestionBD {
 
         $commande = $this->getCommande($noCommande);
         $membre = $gestionMembres->getMembre($commande->getNoMembre());
-        $ac = $gestionAC->getArticlesCommande($noCommande);
+        $tabArticles = $gestionAC->getArticlesCommande($noCommande);
         
         $objJSON["paypalOrderId"] = $commande->getPaypalOrderId();
-        $objJSON["noMembre"] = $commande->getNoMembre();
-        $objJSON["nomMembre"] = $membre->getNomMembre();
         $objJSON["prenomMembre"] = $membre->getPrenomMembre();
+        $objJSON["adresse"] = $membre->getAdresse();
+        $objJSON["ville"] = $membre->getVille();
+        $objJSON["province"] = $membre->getProvince();
+        $objJSON["codePostal"] = $membre->getCodePostal();
+        $objJSON["noTel"] = $membre->getNoTel();
+        $objJSON["courriel"] = $membre->getCourriel();
         $objJSON["dateCommande"] = $commande->getDateCommande();
         $objJSON["montantTotal"] = $this->getMontantTotal($noCommande);
+        
         $objJSON["articles"] = array();
 
+        for($i = 0; $i < count($tabArticles); $i++){
+            $ac = $tabArticles[$i];
+            $noArticle = $ac->getNoArticle();
+            $article = $gestionArticles->getArticle($noArticle);
+            $tableau = array(
+                "libelle" => $article->getLibelle(),
+                "quantite" => $ac->getQuantite(),
+                "prixTotal" => $article->getPrixUnitaire() * $ac->getQuantite()
+            );
+            array_push($objJSON["articles"], $tableau);   
+        }
 
+        $sousTotal = $this->getMontantTotal($noCommande);
+        $taxes = Panier::TAXES * $sousTotal;
+        $livraison = $sousTotal >= Panier::MONTANT_MINIMUM || $sousTotal == 0 ? 0 : Panier::FRAIS_LIVRAISON;
+        $rabais = 0 - (Panier::RABAIS * $sousTotal);
+        $total = $sousTotal + $taxes + $livraison + $rabais;
 
+        $objJSON["sommaire"] = array(
+            "sousTotal" => $sousTotal,
+            "taxes" => round($taxes, 2),
+            "livraison" => round($livraison, 2),
+            "rabais" => round($rabais, 2),
+            "total" => round($total, 2)
+        );
 
+        $objJSON = array($objJSON);
        
-        
-        /*return json_encode(
-            array(
-                array(
-                    "commande" => $this->getCommande($noCommande)->getTableau(),
-                    "total" => number_format(
-                        $gestionAC->getMontantTotal($noCommande) * 
-                        (1 + Panier::TAXES) * 
-                        (1 - Panier::RABAIS), 2
-                    ),
-                    "articles" => $gestionAC->getArticlesCommande($noCommande)
-                )
-            )        
-        );*/
+        return $objJSON;
+
     }
 
      
@@ -177,5 +193,3 @@ class GestionCommandes extends GestionBD {
     }
 
 }
-
-?>

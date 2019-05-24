@@ -53,7 +53,7 @@ class GestionArticlesCommande extends GestionBD {
         $requete->execute();
         while ($donnees = $requete->fetch()) {
             $article = new ArticleEnCommande($donnees);
-            array_push($listeArticles, $article->getTableau());
+            array_push($listeArticles, $article);
         }
 
         return $listeArticles;
