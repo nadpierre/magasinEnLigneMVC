@@ -18,7 +18,7 @@ $panier = new Panier();
 $connexion = new Connexion();
 
 /* Ajouter ou modifier un article */
-if(isset($_POST["requete"]) && isset($_FILES["image"])){
+if(isset($_POST["requete"])){
     if($connexion->estConnecte() && $connexion->getCategorie() == 2){
         $donnees = json_decode($_POST["article"], true);
         $article = new Article($donnees);
@@ -31,9 +31,10 @@ if(isset($_POST["requete"]) && isset($_FILES["image"])){
         }
 
         $reponse["statut"] = "succes";
-        $reponse["message"] = "L'article a été ajouté avec succès";
+        $reponse["message"] = "L'article a été ajouté/modifié avec succès";
+        $reponse["article"] = '['.$article.']';
 
-        if($_FILES["image"]["name"] != ""){
+        if(isset($_FILES["image"]) && $_FILES["image"]["name"] != ""){
             try {
                 $gestionArticles->uploadImage($article->getNoArticle(),$article->getLibelle(),$_FILES["image"]);
                 $reponse["message"] .= " et l'image a été téléversée avec succès.";
@@ -191,7 +192,6 @@ if(isset($objJSON)){
                             if(password_verify($motDePasse, $membre->getMotDePasse())){
                                 $connexion->creerConnexion($membre);
                                 $reponse["statut"] = "succes";
-                                $reponse["membre"] = '['.$membre.']';
                                 $reponse["estConnecte"] = $connexion->estConnecte();
                                 $reponse["categorie"] = $connexion->getCategorie();
                             }
@@ -207,8 +207,12 @@ if(isset($objJSON)){
                         echo json_encode($reponse);
                         break;
                     case "estConnecte" ://valider si le membre est connecté
-                        $reponse["estConnecte"] = $connexion->estConnecte();
-                        $reponse["categorie"] = $connexion->getCategorie();
+                        if($connexion->estConnecte()){
+                            $reponse["statut"] = "succes";
+                        }
+                        else {
+                            $reponse["statut"] = "echec";
+                        }
                         echo json_encode($reponse);      
                         break;
                     case "deconnexion" ://déconnection
@@ -375,9 +379,15 @@ if(isset($objJSON)){
                             //Vider le panier
                             $gestionArticles->effacerQtePanierTous();
                             $panier->viderPanier();
+
+                            //Récupérer le courriel
+                            $noMembre = $derniereCommande->getNoMembre();
+                            $dernierMembre = $gestionMembres->getMembre((int) $noMembre);
+                            $courriel = $dernierMembre->getCourriel();
                             
+                            //Afficher la confirmation
                             $reponse["statut"] = "succes";
-                            $reponse["message"] = "Commande effectuée avec succès.";   
+                            $reponse["commande"] =  array(array("paypalOrderId" => $paypalOrderId, "courriel" => $courriel));
                         }
                         catch(Exception $e) {
                             $panier->deverrouillerPanier();
@@ -408,9 +418,14 @@ if(isset($objJSON)){
                                 //Vider le panier
                                 $gestionArticles->effacerQtePanierTous();
                                 $panier->viderPanier();
+
+                                //Récupérer le courriel
+                                $noMembre = $connexion->getIdUtilisateur();
+                                $courriel = $gestionMembres->getMembre($noMembre)->getCourriel();
                                 
+                                //Afficher la confirmation
                                 $reponse["statut"] = "succes";
-                                $reponse["message"] = "Le panier a bel et bien été vidé";   
+                                $reponse["commande"] =  array(array("paypalOrderId" => $paypalOrderId, "courriel" => $courriel));  
                             }
                             catch(Exception $e) {
                                 $panier->deverrouillerPanier();
@@ -424,28 +439,46 @@ if(isset($objJSON)){
                         }
                         echo json_encode($reponse); 
                         break;
-                    case "confirmation" ://afficher la confirmation de commande
-                            $derniereCommande = $gestionCommandes->getDerniereCommande();
-                            $paypalOrderId = $derniereCommande->getPaypalOrderId();
-                        
-                            if($connexion->estConnecte()) {
+                    case "liste" ://lister toutes les commandes (admin)
+                        if($connexion->estConnecte() && $connexion->getCategorie() == 2){
+                            $reponse["statut"] = "succes";
+                            $reponse["commandes"] = $gestionCommandes->getListeCommandes();    
+                        }
+                        else {
+                            $reponse["statut"] = "echec";
+                            $reponse["message"] = "Vous n'êtes pas autorisé.";
+                        }
+                        echo json_encode($reponse);
+                        break;
+                    case "listeMembre" ://afficher les commandes d'un seul membre
+                        if($connexion->estConnecte()){
+                            if(!isset($objJSON->noMembre)){//consulter ses propres commandes
                                 $noMembre = $connexion->getIdUtilisateur();
-                                $courriel = $gestionMembres->getMembre($noMembre)->getCourriel();
                             }
-                            else {
-                                $noMembre = $derniereCommande->getNoMembre();
-                                $dernierMembre = $gestionMembres->getMembre((int) $noMembre);
-                                $courriel = $dernierMembre->getCourriel();
+                            else{//admin qui consulte les commandes d'un membre
+                                $noMembre = (int) $objJSON->noMembre;
                             }
-                            echo json_encode(
-                                array(
-                                    array(
-                                        "paypalOrderId" => $paypalOrderId,
-                                        "courriel" => $courriel
-                                    )
-                                )
-                            );
-                            break;    
+                            $reponse["statut"] = "succes";
+                            $reponse["commandes"] = $gestionCommandes->trierParMembre($noMembre);
+                        }
+                        else{
+                            $reponse["statut"] = "echec";
+                            $reponse["message"] = "Vous n'êtes pas connecté"; 
+                        }
+                        echo json_encode($reponse);
+                        break;
+                    case "detail" : //voir le détail d'une commande (membre ou admin)
+                        if($connexion->estConnecte()){
+                            $noCommande = (int) $objJSON->noCommande;
+                            $reponse["statut"] = "succes";
+                            $reponse["commande"] = $gestionCommandes->getCommandeDetaillee($noCommande);
+                        }
+                        else{
+                            $reponse["statut"] = "echec";
+                            $reponse["message"] = "Vous n'êtes pas connecté"; 
+                        }
+                        echo json_encode($reponse);
+                        break;
                 }
             }
             break;

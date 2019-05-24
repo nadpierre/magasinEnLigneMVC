@@ -1,80 +1,84 @@
 /**
  * Affiche l'inventaire
  */
-$(document).ready(function(){
-    $("#gabarit").load("vue/gabarit.html", function(){
+$(document).ready(function () {
+    $("#gabarit").load("vue/gabarit.html", function () {
         afficherInventaire(listerArticles);
         getTotalPanier();
+        iconConnexion();
     })
 });
 /**
  * ============================== Function pour Afficher le profil ==============================
  */
-function test(){
-    let modeleInventaire = new ModeleMagasin("modele-profil-client");
-    modeleInventaire.appliquerModele("", "milieu-page");
- }
- function iconConnexionBACKUP(){
-    // recuperer le test sur le boutton
-    let text = $("#btn-msg").text();
-    
-    // changer le text sur le bouton est text == Connexion alors changer le text pour profil
-   $("#btn-msg").text(text == "Connexion" ? "Compte" : "Connexion");
-   
-   if(text == "Connexion"){
-       $("#btn-msg").attr("onclick" , "profilClient()");
-   }
 
+function test() {
 
-   // A partir du id btn-login, chercher les tags 'i' et remove et ajouter la class selon le texte 
-   $('#btn-login').find("i").removeClass(text== "Connexion" ? "fas fa-user-alt" : "fas fa-user-check").addClass( text== "Connexion" ? "fas fa-user-check" : "fas fa-user-alt");
-   
-   // Ajouter une balise 'a' selon le texte 
-   $('.menu-login').append(text == "Connexion" ? "<a href=\"index.html\" class=\"btn-logout\"><i class=\"fas fa-sign-out-alt\" onclick=\"seDeconnecter()\"></i>Logout</a>" : "");
-   
-   $('.btn-logout').remove(text == "Connexion");
-   
+    estConnecte().then(reponse => {
+        console.log("est-il connecte ?" + reponse);
+    }).catch((err) => {
+        console.log("est-il connecte ?" + err);
+    })
 }
 
- function iconConnexion(){
-     // recuperer le test sur le boutton
-     let text = $("#btn-msg").text();
-     
-     // changer le text sur le bouton est text == Connexion alors changer le text pour profil
-    $("#btn-msg").text("Compte");
-    
-    $("#btn-msg").attr("onclick","profilClient()");
 
-
-
-    // A partir du id btn-login, chercher les tags 'i' et remove et ajouter la class selon le texte 
-    $('#btn-login').find("i").removeClass(text== "Connexion" ? "fas fa-user-alt" : "fas fa-user-check").addClass( text== "Connexion" ? "fas fa-user-check" : "fas fa-user-alt");
-    
-    // Ajouter une balise 'a' selon le texte 
-    $('.menu-login').append(text == "Connexion" ? "<a href=\"index.html\" class=\"btn-logout\" onclick=\"seDeconnecter()\"><i class=\"fas fa-sign-out-alt\"></i>Logout</a>" : "");
-    
-    $('.btn-logout').remove(text == "Connexion");
-    
- }
 
 /**
+ * toggle le bon icon selon le statut connection
+ * @param {*} categorie 
+ */
+function toggleIcon(categorie) {
+    // A partir du id btn-login, chercher les tags 'i' et remove et ajouter la class selon le texte 
+    $('#btn-login').find("i").removeClass(categorie != 0 ? "fas fa-user-alt" : "fas fa-user-check").addClass(categorie != 0 ? "fas fa-user-check" : "fas fa-user-alt");
+
+    // Ajouter une balise 'a' selon le texte 
+    $('.menu-login').append(categorie != 0 ? "<a href=\"index.html\" class=\"btn-logout\" onclick=\"seDeconnecter()\"><i class=\"fas fa-sign-out-alt\"></i>Logout</a>" : "");
+}
+
+function iconConnexion() {
+
+    let requete = new RequeteAjax("controleur/controleur.php");
+    let objJSON = {
+        "type": "membre",
+        "requete": "profil"
+    };
+
+    requete.getJSON(objJSON, function (reponse) {
+        let temp = JSON.parse(reponse["membre"]);
+        let categorie = temp[0].categorie;
+
+        if (categorie == 2) {
+            $("#btn-msg").text("Gestion");
+            $("#btn-msg").attr("onclick", "profil()");
+            toggleIcon(categorie);
+        }
+        else if (categorie == 1) {
+            $("#btn-msg").text("Compte");
+            $("#btn-msg").attr("onclick", "profil()");
+            toggleIcon(categorie);
+        }
+    });
+}
+
+/** 
  * Affiche le profile selon la personne connectée
  * Le paramètre est seulement prit en compte si un admin est connecté
  * La validation est fait par le controleur.php
  * 
  * @param {*} noMembre 
  */
-function profil(noMembre){
-    let requete = new RequeteAjax("controleur/controleur.php");
+function profil(noMembre) {
 
-    if (noMembre == "") {
+    let requete = new RequeteAjax("controleur/controleur.php");
+    // UPDATE
+    if (typeof noMembre === "undefined" || noMembre === "") {
         let objJSON = {
-            "type" : "membre",
-            "requete" : "profil"
+            "type": "membre",
+            "requete": "profil"
         };
+
         requete.getJSON(objJSON, function (reponse) {
             let temp = JSON.parse(reponse["membre"]);
-            console.log(temp);
 
             if (temp[0].categorie == 2) {
                 let modele = new ModeleMagasin("modele-profil-admin");
@@ -86,96 +90,247 @@ function profil(noMembre){
             }
         });
     }
-    else{
+    else {
         let objJSON = {
-            "type" : "membre",
-            "requete" : "profil",
-            "noMembre" : noMembre
+            "type": "membre",
+            "requete": "profil",
+            "noMembre": noMembre
         };
         requete.getJSON(objJSON, function (reponse) {
             let temp = JSON.parse(reponse["membre"]);
+
             let modele = new ModeleMagasin("modele-admin-affiche-profil-client");
+
             modele.appliquerModele(temp, "milieu-page");
+
+            let courriel = temp[0]["courriel"];
+            // changer le onclick pour rajouter réinitialiser mot de passe
+            $(".btn-password").attr("onclick", "reinitialiserMotDePasse('" + courriel + "')");
         });
     }
 }
 
-function modifierprofil(){
-    let requete = new RequeteAjax("controleur/controleur.php")
+function modifierprofil() {
+    let requete = new RequeteAjax("controleur/controleur.php");
     let modele = new ModeleMagasin("modele-profil-modification");
 
-    let objJSON = {
-        "type" : "membre",
-        "requete" : "profil"
-    };
-
-    requete.getJSON(objJSON, function(reponse){
-        let temp = JSON.parse(reponse.membre);
-        
-        console.log(temp);
-        modele.appliquerModele(temp, "milieu-page");
-    });
-
- 
-}
-
-function formulaireProfil(noMembre) {
-    let requete = new RequeteAjax("controleur/controleur.php")
-    let modele = new ModeleMagasin("modele-profil-modification");
-
-    if(noMembre == ""){
     let objJSON = {
         "type": "membre",
         "requete": "profil"
     };
 
     requete.getJSON(objJSON, function (reponse) {
-        let temp = JSON.parse(reponse["membre"]);
+        let temp = JSON.parse(reponse.membre);
         modele.appliquerModele(temp, "milieu-page");
     });
+
+}
+
+/**
+ * Afficher le formulaire modification du profil
+ * @param {*} noMembre 
+ */
+function formulaireProfil(noMembre) {
+    let requete = new RequeteAjax("controleur/controleur.php")
+    let modele = new ModeleMagasin("modele-profil-modification");
+    // si le parametre noMembre n'est pas defini
+    if (typeof noMembre === "undefined" || noMembre === "") {
+        let objJSON = {
+            "type": "membre",
+            "requete": "profil"
+        };
+        requete.getJSON(objJSON, function (reponse) {
+            let temp = JSON.parse(reponse["membre"]);
+            modele.appliquerModele(temp, "milieu-page");
+        });
     }
-    else{
+    else { // parametre noMembre est defini
         let objJSON = {
             "type": "membre",
             "requete": "profil",
             "noMembre": noMembre
         };
-
         requete.getJSON(objJSON, function (reponse) {
             let temp = JSON.parse(reponse["membre"]);
-            console.log(temp);
-            
+
             modele.appliquerModele(temp, "milieu-page");
             // Changer le titre de la page
-            $(".formulaire-h2").text("INFORMATIONX DU CLIENT #"+noMembre);
+            $(".formulaire-h2").text("INFORMATIONX DU CLIENT #" + noMembre);
             // changer le onclick pour rajouter le noMembre
-            $("#btn-membre").attr("onclick", "modificationProfil("+noMembre+")");
+            $("#btn-membre").attr("onclick", "modificationProfil(" + noMembre + ")");
         });
     }
 }
 
-function modifierMotDePasse(){
-
+/**
+ * afficher le formulaire de modification mot de passe
+ */
+function modifierMotDePasse() {
     let modeleInventaire = new ModeleMagasin("modele-mot-de-passe");
     modeleInventaire.appliquerModele("", "milieu-page");
-
 }
-function validerModificationPassword(){
+
+/**
+ * Valider la modification mot de passe
+ */
+function validerModificationPassword() {
     let motDePasse = $("#mot-de-passe").val();
     let nouveauMotDePasse = $("#nouveau-mot-de-passe").val();
     let confMotDePasse = $("#confirme-mot-de-passe").val();
 
-    if(nouveauMotDePasse == confMotDePasse){
+    if (nouveauMotDePasse == confMotDePasse) {
         let objJSON = {
-            "type" : "membre",
+            "type": "membre",
             "requete": "motDePasse",
             "ancien": motDePasse,
             "nouveau": confMotDePasse
         };
-
         modifierMembre(objJSON);
     }
 }
+
+/**
+ * Reinitialiser  le mot de passe
+ * @param {*} email 
+ */
+function reinitialiserMotDePasse(email) {
+    let requete = new RequeteAjax("controleur/controleur.php");
+    let modele = new ModeleMagasin("modele-reset-password");
+
+    let objJSON = {
+        "type": "membre",
+        "requete": "oubli",
+        "courriel": email
+    };
+
+    requete.getJSON(objJSON, function (reponse) {
+        let temp = reponse["reset"];
+        modele.appliquerModele(temp, "milieu-page");
+    });
+}
+
+/**
+ * Vider le panier
+ */
+function viderPanier() {
+    let requete = new RequeteAjax("controleur/controleur.php");
+    let objJSON = {
+        "type": "panier",
+        "requete": "vider"
+    };
+    requete.getJSON(objJSON, reponse => {
+        console.log(reponse);
+        getTotalPanier();
+        afficherSommaire();
+    });
+}
+
+/**
+ * Afficher la caisse pour un invite
+ */
+function afficherCaisseInvite() {
+    // afficher le formulaire
+    let modeleCheckout = new ModeleMagasin("checkout-invite");
+    modeleCheckout.appliquerModele("", "milieu-page");
+
+    // afficher la "boite" de la facture
+    let modeleSommaire = new ModeleMagasin("modele-facture");
+    modeleSommaire.appliquerModele("", "sommaireFactureDetail");
+
+    // remplire  les informations sommaire
+    let requeteFacture = new RequeteAjax("controleur/controleur.php");
+    let objJSON = {
+        "type": "panier",
+        "requete": "sommaire"
+    };
+    requeteFacture.getJSON(objJSON, reponse => {
+        modeleSommaire.appliquerModele(reponse, "sommaireFactureDetail");
+    });
+
+    // remplire la facture avec les details des articles dans le panier
+    let modeleSommaireFacture = new ModeleMagasin("modele-details-facture");
+    let requeteFactureDetails = new RequeteAjax("controleur/controleur.php");
+    let objJSONDetail = {
+        "type": "panier",
+        "requete": "liste"
+    };
+    requeteFactureDetails.getJSON(objJSONDetail, reponse => {
+        modeleSommaireFacture.appliquerModele(reponse, "details-facture");
+        afficherPaypal();
+    });
+}
+/**
+ * Afficher la caisse pour un membre
+ */
+
+async function afficherCaisseMembre() {
+    // afficher  les information du client 
+
+    await new Promise((resolve) => {
+        let modeleCaisse = new ModeleMagasin("modele-caisse");
+        let requete = new RequeteAjax("controleur/controleur.php");
+        modeleCaisse.appliquerModele("", "milieu-page");
+        let objJSON = {
+            "type": "membre",
+            "requete": "profil"
+        };
+
+        requete.getJSON(objJSON, reponse => {
+            let temp = JSON.parse(reponse["membre"]);
+            modeleCaisse.appliquerModele(temp, "milieu-page");
+            resolve("Promise 1");
+        });
+        
+    });
+
+
+    await  new Promise((resolve) => {
+        // afficher la facture dans le CALLBACK => remplir les details facture et button paypal
+        let modeleFacture = new ModeleMagasin("modele-facture");
+        let requeteFacture = new RequeteAjax("controleur/controleur.php");
+        let objJSONPanier = {
+            "type": "panier",
+            "requete": "sommaire"
+        };
+
+        requeteFacture.getJSON(objJSONPanier, reponse => {
+            modeleFacture.appliquerModele(reponse, "facture");
+            console.log("promise2");
+            resolve("Promise 2");
+        });
+        
+    });
+
+    await new Promise((resolve) => {
+
+        let modeleSommaireFacture = new ModeleMagasin("modele-details-facture");
+        let requeteFactureDetails = new RequeteAjax("controleur/controleur.php");
+        let objJSONDetail = {
+            "type": "panier",
+            "requete": "liste"
+        };
+
+        requeteFactureDetails.getJSON(objJSONDetail, reponse => {
+            modeleSommaireFacture.appliquerModele(reponse, "details-facture");
+            
+            resolve("succes p3");
+            afficherPaypal();
+        });
+    });
+}
+
+
+/**
+ * Afficher le bon formulaire de la caisse selon le statut de connection
+ */
+function caisseCheckout() {
+    estConnecte().then(() => {
+        afficherCaisseMembre().then();
+    }).catch(()=> {
+        afficherCaisseInvite();
+    })
+}
+
 /**
  * ==============================FIN Function pour Afficher le profil ==============================
  */
@@ -206,8 +361,8 @@ function listerArticles() {
     let objJSON = {
         "type": "inventaire"
     };
-    
-    requete.getJSON(objJSON, function(reponse) {
+
+    requete.getJSON(objJSON, function (reponse) {
         modeleListeArticles.appliquerModele(reponse, "liste-articles");
     });
 }
@@ -217,16 +372,16 @@ function listerArticles() {
  * @param {string} valeur - la valeur du critère de sélection
  */
 function listerParCategorie(valeur) {
-    
+
     //Afficher tous les articles
     let requete = new RequeteAjax("controleur/controleur.php");
     let modeleListeArticles = new ModeleMagasin("modele-liste-articles");
     let objJSON = {
         "type": "inventaire",
-        "categorie" : valeur
+        "categorie": valeur
     };
-    requete.getJSON(objJSON, function(reponse) {
-        
+    requete.getJSON(objJSON, function (reponse) {
+
         modeleListeArticles.appliquerModele(reponse, "liste-articles");
     });
 }
@@ -241,9 +396,9 @@ function listerRecherche() {
     let modeleListeArticles = new ModeleMagasin("modele-liste-articles");
     let objJSON = {
         "type": "inventaire",
-        "mot" : valeur
+        "mot": valeur
     };
-    requete.getJSON(objJSON, function(reponse) {
+    requete.getJSON(objJSON, function (reponse) {
         modeleListeArticles.appliquerModele(reponse, "liste-articles");
     });
 }
@@ -255,8 +410,8 @@ function listerRecherche() {
 function afficherArticle(noArticle) {
     let requete = new RequeteAjax("controleur/controleur.php");
     let objJSON = {
-        "type" : "inventaire",
-        "noArticle" : noArticle
+        "type": "inventaire",
+        "noArticle": noArticle
     };
     let modeleArticle = new ModeleMagasin("modele-article");
     requete.getJSON(objJSON, reponse => { modeleArticle.appliquerModele(reponse, "milieu-page"); });
@@ -275,8 +430,8 @@ function afficherArticle(noArticle) {
 function getTotalPanier() {
     let requete = new RequeteAjax("controleur/controleur.php");
     let objJSON = {
-        "type" : "panier",
-        "requete" : "compteur"
+        "type": "panier",
+        "requete": "compteur"
     };
     requete.getJSON(objJSON, reponse => {
         $("#nombre-total").html(reponse);
@@ -305,16 +460,16 @@ function ajouterAuPanier() {
     let messageErreur = $("#message-erreur");
 
     let objJSON = {
-        "type" : "panier",
+        "type": "panier",
         "requete": "ajouter",
-        "article" : {
+        "article": {
             "noArticle": $("#identifiant").val(),
             "libelle": $("#libelle").val(),
             "cheminImage": $("#cheminImage").val(),
             "prixUnitaire": $("#prix").val(),
             "quantite": $("#quantity").val()
         }
-        
+
     };
 
     let requete = new RequeteAjax("controleur/controleur.php");
@@ -324,7 +479,7 @@ function ajouterAuPanier() {
             getTotalPanier();
             messageErreur.removeClass('alert-danger');
             messageErreur.addClass('alert-success');
-            messageErreur.css("color", "green");   
+            messageErreur.css("color", "green");
         }
         else if (reponse["statut"] === "echec") {
             messageErreur.removeClass('alert-success');
@@ -346,8 +501,8 @@ function afficherSommaire() {
     let requete = new RequeteAjax("controleur/controleur.php");
     let modelePanier = new ModeleMagasin("modele-panier");
     let objJSON = {
-        "type" : "panier",
-        "requete" : "sommaire"
+        "type": "panier",
+        "requete": "sommaire"
     };
     requete.getJSON(objJSON, reponse => {
         modelePanier.appliquerModele(reponse, "milieu-page");
@@ -363,10 +518,10 @@ function listerPanier() {
     let requete = new RequeteAjax("controleur/controleur.php");
     let modeleListePanier = new ModeleMagasin("modele-liste-panier");
     let objJSON = {
-        "type" : "panier",
-        "requete" : "liste"
+        "type": "panier",
+        "requete": "liste"
     };
-    requete.getJSON(objJSON,function (reponse) {
+    requete.getJSON(objJSON, function (reponse) {
         modeleListePanier.appliquerModele(reponse, "liste-panier");
     })
 }
@@ -377,7 +532,7 @@ function listerPanier() {
 function supprimerDuPanier(noArticle) {
 
     let objJSON = {
-        "type" : "panier",
+        "type": "panier",
         "requete": "supprimer",
         "noArticle": noArticle
     };
@@ -413,8 +568,8 @@ function modifierPanier() {
     };
 
     let requete = new RequeteAjax("controleur/controleur.php");
-    requete.getJSON(objJSON, function(reponse) {
-        if(reponse["statut"] === "echec"){
+    requete.getJSON(objJSON, function (reponse) {
+        if (reponse["statut"] === "echec") {
             messageErreur.addClass('alert');
             messageErreur.addClass('alert-danger');
             messageErreur.css("color", "red");
@@ -422,9 +577,9 @@ function modifierPanier() {
         }
         else {
             getTotalPanier();
-            afficherSommaire();  
-        }    
-    });     
+            afficherSommaire();
+        }
+    });
 }
 
 /**
@@ -433,8 +588,8 @@ function modifierPanier() {
 function viderPanier() {
     let requete = new RequeteAjax("controleur/controleur.php");
     let objJSON = {
-        "type" : "panier",
-        "requete" : "vider"
+        "type": "panier",
+        "requete": "vider"
     };
 
     requete.getJSON(objJSON, reponse => {
@@ -442,7 +597,7 @@ function viderPanier() {
         getTotalPanier();
         afficherSommaire();
     });
-    
+
 }
 
 /**
@@ -460,7 +615,7 @@ function formulaireInscription() {
     if (nbTotal == "0") {
         messageErreur.addClass('alert');
         messageErreur.addClass('alert-danger');
-        messageErreur.html("Vous ne pouvez pas passer à la caisse si votre panier est vide."); 
+        messageErreur.html("Vous ne pouvez pas passer à la caisse si votre panier est vide.");
     }
     else {
         let modeleInscription = new ModeleMagasin("modele-inscription");
@@ -494,7 +649,7 @@ function validerFormulaire() {
 
     //Expression régulières
     const LETTRES_SEULEMENT = /[a-zA-ZáàäâéèëêíìïîóòöôúùüûçñÁÀÄÂÉÈËÊÍÌÏÎÓÒÖÔÚÙÜÛÑÇ\'\-]+/;
-    const CODE_POSTAL = /^[A-Z][0-9][A-Z] ?[0-9][A-Z][0-9]$/;
+    const CODE_POSTAL = /^[A-Z][0-9][A-Z] ?[0-9][A-Z][0-9]/;
     const NO_TEL = /^\(?([0-9]{3})\)?[-. ]?([0-9]{3})[-. ]?([0-9]{4})$/;
     const COURRIEL = /[^@]+@[^\.]+\..+/g;
 
@@ -511,7 +666,7 @@ function validerFormulaire() {
     if (!codePostal.match(CODE_POSTAL)) {
         messageErreur.addClass('alert');
         messageErreur.addClass('alert-danger');
-        messageErreur.hml("Format de code postal invalide.");
+        messageErreur.html("Format de code postal invalide.");
         return;
     }
 
@@ -549,16 +704,16 @@ function validerFormulaire() {
         "noTel": noTel,
         "courriel": courriel,
         "motDePasse": motDePasse,
-        "categorie" : 1
+        "categorie": 1
     }
 
     let objJSON = {
-        "type" : "membre",
+        "type": "membre",
         "requete": "inscription",
-        "client": JSON.stringify(membre)
+        "membre": JSON.stringify(membre)
     };
 
-    ajouterClient(objJSON);
+    ajouterMembre(objJSON);
 }
 
 
@@ -569,14 +724,14 @@ function validerFormulaire() {
 function ajouterMembre(objJSON) {
     let messageErreur = $("#message-erreur");
     let requete = new RequeteAjax("controleur/controleur.php");
-    requete.getJSON(objJSON, function(reponse) {
+    requete.getJSON(objJSON, function (reponse) {
         if (reponse["statut"] === "succes") {
             afficherCaisse(reponse["membre"]);
         }
         else if (reponse["statut"] === "echec") {
             messageErreur.addClass('alert');
             messageErreur.addClass('alert-danger');
-            messageErreur.html(objetJSON["message"]);
+            messageErreur.html(reponse["message"]);
         }
     });
 }
@@ -627,18 +782,18 @@ function seConnecter() {
  * Déconnexion du client actif
  */
 
-function seDeconnecter(){
+function seDeconnecter() {
     let objJSON = {
         "type": "membre",
-        "requete": "deconnexion",
-        "courriel": courriel
+        "requete": "deconnexion"
     };
 
     let requete = new RequeteAjax("controleur/controleur.php");
-    requete.getJSON(objJSON, function(reponse){
+    requete.getJSON(objJSON, function (reponse) {
         if (reponse["statut"] == "succes") {
-            iconConnexion();
             afficherInventaire(listerArticles);
+            iconConnexion();
+
         }
         else if (reponse["statut"] == "echec") {
             messageErreur.addClass('alert');
@@ -651,47 +806,52 @@ function seDeconnecter(){
 /**
 * Désabonne le compte du client
 */
-function desabonner(courriel){
+function desabonner(courriel) {
     let objJSON = {
-        "type" : "membre",
-        "requete" : "desabonner",
-        "courriel" : courriel
+        "type": "membre",
+        "requete": "desabonner",
+        "courriel": courriel
     };
-
-    let requete = new RequeteAjax("controleur/controleur.php");
-    requete.getJSON(objJSON, function (reponse){
-        if(reponse["statut"] == "succes"){
-            afficherInventaire(listerArticles);
-            getTotalPanier();
-        }
-        else if (reponse["statut"] == "echec"){
-            messageErreur.addClass('alert');
-            messageErreur.addClass('alert-danger');
-            messageErreur.html(reponse["message"]);
-        }
-    })
+    if (confirm("Êtes-vous sûr de vouloir vous désabonnez?")){
+        let requete = new RequeteAjax("controleur/controleur.php");
+        requete.getJSON(objJSON, function (reponse) {
+            if (reponse["statut"] == "succes") {
+                afficherInventaire(listerArticles);
+                getTotalPanier();
+            }
+            else if (reponse["statut"] == "echec") {
+                messageErreur.addClass('alert');
+                messageErreur.addClass('alert-danger');
+                messageErreur.html(reponse["message"]);
+            }
+        })
+    }
+    
 }
 
 /**
  * Valider si le client est connecté
  */
-function estConnecte(){
-    let objJSON = {
-        "type" : "membre",
-        "requete" : "estConnecte"
-    };
-    let requete = new RequeteAjax("controleur/controleur.php");
-    requete.getJSON(objJSON, function(){
-        if(reponse["statut"] == "succes") {
-            return true;
-        }
-        else if (reponse["statut"] == "echec"){
-            return false;
-        }
+function estConnecte() {
+    return new Promise((resolve, reject) => {
+        let objJSON = {
+            "type": "membre",
+            "requete": "estConnecte"
+        };
+        let requete = new RequeteAjax("controleur/controleur.php");
+        requete.getJSON(objJSON, function (reponse) {
+
+            if (reponse["statut"] == "succes") {
+                resolve(true)
+            }
+            else if (reponse["statut"] == "echec") {
+                reject(false)
+            }
+        });
     })
 }
 
-function modificationProfil(noMembre){
+function modificationProfil(noMembre) {
     //Message d'erreur
     messageErreur = $("#message-erreur");
 
@@ -736,9 +896,9 @@ function modificationProfil(noMembre){
         messageErreur.addClass('alert-danger');
         messageErreur.html("Format de numéro de téléphone invalide.");
         return;
-    } 
-  
-    if(noMembre == ""){
+    }
+
+    if (noMembre == "") {
         membre = {
             "nomMembre": nom,
             "prenomMembre": prenom,
@@ -749,12 +909,12 @@ function modificationProfil(noMembre){
             "noTel": noTel
         };
         objJSON = {
-         "type": "membre",
-         "requete": "modifier",
-         "membre": JSON.stringify(membre)
+            "type": "membre",
+            "requete": "modifier",
+            "membre": JSON.stringify(membre)
         };
     }
-    else{
+    else {
         membre = {
             "noMembre": noMembre,
             "nomMembre": nom,
@@ -767,13 +927,13 @@ function modificationProfil(noMembre){
         };
 
         objJSON = {
-        "type": "membre",
-        "requete": "modifier",
-        "membre": JSON.stringify(membre),
-        "noMembre": noMembre
-        };   
+            "type": "membre",
+            "requete": "modifier",
+            "membre": JSON.stringify(membre),
+            "noMembre": noMembre
+        };
     }
-    modifierMembre(objJSON,noMembre);
+    modifierMembre(objJSON, noMembre);
 }
 
 function modifierMembre(objJSON, noMembre) {
@@ -782,13 +942,13 @@ function modifierMembre(objJSON, noMembre) {
     let requete = new RequeteAjax("controleur/controleur.php");
     requete.getJSON(objJSON, function (reponse) {
         if (reponse["statut"] === "succes") {
-            if(noMembre == ""){
+            if (noMembre == "") {
                 profil();
             }
-            else{
+            else {
                 profil(noMembre);
             }
-            
+
         }
         else if (reponse["statut"] === "echec") {
             messageErreur.addClass('alert');
@@ -804,30 +964,30 @@ function modifierMembre(objJSON, noMembre) {
  * -----------------------
  */
 
- /**
-  * Affiche le profil d'un administrateur 
-  */
- function profilAdmin(){
+/**
+ * Affiche le profil d'un administrateur 
+ */
+function profilAdmin() {
     let requete = new RequeteAjax("controleur/controleur.php")
     let modele = new ModeleMagasin("modele-profil-admin");
 
     let objJSON = {
-        "type" : "membre",
-        "requete" : "profilAdmin"
+        "type": "membre",
+        "requete": "profilAdmin"
     };
 
-    requete.getJSON(objJSON, function(reponse){
+    requete.getJSON(objJSON, function (reponse) {
         let temp = JSON.parse(reponse.membre);
         modele.appliquerModele(temp, "milieu-page");
-        
-    });
- }
 
-function soloArticleAdmin(noArticle){
+    });
+}
+
+function soloArticleAdmin(noArticle) {
     let requete = new RequeteAjax("controleur/controleur.php");
     let objJSON = {
-        "type" : "inventaire",
-        "noArticle" : noArticle
+        "type": "inventaire",
+        "noArticle": noArticle
     };
     let modeleArticle = new ModeleMagasin("modele-article-admin");
     requete.getJSON(objJSON, reponse => { modeleArticle.appliquerModele(reponse, "milieu-page"); });
@@ -836,53 +996,48 @@ function soloArticleAdmin(noArticle){
 /** 
  * Ajout article template
  */
-function templateAjoutAA(){
+function templateAjoutAA() {
     let modele = new ModeleMagasin("modele-ajout-article-admin");
     modele.appliquerModele("", "milieu-page");
 }
 
- /** 
+/** 
 * Ajout d'un article
 */
-function ajouterArticle(){
+function ajouterArticle() {
     event.preventDefault();
 
     let objArticle = {
-        "libelle" : $("#libelle").val(),
-        "categorie" : $("#categorie").val(),
-        "prixUnitaire" : $("#prix").val(),
-        "quantiteEnStock" : $("#quantite").val() 
+        "libelle": $("#libelle").val(),
+        "categorie": $("#categorie").val(),
+        "prixUnitaire": $("#prix").val(),
+        "quantiteEnStock": $("#quantite").val()
     }
-    
+
     var donnees = new FormData();
     donnees.append("requete", "ajouter");
     donnees.append("image", $("#photo").get(0).files[0]);
     donnees.append("article", JSON.stringify(objArticle));
 
     let requete = new RequeteAjax("controleur/controleur.php")
-    let modele = new ModeleMagasin("modele-inventaire-admin");
+
     requete.envoyerArticle(donnees, reponse => {
-        console.log(reponse);
-        requete.getJSON(objJSON, reponse => {
-            console.log(reponse);
-            modele.appliquerModele(reponse, "milieu-page");
-            listeSolo("modele-liste-panier-admin");
-        }); 
-    })
-    
+        afficherListeArticles();
+    });
+
 }
 
 /** 
 * Modifier un article
 */
-function modifierArticle(noArticle){
+function modifierArticle(noArticle) {
     event.preventDefault();
     let objArticle = {
-        "noArticle" : noArticle,
-        "libelle" : $("#libelle").val(),
-        "categorie" : $("#categorie").val(),
-        "prixUnitaire" : $("#prix").val(),
-        "quantiteEnStock" : $("#quantite").val() 
+        "noArticle": noArticle,
+        "libelle": $("#libelle").val(),
+        "categorie": $("#categorie").val(),
+        "prixUnitaire": $("#prix").val(),
+        "quantiteEnStock": $("#quantite").val()
     }
 
     var donnees = new FormData();
@@ -900,17 +1055,17 @@ function modifierArticle(noArticle){
 /** 
 * Supprimer un article
 */
-function supprimerArticle(noArticle){
+function supprimerArticle(noArticle) {
     event.preventDefault();
     let messageErreur = $("#message-erreur");
-    if(confirm("Voulez-vous supprimer l'article "+ noArticle + "?")){
+    if (confirm("Voulez-vous supprimer l'article " + noArticle + "?")) {
         let objJSON = {
-            "type" : "inventaire",
-            "requete" : "supprimer",
-            "noArticle" : noArticle
+            "type": "inventaire",
+            "requete": "supprimer",
+            "noArticle": noArticle
         }
         let requete = new RequeteAjax("controleur/controleur.php");
-        requete.getJSON(objJSON, function(reponse){
+        requete.getJSON(objJSON, function (reponse) {
             console.log(reponse);
             if (reponse["statut"] === "succes") {
                 afficherListeArticles();
@@ -919,7 +1074,7 @@ function supprimerArticle(noArticle){
                 messageErreur.addClass('alert');
                 messageErreur.addClass('alert-danger');
                 messageErreur.html(objetJSON["message"]);
-            }            
+            }
         });
     }
 }
@@ -927,20 +1082,20 @@ function supprimerArticle(noArticle){
 /*
 * Rechercher l'article
 */
-function rechercherArticleAdmin(mot){
-    if(event.keyCode == 13){
+function rechercherArticleAdmin(mot) {
+    if (event.keyCode == 13) {
         let modele = new ModeleMagasin("modele-inventaire-admin");
         modele.appliquerModele("", "milieu-page");
 
         let requete = new RequeteAjax("controleur/controleur.php");
         let objJSON = {
             "type": "inventaire",
-            "mot" : mot
+            "mot": mot
         };
         requete.getJSON(objJSON, reponse => {
             let modele1 = new ModeleMagasin("modele-liste-panier-admin");
             modele1.appliquerModele(reponse, "liste-panier");
-        }); 
+        });
     }
 }
 
@@ -951,8 +1106,8 @@ function afficherListeArticles() {
     let requete = new RequeteAjax("controleur/controleur.php");
     let modele = new ModeleMagasin("modele-inventaire-admin");
     let objJSON = {
-        "type" : "panier",
-        "requete" : "sommaire" 
+        "type": "panier",
+        "requete": "sommaire"
     };
 
     requete.getJSON(objJSON, reponse => {
@@ -964,13 +1119,13 @@ function afficherListeArticles() {
 /**
  * Affiche la ligne du tableau dans la liste d'article
  */
-function articleLigne(){
+function articleLigne() {
     let requete = new RequeteAjax("controleur/controleur.php");
     let modele = new ModeleMagasin("modele-liste-panier-admin");
     let objJSON = {
-        "type" : "inventaire"
+        "type": "inventaire"
     };
-    requete.getJSON(objJSON, function(reponse){
+    requete.getJSON(objJSON, function (reponse) {
         console.log(reponse);
         modele.appliquerModele(reponse, "liste-panier");
     })
@@ -980,7 +1135,7 @@ function articleLigne(){
 /** 
  * Affiche la liste de membres
  */
-function afficherListeMembres(){
+function afficherListeMembres() {
     let modele = new ModeleMagasin("modele-liste-membres-admin");
 
     modele.appliquerModele("", "milieu-page");
@@ -990,14 +1145,14 @@ function afficherListeMembres(){
 /** 
  * Affiche la ligne du membre dans le tableau
  */
-function membreLigne(){
+function membreLigne() {
     let requete = new RequeteAjax("controleur/controleur.php");
     let modele = new ModeleMagasin("modele-membre-admin");
     let objJSON = {
-        "type" : "membre",
-        "requete" : "liste"
+        "type": "membre",
+        "requete": "liste"
     };
-    requete.getJSON(objJSON, function(reponse){
+    requete.getJSON(objJSON, function (reponse) {
         let membres = JSON.parse(reponse["membres"]);
         modele.appliquerModele(membres, "liste-panier");
     });
@@ -1006,38 +1161,38 @@ function membreLigne(){
 /* 
 * Rechercher un membre
 */
-function rechercherMembreAdmin(nom){
-    if(event.keyCode == 13){
+function rechercherMembreAdmin(nom) {
+    if (event.keyCode == 13) {
         let modele = new ModeleMagasin("modele-liste-membres-admin");
         modele.appliquerModele("", "milieu-page");
 
         let requete = new RequeteAjax("controleur/controleur.php");
         let objJSON = {
             "type": "membre",
-            "requete" : "recherche",
-            "nom" : nom
+            "requete": "recherche",
+            "nom": nom
         };
         requete.getJSON(objJSON, reponse => {
             let membres = JSON.parse(reponse["membres"]);
             let modele1 = new ModeleMagasin("modele-membre-admin");
             modele1.appliquerModele(membres, "liste-panier");
-        }); 
+        });
     }
 }
 
- /** UPDATE
-  * Supprime le compte choisi
-  */
- function supprimerMembre(noMembre){
+/** 
+ * Supprime le compte choisi
+ */
+function supprimerMembre(noMembre) {
     let messageErreur = $("#message-erreur");
-    if(confirm("Voulez-vous supprimer le membre "+ noMembre + "?")){
+    if (confirm("Voulez-vous supprimer le membre " + noMembre + "?")) {
         let objJSON = {
-            "type" : "membre",
-            "requete" : "supprimer",
-            "noMembre" : noMembre
+            "type": "membre",
+            "requete": "supprimer",
+            "noMembre": noMembre
         }
         let requete = new RequeteAjax("controleur/controleur.php");
-        requete.getJSON(objJSON, function(reponse){
+        requete.getJSON(objJSON, function (reponse) {
             if (reponse["statut"] === "succes") {
                 afficherListeMembres();
             }
@@ -1045,10 +1200,80 @@ function rechercherMembreAdmin(nom){
                 messageErreur.addClass('alert');
                 messageErreur.addClass('alert-danger');
                 messageErreur.html(objetJSON["message"]);
-            }            
+            }
         });
     }
- }
+}
+
+/**
+ * Affiche le modèle pour l'ajout d'un administrateur
+ */
+function modeleAjoutMembreAdmin(){
+    let modele = new ModeleMagasin("modele-ajout-admin");
+    modele.appliquerModele("", "milieu-page");
+}
+
+/**
+ * Valide et ajoute un membre administrateur
+ */
+function ajouterAdmin(){
+    //Message d'erreur
+    messageErreur = $("#message-erreur");
+
+    //Données du formulaire
+    let nom = $("#lname").val();
+    let prenom = $("#fname").val();
+    let courriel = $("#email").val();
+    let motDePasse = $("#mot-de-passe").val();
+    let confMotDePasse = $("#conf-mot-de-passe").val();
+
+    //Expression régulières
+    const LETTRES_SEULEMENT = /[a-zA-ZáàäâéèëêíìïîóòöôúùüûçñÁÀÄÂÉÈËÊÍÌÏÎÓÒÖÔÚÙÜÛÑÇ\'\-]+/;
+    const COURRIEL = /[^@]+@[^\.]+\..+/g;
+
+    //Vérifier si le nom, le prénom et la ville ont seulement des lettres
+    if (!nom.match(LETTRES_SEULEMENT) || !prenom.match(LETTRES_SEULEMENT)) {
+        messageErreur.addClass('alert');
+        messageErreur.addClass('alert-danger');
+        messageErreur.html("Ce champ ne doit contenir que des lettres.");
+        return;
+    }
+
+    //Vérifier si le courriel est valide
+    if (!courriel.match(COURRIEL)) {
+        messageErreur.addClass('alert');
+        messageErreur.addClass('alert-danger');
+        messageErreur.html("Format de courriel invalide.");
+        return;
+    }
+
+    //Vérifier que les deux mots de passes sont identiques
+    if (motDePasse !== confMotDePasse) {
+        messageErreur.addClass('alert');
+        messageErreur.addClass('alert-danger');
+        messageErreur.html("Les deux mots de passe doivent être identiques.");
+        return;
+    }
+
+    let membre = {
+        "nomMembre": nom,
+        "prenomMembre": prenom,
+        "courriel": courriel,
+        "motDePasse": motDePasse,
+        "categorie": 2
+    }
+
+    let objJSON = {
+        "type": "membre",
+        "requete": "inscription",
+        "membre": JSON.stringify(membre)
+    };
+
+    ajouterMembre(objJSON);
+    afficherListeMembres();
+}
+
+
 
 /**
  * -----------------------
@@ -1068,15 +1293,14 @@ function afficherCaisse(reponse) {
     let requete = new RequeteAjax("controleur/controleur.php");
     let modeleFacture = new ModeleMagasin("modele-facture");
     let objJSON = {
-        "type" : "panier",
-        "requete" : "sommaire"
+        "type": "panier",
+        "requete": "sommaire"
     };
     requete.getJSON(objJSON, donnees => {
         modeleFacture.appliquerModele(donnees, "facture");
         listerFacture();
         afficherPaypal();
     });
-
 }
 
 /**
@@ -1086,8 +1310,8 @@ function listerFacture() {
     let requete = new RequeteAjax("controleur/controleur.php");
     let modeleDetailsFacture = new ModeleMagasin("modele-details-facture");
     let objJSON = {
-        "type" : "panier",
-        "requete" : "liste"
+        "type": "panier",
+        "requete": "liste"
     };
     requete.getJSON(objJSON, donnees => {
         modeleDetailsFacture.appliquerModele(donnees, "details-facture");
@@ -1125,56 +1349,130 @@ function afficherPaypal() {
     }).render('#paypal-button-container');
 }
 
-
 /**
  * Crée une commande avec les articles
  * @param {string} paypalOrderId - le numéro de confirmation de Paypal
  */
 function placerCommande(paypalOrderId) {
+    let objJSON;
+    let messageErreur;
+    
+    //Message d'erreur
+    messageErreur = $("#message-erreur");
 
-    //Tableau des numéros d'article
-    let numeros = $("#numeros");
-    let tabNoArticle = new Array();
-    for (let i = 0; i < numeros.length; i++) {
-        tabNoArticle.push(numeros[i].value);
-    }
-    //Tableau des quantités
-    let quantites = $("#quantites");
-    let tabQuantite = new Array();
-    for (let i = 0; i < quantites.length; i++) {
-        tabQuantite.push(quantites[i].value);
-    }
+   estConnecte().then(() =>{
 
-    let objJSON = {
-        "requete": "commande",
-        "noClient": $("#numero-client").val(),
-        "paypalOrderId": paypalOrderId,
-        "tabNoArticle": JSON.stringify(tabNoArticle),
-        "tabQuantite": JSON.stringify(tabQuantite)
-    };
+        objJSON = {
+            "type" : "commande",
+            "requete" : "membre",
+            "paypalOrderId" : paypalOrderId
+        }    
 
-    let txtJSON = JSON.stringify(objJSON);
-    let requete = new RequeteAjax("controleur/controleur.php");
-    requete.envoyerDonnees(txtJSON, (donnees) => {
-        commandeTerminee();
-    });
+        envoyerCommande(objJSON);
+
+    }).catch(() =>{
+
+        //Données du formulaire
+        let nom = $("#lname").val();
+        let prenom = $("#fname").val();
+        let adresse1 = $("#address").val();
+        let adresse2 = $("#address2").val();
+        let adresse = adresse1 + (adresse2 !== "" ? " " + adresse2 : "");
+        let ville = $("#towncity").val();
+        let province = $("#province").val();
+        let codePostal = $("#zippostalcode").val();
+        let noTel = $("#phone").val();
+        let courriel = $("#email").val();
+
+        //Expression régulières
+        const LETTRES_SEULEMENT = /[a-zA-ZáàäâéèëêíìïîóòöôúùüûçñÁÀÄÂÉÈËÊÍÌÏÎÓÒÖÔÚÙÜÛÑÇ\'\-]+/;
+        const CODE_POSTAL = /^[A-Z][0-9][A-Z] ?[0-9][A-Z][0-9]$/;
+        const NO_TEL = /^\(?([0-9]{3})\)?[-. ]?([0-9]{3})[-. ]?([0-9]{4})$/;
+        const COURRIEL = /[^@]+@[^\.]+\..+/g;
+
+        //Vérifier si le nom, le prénom et la ville ont seulement des lettres
+        if (!nom.match(LETTRES_SEULEMENT) || !prenom.match(LETTRES_SEULEMENT) ||
+            !ville.match(LETTRES_SEULEMENT)) {
+            messageErreur.addClass('alert');
+            messageErreur.addClass('alert-danger');
+            messageErreur.html("Ce champ ne doit contenir que des lettres.");
+            return;
+        }
+
+        //Vérifier si le code postal est valide
+        if (!codePostal.match(CODE_POSTAL)) {
+            messageErreur.addClass('alert');
+            messageErreur.addClass('alert-danger');
+            messageErreur.hml("Format de code postal invalide.");
+            return;
+        }
+        //Vérifier si le numéro de téléphone est valide
+        if (!noTel.match(NO_TEL)) {
+            messageErreur.addClass('alert');
+            messageErreur.addClass('alert-danger');
+            messageErreur.html("Format de numéro de téléphone invalide.");
+            return;
+        }
+
+    //Vérifier si le courriel est valide
+        if (!courriel.match(COURRIEL)) {
+            messageErreur.addClass('alert');
+            messageErreur.addClass('alert-danger');
+            messageErreur.html("Format de courriel invalide.");
+            return;
+        }
+
+        let membre = {
+            "nomMembre": nom,
+            "prenomMembre": prenom,
+            "adresse": adresse,
+            "ville": ville,
+            "province": province,
+            "codePostal": codePostal,
+            "noTel": noTel,
+            "courriel": courriel,
+            "categorie": 0
+        }
+
+        objJSON = {
+            "type": "commande",
+            "requete": "invite",
+            "membre" : JSON.stringify(membre),
+            "paypalOrderId" : paypalOrderId
+        };
+        
+       
+       envoyerCommande(objJSON);
+   });
+
 }
 
 /**
  * Affiche que la commande est bel et bien complétée,
  * le numéro de confirmation et le courriel du client
  */
-function commandeTerminee() {
+/**
+ * Affiche que la commande est bel et bien complétée,
+ * le numéro de confirmation et le courriel du client
+ */
+function commandeTerminee(objCommande) {
     let requete = new RequeteAjax("controleur/controleur.php");
     let modeleComplete = new ModeleMagasin("modele-commande-complete");
-    let objJSON = {
-        "type" : "commande",
-        "requete" : "terminee"
-    }
-    requete.getJSON(objJSON, reponse => {
-        modeleComplete.appliquerModele(reponse, "milieu-page");
-    });
+    modeleComplete.appliquerModele(objCommande, "milieu-page");
     getTotalPanier();
+
 }
 
-
+/**
+ * Envoie la commande au serveur
+ * @param {Object} objJSON 
+ */
+function envoyerCommande(objJSON) {
+    let requete = new RequeteAjax("controleur/controleur.php");
+    requete.getJSON(objJSON, (reponse) => {
+        if (reponse["statut"] == "succes") {
+            const objCommande = reponse["commande"];
+            commandeTerminee(objCommande);
+        }
+    });
+}
