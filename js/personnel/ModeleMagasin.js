@@ -19,11 +19,11 @@ class ModeleMagasin {
      * @param {string} txtJSON - la réponse du serveur
      * @param {string} idElement - le modèle à afficher
      */
-    appliquerModele(objJSON, idElement) {
+    appliquerModele(txtJSON, idElement) {
         let codeHTML = "";
         
-        if(objJSON != ""){
-           
+        if(txtJSON != ""){
+            let objJSON = JSON.parse(txtJSON);
             for(let i = 0; i < objJSON.length; i++) {
                 let modeleTemp = this.modele;
                 //Si on affiche la liste d'articles, on ajoute un "retour à la ligne" après 4 articles
