@@ -124,7 +124,6 @@ class GestionCommandes extends GestionBD {
         $objJSON["noTel"] = $membre->getNoTel();
         $objJSON["courriel"] = $membre->getCourriel();
         $objJSON["dateCommande"] = $commande->getDateCommande();
-        $objJSON["montantTotal"] = $this->getMontantTotal($noCommande);
         
         $objJSON["articles"] = array();
 
@@ -153,6 +152,8 @@ class GestionCommandes extends GestionBD {
             "rabais" => round($rabais, 2),
             "total" => round($total, 2)
         );
+
+        $objJSON["sommaire"] = array($objJSON["sommaire"]);
 
         $objJSON = array($objJSON);
        
