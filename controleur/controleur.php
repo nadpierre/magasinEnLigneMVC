@@ -439,9 +439,25 @@ if(isset($objJSON)){
                         }
                         echo json_encode($reponse); 
                         break;
-                    case "listeMembre" ://afficher les commandes d'un seul membre (membre et admin)
+                    case "liste" ://lister toutes les commandes (admin)
+                        if($connexion->estConnecte() && $connexion->getCategorie() == 2){
+                            $reponse["statut"] = "succes";
+                            $reponse["commandes"] = $gestionCommandes->getListeCommandes();    
+                        }
+                        else {
+                            $reponse["statut"] = "echec";
+                            $reponse["message"] = "Vous n'êtes pas autorisé.";
+                        }
+                        echo json_encode($reponse);
+                        break;
+                    case "listeMembre" ://afficher les commandes d'un seul membre
                         if($connexion->estConnecte()){
-                            $noMembre = (int) $objJSON->noMembre;
+                            if(!isset($objJSON->noMembre)){//consulter ses propres commandes
+                                $noMembre = $connexion->getIdUtilisateur();
+                            }
+                            else{//admin qui consulte les commandes d'un membre
+                                $noMembre = (int) $objJSON->noMembre;
+                            }
                             $reponse["statut"] = "succes";
                             $reponse["commandes"] = $gestionCommandes->trierParMembre($noMembre);
                         }

@@ -21,6 +21,48 @@ function test() {
     })
 }
 
+function afficherCommande(noMembre) {
+
+    let requete = new RequeteAjax("controleur/controleur.php");
+    let modele = new ModeleMagasin("modele-commande-client");
+    modele.appliquerModele("", "milieu-page");
+
+    let objJSON = {
+        "type": "commande",
+        "requete": "listeMembre",
+        "noMembre": noMembre
+    };
+
+    requete.getJSON(objJSON, function (reponse) {
+        let temp = JSON.parse(reponse["commandes"]);
+
+        let modele2 = new ModeleMagasin("modele-liste-commande");
+        modele2.appliquerModele(temp, "liste-panier");
+    });
+}
+
+function afficherCommandeDetails(noCommande) {
+    let requete = new RequeteAjax("controleur/controleur.php");
+    let modele = new ModeleMagasin("modele-facture-client");
+    let objJSON = {
+        "type": "commande",
+        "requete": "detail",
+        "noCommande": noCommande
+    }
+
+    requete.getJSON(objJSON, function (reponse) {
+        let commande = reponse["commande"];
+        modele.appliquerModele(commande, "milieu-page");
+
+        let commandeDetail = reponse["commande"][0]["articles"];
+        let modeleDetail = new ModeleMagasin("modele-commande-details-facture");
+        modeleDetail.appliquerModele(commandeDetail, "list-article-facture");
+
+        let commandeSommaire = reponse["commande"][0]["sommaire"];
+        let modeleSommaire = new ModeleMagasin("modele-commande-details-facture-sous-total");
+        modeleSommaire.appliquerModele(commandeSommaire, "commandeSommaires");
+    });
+}
 
 
 /**
@@ -162,6 +204,13 @@ function formulaireProfil(noMembre) {
     }
 }
 
+function afficherReinitiation(){
+    
+    let modele = new ModeleMagasin("modele-reinitialiser-mot-de-passe");
+
+    modele.appliquerModele("","milieu-page");
+}
+
 /**
  * afficher le formulaire de modification mot de passe
  */
@@ -206,22 +255,6 @@ function reinitialiserMotDePasse(email) {
     requete.getJSON(objJSON, function (reponse) {
         let temp = reponse["reset"];
         modele.appliquerModele(temp, "milieu-page");
-    });
-}
-
-/**
- * Vider le panier
- */
-function viderPanier() {
-    let requete = new RequeteAjax("controleur/controleur.php");
-    let objJSON = {
-        "type": "panier",
-        "requete": "vider"
-    };
-    requete.getJSON(objJSON, reponse => {
-        console.log(reponse);
-        getTotalPanier();
-        afficherSommaire();
     });
 }
 
