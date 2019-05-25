@@ -183,7 +183,7 @@ class GestionCommandes extends GestionBD {
         $requete->execute();
          
     }
-
+  
     /**
      * Supprime une commande
      * @param {Commande} $commande - une instance de l'objet Commande

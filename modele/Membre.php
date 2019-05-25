@@ -19,12 +19,6 @@ class Membre {
     private $courriel;
     private $motDePasse;
     
-
-    /* CONSTANTES (regex) */
-    const LETTRES_SEULEMENT = '/[a-zA-ZáàäâéèëêíìïîóòöôúùüûçñÁÀÄÂÉÈËÊÍÌÏÎÓÒÖÔÚÙÜÛÑÇ\'\-]+/';
-    const CODE_POSTAL = '/^[A-Z][0-9][A-Z] ?[0-9][A-Z][0-9]$/';
-    const NO_TEL = '/^\(?([0-9]{3})\)?[-. ]?([0-9]{3})[-. ]?([0-9]{4})$/';
-
     
     /**
      * CONSTRUCTEUR : crée un objet de type Membre
@@ -93,19 +87,11 @@ class Membre {
         $this->noMembre = $noMembre;
     }
 
-    public function setNomMembre($nomMembre) {
-        if(!preg_match(self::LETTRES_SEULEMENT, $nomMembre)){
-            throw new Exception('Le nom du membre ne doit contenir que des lettres');
-            return;
-        }
+    public function setNomMembre($nomMembre) {    
         $this->nomMembre = $nomMembre;
     }
 
-    public function setPrenomMembre($prenomMembre) {
-        if(!preg_match(self::LETTRES_SEULEMENT, $prenomMembre)){
-            throw new Exception('Le prénom ne doit contenir que des lettrees.');
-            return;
-        }
+    public function setPrenomMembre($prenomMembre) {  
         $this->prenomMembre = $prenomMembre;
     }
 
@@ -130,34 +116,18 @@ class Membre {
     }
 
     public function setVille($ville) {
-        if(!preg_match(self::LETTRES_SEULEMENT, $ville)){
-            throw new Exception('La ville ne doit contenir que des lettres.');
-            return;
-        }
         $this->ville = $ville;
     }
 
     public function setProvince($province) {
-        if(!preg_match(self::LETTRES_SEULEMENT, $province)){
-            throw new Exception('La province ne doit contenir que des lettres.');
-            return;
-        }
         $this->province = $province;
     }
 
     public function setCodePostal($codePostal) {
-        if(!preg_match(self::CODE_POSTAL, $codePostal)){
-            throw new Exception('Format de code postal invalide.');
-            return;
-        }
         $this->codePostal = $codePostal;
     }
 
     public function setNoTel($noTel) {
-        if(!preg_match(self::NO_TEL, $noTel)){
-            throw new Exception('Format de numéro de téléphone invalide.');
-            return;
-        }
         $this->noTel = $noTel;
     }
 
