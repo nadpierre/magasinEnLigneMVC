@@ -1,10 +1,2 @@
-controleur/RequeteAjax.js
-controleur/controleur.js
-css/*
-fonts/*
-images/*
-js/*
-sass/*
+.vscode
 test/*
-vue/*
-index.html
