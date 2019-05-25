@@ -1,8 +1,2 @@
-modele/*
-vue/*
-index.html
 .vscode
-controleur/._controleur.*
-._.gitignore
-._modele
-controleur/controleur.php
+test/*
